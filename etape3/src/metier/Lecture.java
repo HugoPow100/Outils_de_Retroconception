@@ -319,13 +319,8 @@ public class Lecture {
 					}
 				}
 
-				lstAssociations.add(new Association(
-					classeDest, classeOrig, multDest, multOrig, !bidirectionnel));
-
-				// --- Affichage pour debug ---
-    			System.out.println("[ASSOCIATION MULTI] " + classeOrig.getNom() + " --> " 
-                       + classeDest.getNom() + " : " 
-                       + multOrig + " -> " + multDest);
+			lstAssociations.add(new Association(
+				classeDest, classeOrig, multDest, multOrig, !bidirectionnel));
 			}
 
 			// -------- SIMPLE INSTANCE --------
@@ -335,17 +330,39 @@ public class Lecture {
 				String   typeDest   = entry.getKey();
 				int      max        = entry.getValue();
 
-			// Vérifier que la classe existe dans la HashMap
-			if (!hashMapClasses.containsKey(typeDest + ".java")) {
-				continue; // Ignorer si la classe n'existe pas
-			}
+		// Vérifier que la classe existe dans la HashMap
+		if (!hashMapClasses.containsKey(typeDest + ".java")) {
+			continue; // Ignorer si la classe n'existe pas
+		}
 
-			Classe   classeDest = hashMapClasses.get(typeDest + ".java");				
-			Multiplicite multOrig  = new Multiplicite(1,1);
-			Multiplicite multDest  = new Multiplicite(1, max);
+		Classe   classeDest = hashMapClasses.get(typeDest + ".java");				
+		Multiplicite multOrig  = new Multiplicite(1,1);
+				Multiplicite multDest  = new Multiplicite(1, max);
+
+				// Vérifier si la classe destination référence aussi la classe origine
+				boolean bidirectionnel = false;
+				for (Attribut attrDest : classeDest.getLstAttribut()) {
+					String typeAttrDest = nettoyerType(attrDest.getTypeAttribut().trim());
+					if (typeAttrDest.equals(classeOrig.getNom())) {
+						bidirectionnel = true;
+						break;
+					}
+				}
+				// Vérifier aussi dans les paramètres des méthodes de la classe destination
+				if (!bidirectionnel) {
+					for (Methode methodeDest : classeDest.getLstMethode()) {
+						for (Parametre paramDest : methodeDest.getLstParametre()) {
+							if (nettoyerType(paramDest.getTypePara()).equals(classeOrig.getNom())) {
+								bidirectionnel = true;
+								break;
+							}
+						}
+						if (bidirectionnel) break;
+					}
+				}
 
 				lstAssociations.add(new Association(
-					classeDest, classeOrig, multDest, multOrig, true));
+					classeDest, classeOrig, multDest, multOrig, !bidirectionnel));
 			}
 		}
 	}

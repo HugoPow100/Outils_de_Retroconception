@@ -39,6 +39,12 @@ public class Retroconception {
 		}
 	}
 
+	private static boolean estMultiInstance(Association assoc) {
+		String multDest = assoc.getMultDest().toString();
+		return multDest.contains("*") || multDest.matches(".*\\d+\\.\\.\\.\\d+.*");
+	}
+	
+
 	private static void afficherDetailsClasse(Classe classe) {
 		ArrayList<Attribut> attributs = classe.getLstAttribut();
 		ArrayList<Methode> methodes = classe.getLstMethode();

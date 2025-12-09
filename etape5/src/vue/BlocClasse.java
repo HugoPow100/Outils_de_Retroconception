@@ -4,7 +4,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlocClasse {
+public class BlocClasse 
+{
 
     private String nom;
     private int x;
@@ -24,7 +25,8 @@ public class BlocClasse {
     private static final Color COULEUR_BORDURE = new Color(0, 0, 0);
     private static final Color COULEUR_ENTETE = new Color(100, 150, 200);
 
-    public BlocClasse(String nom, int x, int y) {
+    public BlocClasse(String nom, int x, int y) 
+    {
         this.nom = nom;
         this.x = x;
         this.y = y;
@@ -36,7 +38,8 @@ public class BlocClasse {
         this.methodes = new ArrayList<>();
     }
 
-    public void dessiner(Graphics2D g) {
+    public void dessiner(Graphics2D g) 
+    {
         int hauteurCalculee = calculerHauteur();
         
         g.setColor(COULEUR_FOND);
@@ -58,32 +61,40 @@ public class BlocClasse {
 
         int yActuel = y + HAUTEUR_ENTETE + PADDING;
 
-        if (!attributs.isEmpty()) {
+        if (!attributs.isEmpty()) 
+        {
             g.setColor(Color.BLACK);
             g.setFont(new Font("Arial", Font.PLAIN, 9));
-            for (String att : attributs) {
+
+            for (String att : attributs) 
+            {
                 g.drawString(att, x + PADDING, yActuel);
                 yActuel += HAUTEUR_LIGNE;
             }
         }
 
-        if (!attributs.isEmpty() && !methodes.isEmpty()) {
+        if (!attributs.isEmpty() && !methodes.isEmpty()) 
+        {
             g.setColor(COULEUR_BORDURE);
             g.drawLine(x + PADDING, yActuel - 5, x + largeur - PADDING, yActuel - 5);
             yActuel += 5;
         }
 
-        if (!methodes.isEmpty()) {
+        if (!methodes.isEmpty()) 
+        {
             g.setColor(Color.BLACK);
             g.setFont(new Font("Arial", Font.PLAIN, 9));
-            for (String met : methodes) {
+
+            for (String met : methodes) 
+            {
                 g.drawString(met, x + PADDING, yActuel);
                 yActuel += HAUTEUR_LIGNE;
             }
         }
     }
 
-    private int calculerHauteur() {
+    private int calculerHauteur() 
+    {
         int h = HAUTEUR_ENTETE + PADDING;
         h += attributs.size() * HAUTEUR_LIGNE;
         if (!attributs.isEmpty() && !methodes.isEmpty()) {

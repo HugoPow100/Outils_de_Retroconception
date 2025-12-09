@@ -6,15 +6,25 @@ public class Disque {
     private String nom;
     private ArrayList<Point> points;
     private int rayon;
+    private Point pointAssocie; // Association bidirectionnelle explicite
 
     public Disque(String nom, int rayon) {
         this.nom = nom;
         this.rayon = rayon;
         this.points = new ArrayList<Point>();
+        this.pointAssocie = null;
     }
 
     public void ajouterPoint(Point p) {
         this.points.add(p);
+    }
+
+    public Point getPointAssocie() {
+        return this.pointAssocie;
+    }
+
+    public void setPointAssocie(Point point) {
+        this.pointAssocie = point;
     }
 
     public ArrayList<Point> getPoints() {
