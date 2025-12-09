@@ -1,25 +1,20 @@
 #!/bin/bash
-# Script pour compiler le projet avec architecture MVC
+# Script pour compiler et exécuter Retroconception avec architecture MVC
 
-# Se placer dans le dossier racine du projet
+# Se placer dans le dossier du script
 cd "$(dirname "$0")"
 
 # Compiler tous les fichiers Java avec les packages
 echo "Compilation du projet..."
-javac -d . metier/*.java controleur/*.java
-
-if [ $? -eq 0 ]; then
-    echo "✓ Compilation réussie"
-else
+javac -d bin src/metier/*.java
+if [ $? -ne 0 ]; then
+    echo
     echo "✗ Erreur de compilation"
     exit 1
 fi
 
-#!/bin/bash
-# Script pour exécuter Retroconception avec architecture MVC
-
-# Se placer dans le dossier racine du projet
-cd "$(dirname "$0")"
+echo
+echo "✓ Compilation réussie"
 
 # Vérifier si un argument est fourni
 if [ $# -eq 0 ]; then
@@ -28,4 +23,4 @@ if [ $# -eq 0 ]; then
 fi
 
 # Exécuter le programme
-java controleur.Retroconception "$@"
+java -cp bin metier.Retroconception "$@"

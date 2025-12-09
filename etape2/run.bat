@@ -1,26 +1,21 @@
 @echo off
-REM Script pour compiler le projet avec architecture MVC
+REM Script pour compiler et executer Retroconception avec architecture MVC
 
 REM Se placer dans le dossier du script
 cd /d "%~dp0"
 
 REM Compiler tous les fichiers Java avec les packages
 echo Compilation du projet...
-javac -d . metier\*.java
+javac -d bin src\metier\*.java
 
-if %errorlevel% equ 0 (
-    echo. 
-    echo √ Compilation reussie
-) else (
+if %errorlevel% neq 0 (
     echo.
     echo X Erreur de compilation
     exit /b 1
 )
-@echo off
-REM Script pour executer Retroconception avec architecture MVC
 
-REM Se placer dans le dossier du script
-cd /d "%~dp0"
+echo. 
+echo √ Compilation reussie
 
 REM Verifier si un argument est fourni
 if "%~1"=="" (
@@ -29,4 +24,4 @@ if "%~1"=="" (
 )
 
 REM Executer le programme
-java metier.Retroconception %*
+java -cp bin metier.Retroconception %*
