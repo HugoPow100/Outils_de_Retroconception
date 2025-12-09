@@ -5,13 +5,17 @@ public class Association extends Liaison {
     private boolean unidirectionnel = false;
     private Multiplicite multOrig;
     private Multiplicite multDest;
+    private int num;
 
-    public Association(String nomAttribut, Classe classeDest, Classe classeOrig,
+    private static int nbAssoc;
+
+    public Association(Classe classeDest, Classe classeOrig,
             Multiplicite multDest, Multiplicite multOrig, boolean unidirectionnel) {
-        super(nomAttribut, classeDest, classeOrig);
+        super(classeDest, classeOrig);
         this.multDest = multDest;
         this.multOrig = multOrig;
         this.unidirectionnel = unidirectionnel;
+        num = ++nbAssoc;
     }
 
     public boolean isUnidirectionnel() {
@@ -46,8 +50,12 @@ public class Association extends Liaison {
         String multO = (this.multOrig != null) ? this.multOrig.toString() : "?";
         String multD = (this.multDest != null) ? this.multDest.toString() : "?";
 
-        return String.format("Association 0 : %s de %s(%s) vers %s(%s)",
-                sens, origine, multO, dest, multD);
+        return String.format("Association %d : %s de %s(%s) vers %s(%s)",
+                this.getNum(), sens, origine, multO, dest, multD);
+    }
+
+    public int getNum() {
+        return this.num;
     }
 
 }

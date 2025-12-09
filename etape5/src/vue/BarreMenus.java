@@ -8,11 +8,15 @@ import javax.swing.JOptionPane;
 
 public class BarreMenus extends JMenuBar {
 
-    public BarreMenus() {
+    private FenetrePrincipale fenetrePrincipale;
+    
+    public BarreMenus(FenetrePrincipale fenetrePrincipale) {
         add(creerMenuFichier());
         //add(creerMenuEdition());
         add(creerMenuAffichage());
         add(creerMenuAide());
+
+        this.fenetrePrincipale = fenetrePrincipale;
     }
 
     private JMenu creerMenuFichier() {
@@ -25,7 +29,7 @@ public class BarreMenus extends JMenuBar {
         ouvrirItem.addActionListener(e -> actionOuvrirProjet());
 
         JMenuItem exporterItem = new JMenuItem("Exporter en image");
-        exporterItem.addActionListener(e -> actionExporter());
+        exporterItem.addActionListener(e -> fenetrePrincipale.sauvegarderDiagramme());
 
         JMenuItem sauvegarderItem = new JMenuItem("Sauvegarder positions");
         sauvegarderItem.addActionListener(e -> actionSauvegarder());

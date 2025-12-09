@@ -13,21 +13,20 @@ public class Retroconception {
 		String cheminFichier = args[0];
 
 		Lecture lecture = new Lecture(cheminFichier);
-		HashMap<String, ArrayList<Classe>> hashMapClasses = lecture.getHashMapClasses();
+		HashMap<String, Classe> hashMapClasses = lecture.getHashMapClasses();
 
 		for (String nomFichier : hashMapClasses.keySet()) {
-			ArrayList<Classe> classes = hashMapClasses.get(nomFichier);
-			for (Classe classe : classes) {
-				System.out.println("\n=== Analyse de la classe " + classe.getNom() + " ===\n");
+			Classe classe = hashMapClasses.get(nomFichier);
+				String abstractInfo = classe.isAbstract() ? " (abstract)" : "";
+				System.out.println("\n=== Analyse de la classe " + classe.getNom() + abstractInfo + " ===\n");
 
 				// Affichage détaillé
-				afficherDetailsClasse(classe);
+				// afficherDetailsClasse(classe);
 
-				System.out.println();
+				// System.out.println();
 
 				// Affichage UML
 				afficherUML(classe);
-			}
 		}
 	}
 
@@ -64,8 +63,9 @@ public class Retroconception {
 						affichageType = typeRetour;
 					}
 
+					String abstractTag = m.isAbstract() ? "\t{abstract}" : "";
 					System.out.println("méthode : " + m.getNomMethode() + "\tvisibilité : " + m.getVisibilite()
-							+ "\ttype de retour : " + affichageType);
+							+ "\ttype de retour : " + affichageType + abstractTag);
 				} // Afficher les paramètres
 				if (m.getLstParametre().isEmpty()) {
 					System.out.println("paramètres : aucun");
@@ -96,11 +96,15 @@ public class Retroconception {
 		ArrayList<Methode> methodes = classe.getLstMethode();
 
 		// Calculer la largeur de la boîte
-		int largeur = Math.max(50, classe.getNom().length() + 10);
+		String nomClasse = classe.getNom();
+		if (classe.isAbstract()) {
+			nomClasse = "<<abstract>> " + nomClasse;
+		}
+		int largeur = Math.max(50, nomClasse.length() + 10);
 		String ligne = "-".repeat(largeur);
 
 		System.out.println(ligne);
-		System.out.println(centrer(classe.getNom(), largeur));
+		System.out.println(centrer(nomClasse, largeur));
 		System.out.println(ligne);
 
 		// Afficher les attributs

@@ -1,6 +1,7 @@
 package metier;
 
-public class Multiplicite {
+public class Multiplicite 
+{
 
     // Integer.MAX_VALUE = * en affichage
     private int debut;
@@ -31,6 +32,19 @@ public class Multiplicite {
 		else
 			this.fin   = Integer.parseInt(fin);
     }
+
+
+	public void setDebut(int debut)
+	{
+		this.debut = debut;
+	}
+
+	public void setFin(int fin)
+	{
+		this.fin = fin;
+	}
+
+
 
     public String toString() 
 	{

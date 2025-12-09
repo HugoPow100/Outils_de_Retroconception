@@ -4,23 +4,28 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.HashMap;
+import java.util.regex.*;
 
 public class Lecture {
-	private HashMap<String, ArrayList<Classe>> hashMapClasses;
+	private HashMap<String, Classe> hashMapClasses;
 	private ArrayList<Classe> lstClasse;
 	private ArrayList<Attribut> lstAttribut;
 	private ArrayList<Methode> lstMethode;
+	private List<Heritage> lstHeritage;
+	private ArrayList<Association> lstAssociations;
+	private ArrayList<String> lstNomFichier;
 
 	public Lecture(String nom) {
-		this.hashMapClasses = new HashMap<String, ArrayList<Classe>>();
+		this.hashMapClasses = new HashMap<String, Classe>();
 		this.lstAttribut = new ArrayList<Attribut>();
 		this.lstMethode = new ArrayList<Methode>();
+		this.lstNomFichier = new ArrayList<String>();
 
 		analyserFichier(nom);
 	}
 
-	public void analyserFichier(String paraCheminFichier) {
+	public void analyserFichier(String paraCheminFichier) 
+	{
 		Scanner scFic;
 
 		File f = new File(paraCheminFichier);
@@ -36,9 +41,16 @@ public class Lecture {
 			// Récupére tous les fichiers du dossier
 			File[] tabFichiers = f.listFiles();
 
-			if (tabFichiers != null) {
-				for (File file : tabFichiers) {
+			if (tabFichiers != null)
+			{
+				for (File file : tabFichiers) 
+				{
 					lstCheminFich.add(file.getAbsolutePath()); // récupere tous les chemins de chaque fichier
+
+					Path p = file.toPath();
+					String nomFichier = String.valueOf(p.getFileName()).replace(".java", "");
+
+					this.lstNomFichier.add(nomFichier);
 				}
 
 				// Libére la mémoire
@@ -46,53 +58,112 @@ public class Lecture {
 			}
 		}
 
-		try {
-			if (!lstCheminFich.isEmpty()) {
-				for (String chemin : lstCheminFich) {
+		try
+		{
+
+			if (!lstCheminFich.isEmpty()) 
+			{
+				for (String chemin : lstCheminFich) 
+				{
 					scFic = new Scanner(new FileInputStream(chemin), "UTF8");
 
 					Path p = Paths.get(chemin);
 					String nomFichier = String.valueOf(p.getFileName());
 
-					ArrayList<Classe> classesPourCeFichier = new ArrayList<>();
-					classesPourCeFichier.add(scanne(scFic, nomFichier));
+					Classe classe;
+					classe = scanne(scFic, nomFichier);
 
-					this.hashMapClasses.put(nomFichier, classesPourCeFichier);
+				this.hashMapClasses.put(nomFichier, classe);
 
-					scFic.close();
-
-					// Nettoi les liste pour le prochain fichier à lire
-					this.lstAttribut.clear();
-					this.lstClasse.clear();
-					this.lstMethode.clear();
-				}
-
-				// Nettoie la list car les chemin ne sont plus utile
+				scFic.close();
+			}				// Nettoie la list car les chemin ne sont plus utile
 				lstCheminFich.clear();
-			} else {
+			} 
+			else 
+			{
 				scFic = new Scanner(new FileInputStream(paraCheminFichier), "UTF8");
 
 				Path p = Paths.get(paraCheminFichier);
 				String nomFichier = String.valueOf(p.getFileName());
 
-				ArrayList<Classe> classesPourCeFichier = new ArrayList<>();
-				classesPourCeFichier.add(scanne(scFic, nomFichier));
+				Classe classe;
+				classe = scanne(scFic, nomFichier);
 
-				this.hashMapClasses.put(nomFichier, classesPourCeFichier);
+				this.hashMapClasses.put(nomFichier, classe);
 
 				scFic.close();
-
-				// Nettoie les liste car plus utile
-				this.lstAttribut.clear();
-				this.lstClasse.clear();
-				this.lstMethode.clear();
 			}
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+			/*for (String nomFichier : this.lstNomFichier)
+			{
+				Classe classeOrig = this.hashMapClasses.get(nomFichier).get(0);
 
-	}
+				for(Attribut attribut : classeOrig.lstAttribut())
+				{
+					for(String nomFichierCheck : lstNomFichier)
+					{
+						if(attribut.getTypeAttribut().equals(nomFichierCheck) && !attribut.getTypeAttribut().equals(nomFichier))
+						{
+							Classe classeDest =  this.hashMapClasses.get(nomFichierCheck).get(0);
+
+							Association ass = new Association (classeDest, classeOrig,Multiplicite multDest, Multiplicite multOrig, boolean unidirectionnel);
+							
+							this.lstAssociations.add(ass);
+						}
+					}
+				}
+			}*/
+
+
+			for (String nomFichier : hashMapClasses.keySet()) 
+			{
+				Classe classeOrig = hashMapClasses.get(nomFichier);
+
+				// Compter combien de fois chaque type de classe apparaît dans les attributs
+				Map<String, Integer> compteur = new HashMap<>();
+				
+				for (Attribut attr : classeOrig.getLstAttribut()) 
+				{
+					String type = nettoyerType(attr.getTypeAttribut());
+
+					if (hashMapClasses.containsKey(type)) 
+					{
+						compteur.put(type, compteur.getOrDefault(type, 0) + 1);
+					}
+				}
+
+				// Créer les associations avec multiplicité
+				for (Map.Entry<String, Integer> entry : compteur.entrySet()) 
+				{
+					String typeDest       = entry.getKey();
+					int    max            = entry.getValue();
+
+					Classe classeDest     = hashMapClasses.get(typeDest); // récupérer la Classe dans l'ArrayList
+
+					Multiplicite multOrig = new Multiplicite(1, 1); // origine = 1..1
+					Multiplicite multDest;
+
+					// Vérifie si le type peut contenir plusieurs instances (tableau ou collection)
+					boolean multi = estMultiInstance(typeDest);
+
+					if (multi) 
+					{
+						multDest = new Multiplicite(0, Integer.MAX_VALUE); // 0..*
+					} 
+					else 
+					{
+						multDest = new Multiplicite(1, max); // 1..N selon occurrences
+					}
+
+					lstAssociations.add(new Association(classeDest, classeOrig, multDest, multOrig, true));
+				}
+			}
+
+	} 
+	catch (Exception e) 
+	{
+		e.printStackTrace();
+	}	}
 
 	private Classe scanne(Scanner scFic, String nomFichierAvExt) {
 		Scanner scLigne;
@@ -121,12 +192,23 @@ public class Lecture {
 		List<Parametre> lstParametres = new ArrayList<Parametre>();
 
 		String nomFichier = nomFichierAvExt.replace(".java", "");
+		boolean isClasseAbstract = false;
 
 		while (scFic.hasNextLine()) {
 			// retire les espaces en début/fin
 			String ligne = scFic.nextLine().trim();
 
+			// Détecter si la classe est abstraite
+			if (ligne.contains("abstract") && ligne.contains("class")) {
+				isClasseAbstract = true;
+			}
+
 			if (ligne.startsWith("private") || ligne.startsWith("protected") || ligne.startsWith("public")) {
+				if (ligne.contains("class") && ligne.contains("extends")) {
+					String classeOrigine = ligne.substring(ligne.indexOf("extends") + 7).trim();
+					// TODO: gérer l'héritage
+				}
+
 				// c'est un attribut, pas une méthode
 				if (!ligne.contains("(") && ligne.endsWith(";")) {
 					// Découper la ligne : visibilité, type, nom
@@ -143,26 +225,25 @@ public class Lecture {
 						nom = ligneAttribut[2].replace(";", ""); // retirer le ;
 					}
 
-					/*for ( : ) {
-						
-					}*/
-
-					System.out.println("Le nouvel attribut a été creer : ");
+					//System.out.println("Création d'un attribu");
 					lstAttribut.add(new Attribut(nom, type, visibiliteAtribut, portee));
 				}
 
-				if (ligne.contains("(") && ligne.contains(")") && !ligne.endsWith(";")) // permet de gérer le cas ou
-																						// c'est une liste ou une
-																						// définition de classe afin de
-																						// ne pas entrer danns le if
+				// Détecter les méthodes (abstraites ou non)
+				if (ligne.contains("(") && ligne.contains(")") &&
+						(!ligne.endsWith(";") || ligne.contains("abstract"))) // Inclure les méthodes abstraites qui se
+																				// terminent par ;
 				{
+					boolean isMethodeAbstract = ligne.contains("abstract");
 					String[] ligneMethode = ligne.split("\\s+");
 					visibilite = ligneMethode[0];
 
+					int offset = isMethodeAbstract ? 1 : 0;
+
 					if (ligne.contains("static")) {
 						portee = "classe";
-						typeRetour = ligneMethode[2];
-						nomMethode = ligneMethode[3].substring(0, ligneMethode[3].indexOf("("));
+						typeRetour = ligneMethode[2 + offset];
+						nomMethode = ligneMethode[3 + offset].substring(0, ligneMethode[3 + offset].indexOf("("));
 					} else {
 						portee = "instance";
 
@@ -170,8 +251,8 @@ public class Lecture {
 							typeRetour = "";
 							nomConstructeur = "Constructeur";
 						} else {
-							typeRetour = ligneMethode[1];
-							nomMethode = ligneMethode[2].substring(0, ligneMethode[2].indexOf("("));
+							typeRetour = ligneMethode[1 + offset];
+							nomMethode = ligneMethode[2 + offset].substring(0, ligneMethode[2 + offset].indexOf("("));
 						}
 
 					}
@@ -196,23 +277,58 @@ public class Lecture {
 
 					if (!nomConstructeur.equals("")) {
 
-						System.out.println("Nouvelle méthode ajouté dans la liste");
+						//System.out.println("Nouvelle méthode ajoutée dans la liste");
 						this.lstMethode.add(
-								new Methode(nomConstructeur, typeRetour, visibilite, new ArrayList<>(lstParametres)));
+								new Methode(nomConstructeur, typeRetour, visibilite, false,
+										new ArrayList<>(lstParametres)));
 						nomConstructeur = ""; // Réinitialiser
 					} else {
-						System.out.println("Nouvelle méthode ajouté");
+						//System.out.println("Nouvelle méthode ajoutée");
 						this.lstMethode
-								.add(new Methode(nomMethode, typeRetour, visibilite, new ArrayList<>(lstParametres)));
+								.add(new Methode(nomMethode, typeRetour, visibilite, isMethodeAbstract,
+										new ArrayList<>(lstParametres)));
 					}
 				}
 			}
 		}
 
-		return new Classe(nomFichier, this.lstAttribut, this.lstMethode);
+		return new Classe(nomFichier, isClasseAbstract, this.lstAttribut, this.lstMethode);
 	}
 
-	public HashMap<String, ArrayList<Classe>> getHashMapClasses() {
+	private Classe getClasse(String nomFichier)
+	{
+		for (Classe classe : hashMapClasses.values())
+		{
+			if (classe.getNom().equals(nomFichier))
+			return classe;
+		}
+		return null;
+	}
+
+	/**
+	 * Nettoie le type pour retirer List<>, Set<> ou [].
+	 */
+	private String nettoyerType(String type) 
+	{
+		type = type.trim();
+		if (type.endsWith("[]")) return type.substring(0, type.length() - 2);
+		if (type.startsWith("List<") && type.endsWith(">")) return type.substring(5, type.length() - 1);
+		if (type.startsWith("Set<") && type.endsWith(">")) return type.substring(4, type.length() - 1);
+		return type;
+	}
+
+	/**
+	 * Retourne true si le type peut contenir plusieurs instances (tableau ou collection).
+	 */
+	private boolean estMultiInstance(String type) 
+	{
+		type = type.trim();
+		return type.endsWith("[]") || type.startsWith("List<") || type.startsWith("Set<");
+	}
+
+	public HashMap<String, Classe> getHashMapClasses() 
+	{
+		// System.out.println(this.hashMapClasses.values());
 		return this.hashMapClasses;
 	}
 }

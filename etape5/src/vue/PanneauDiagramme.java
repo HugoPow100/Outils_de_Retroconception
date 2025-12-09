@@ -1,16 +1,16 @@
 package vue;
 
-import javax.swing.*;
+import controlleur.Controlleur;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import controlleur.Controlleur;
+import javax.swing.*;
 
 public class PanneauDiagramme extends JPanel {
 
     private List<BlocClasse> blocsClasses;
+    private List<LiaisonVue> liaisons;
     private String cheminProjetCourant;
     private BlocClasse blocEnDeplacement;
     private Point pointDernier;
@@ -18,6 +18,7 @@ public class PanneauDiagramme extends JPanel {
 
     public PanneauDiagramme() {
         this.blocsClasses = new ArrayList<>();
+        this.liaisons = new ArrayList<>();
         this.cheminProjetCourant = null;
         this.controlleur = new Controlleur();
 
@@ -31,9 +32,11 @@ public class PanneauDiagramme extends JPanel {
     public void chargerProjet(String cheminProjet) {
         this.cheminProjetCourant = cheminProjet;
         blocsClasses.clear();
+        liaisons.clear();
 
         List<BlocClasse> blocCharges = controlleur.chargerProjetEnBlocsClasses(cheminProjet);
         blocsClasses.addAll(blocCharges);
+        liaisons.addAll(controlleur.getLiaisons());
 
         repaint();
     }
@@ -87,17 +90,34 @@ public class PanneauDiagramme extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Dessiner les blocs
+        // Dessiner les liaisons d'abord (derrière les blocs)
+        dessinerLiaisons(g2d);
+
+        // Dessiner les blocs par-dessus
         for (BlocClasse bloc : blocsClasses) {
             bloc.dessiner(g2d);
         }
-
-        // Dessiner les liaisons
-        dessinerLiaisons(g2d);
     }
 
     private void dessinerLiaisons(Graphics2D g2d) {
+        for (LiaisonVue liaison : liaisons) {
+            liaison.dessiner(g2d);
+        }
     }
+
+    public void ajouterLiaison(BlocClasse blocOrig, BlocClasse blocDest, String type) {
+        LiaisonVue liaison = new LiaisonVue(blocOrig, blocDest, type);
+        liaisons.add(liaison);
+        controlleur.ajouterLiaison(liaison);
+        repaint();
+    }
+
+    public void supprimerLiaison(LiaisonVue liaison) {
+        liaisons.remove(liaison);
+        controlleur.supprimerLiaison(liaison);
+        repaint();
+    }
+
 
     public List<BlocClasse> getBlocsClasses() {
         return blocsClasses;
