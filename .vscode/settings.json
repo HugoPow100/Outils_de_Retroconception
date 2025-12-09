@@ -1,0 +1,8 @@
+{
+    "java.project.sourcePaths": [
+        "etape3/src",
+        "etape5",
+        "etape5/src"
+    ],
+    "java.project.referencedLibraries": []
+}

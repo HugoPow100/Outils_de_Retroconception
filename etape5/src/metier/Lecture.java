@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.*;
-import java.util.HashMap;
 
 public class Lecture {
 	private HashMap<String, ArrayList<Classe>> hashMapClasses;
@@ -61,14 +60,16 @@ public class Lecture {
 					this.hashMapClasses.put(nomFichier, classesPourCeFichier);
 
 					scFic.close();
+
+					// Nettoi les liste pour le prochain fichier à lire
+					this.lstAttribut.clear();
+					this.lstClasse.clear();
+					this.lstMethode.clear();
 				}
 
 				// Nettoie la list car les chemin ne sont plus utile
 				lstCheminFich.clear();
-
-			} 
-			else 
-			{
+			} else {
 				scFic = new Scanner(new FileInputStream(paraCheminFichier), "UTF8");
 
 				Path p = Paths.get(paraCheminFichier);
@@ -80,6 +81,11 @@ public class Lecture {
 				this.hashMapClasses.put(nomFichier, classesPourCeFichier);
 
 				scFic.close();
+
+				// Nettoie les liste car plus utile
+				this.lstAttribut.clear();
+				this.lstClasse.clear();
+				this.lstMethode.clear();
 			}
 
 		} catch (Exception e) {
@@ -137,6 +143,10 @@ public class Lecture {
 						nom = ligneAttribut[2].replace(";", ""); // retirer le ;
 					}
 
+					/*for ( : ) {
+						
+					}*/
+
 					System.out.println("Le nouvel attribut a été creer : ");
 					lstAttribut.add(new Attribut(nom, type, visibiliteAtribut, portee));
 				}
@@ -155,6 +165,7 @@ public class Lecture {
 						nomMethode = ligneMethode[3].substring(0, ligneMethode[3].indexOf("("));
 					} else {
 						portee = "instance";
+
 						if (ligne.contains(nomFichier)) {
 							typeRetour = "";
 							nomConstructeur = "Constructeur";

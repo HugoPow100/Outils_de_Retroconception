@@ -1,0 +1,53 @@
+package metier;
+
+public class Association extends Liaison {
+
+    private boolean unidirectionnel = false;
+    private Multiplicite multOrig;
+    private Multiplicite multDest;
+
+    public Association(String nomAttribut, Classe classeDest, Classe classeOrig,
+            Multiplicite multDest, Multiplicite multOrig, boolean unidirectionnel) {
+        super(nomAttribut, classeDest, classeOrig);
+        this.multDest = multDest;
+        this.multOrig = multOrig;
+        this.unidirectionnel = unidirectionnel;
+    }
+
+    public boolean isUnidirectionnel() {
+        return unidirectionnel;
+    }
+
+    public void setUnidirectionnel(boolean unidirectionnel) {
+        this.unidirectionnel = unidirectionnel;
+    }
+
+    public Multiplicite getMultOrig() {
+        return multOrig;
+    }
+
+    public void setMultOrig(Multiplicite multOrig) {
+        this.multOrig = multOrig;
+    }
+
+    public Multiplicite getMultDest() {
+        return multDest;
+    }
+
+    public void setMultDest(Multiplicite multDest) {
+        this.multDest = multDest;
+    }
+
+    @Override
+    public String toString() {
+        String sens = (this.unidirectionnel) ? "unidirectionnelle" : "bidirectionnelle";
+        String origine = (this.classeOrig != null) ? this.classeOrig.getNom() : "?";
+        String dest = (this.classeDest != null) ? this.classeDest.getNom() : "?";
+        String multO = (this.multOrig != null) ? this.multOrig.toString() : "?";
+        String multD = (this.multDest != null) ? this.multDest.toString() : "?";
+
+        return String.format("Association 0 : %s de %s(%s) vers %s(%s)",
+                sens, origine, multO, dest, multD);
+    }
+
+}
