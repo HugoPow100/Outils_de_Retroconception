@@ -43,8 +43,21 @@ public class Controlleur {
         // Créer les liaisons (placeholders pour le moment)
         creerLiaisonsPlaceholder(blocs, mapBlocsParNom);
 
+        // Créer les liaisons
+        //creerLiaisons(lecture.getLstAssociation(), blocs, mapBlocsParNom);
+
         return blocs;
     }
+
+    private void creerLiaisons(List<Association> lstAssoc, List<BlocClasse> blocs, HashMap<String, BlocClasse> mapBlocsParNom) {
+        List<LiaisonVue> liaisons = new ArrayList<LiaisonVue>();
+
+        for (Association assoc : lstAssoc) 
+        {
+            liaisons.add(new LiaisonVue(mapBlocsParNom.get(assoc.getClasseOrig().getNom()), mapBlocsParNom.get(assoc.getClasseDest().getNom())));
+        }
+    }
+
 
     private void creerLiaisonsPlaceholder(List<BlocClasse> blocs, HashMap<String, BlocClasse> mapBlocsParNom) {
         // TODO: À remplacer par les liaisons du métier une fois prêtes

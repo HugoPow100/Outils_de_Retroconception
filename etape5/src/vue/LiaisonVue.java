@@ -7,6 +7,9 @@ public class LiaisonVue {
     private BlocClasse blocOrigine;
     private BlocClasse blocDestination;
 
+    private Point ancrageOrig;
+    private Point ancrageDest;
+
     public LiaisonVue(BlocClasse blocOrigine, BlocClasse blocDestination) {
         this.blocOrigine = blocOrigine;
         this.blocDestination = blocDestination;
@@ -14,17 +17,15 @@ public class LiaisonVue {
 
     public void dessiner(Graphics2D g) {
         // Récupérer les points de connexion (centres des blocs)
-        int x1 = blocOrigine.getX() + blocOrigine.getLargeur() / 2;
-        int y1 = blocOrigine.getY() + 15; // En haut du bloc
+        Point ancrageOrig = new Point(blocOrigine.getX() + blocOrigine.getLargeur(),blocOrigine.getY() + 15); // En haut du bloc
 
-        int x2 = blocDestination.getX() + blocDestination.getLargeur() / 2;
-        int y2 = blocDestination.getY() + 15;
+        Point ancrageDest= new Point(blocDestination.getX(),blocDestination.getY() + 15);
 
         // Trait plein simple pour association
         g.setColor(Color.BLACK);
         g.setStroke(new BasicStroke(1));
-        g.drawLine(x1, y1, x2, y2);
-        dessinerFlecheSimple(g, x1, y1, x2, y2);
+        g.drawLine(ancrageOrig.x, ancrageOrig.y, ancrageDest.x, ancrageDest.y);
+        dessinerFlecheSimple(g, ancrageOrig.x, ancrageOrig.y, ancrageDest.x, ancrageDest.y);
     }
 
     private void dessinerFlecheSimple(Graphics2D g, int x1, int y1, int x2, int y2) {
