@@ -1,6 +1,6 @@
 package test;
 
-public class Data {
+public abstract class Data {
     private String Salpoe;
     private int tontonH;
     private int oncleStaline;
@@ -14,6 +14,8 @@ public class Data {
     private void test() {
         this.tontonH = this.oncleStaline;
     }
+
+    public abstract void doSomething();
 
     public int getX() {
         return this.tontonH;

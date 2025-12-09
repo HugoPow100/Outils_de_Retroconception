@@ -123,11 +123,17 @@ public class Lecture
 		List<Parametre> lstParametres = new ArrayList<Parametre>();
 
 		String nomFichier        = nomFichierAvExt.replace(".java","");
+		boolean isClasseAbstract = false;
 
 		while ( scFic.hasNextLine() )
 		{
 			// retire les espaces en début/fin
-			String ligne = scFic.nextLine().trim(); 
+			String ligne = scFic.nextLine().trim();
+
+			// Détecter si la classe est abstraite
+			if (ligne.contains("abstract") && ligne.contains("class")) {
+				isClasseAbstract = true;
+			} 
 
 			if (ligne.startsWith("private") || ligne.startsWith("protected") || ligne.startsWith("public"))
 			{
@@ -151,21 +157,24 @@ public class Lecture
 						nom          = ligneAttribut[2].replace(";", ""); // retirer le ;
 					}
 
-					System.out.println("Le nouvel attribut a été creer : ");
-					lstAttribut.add(new Attribut(nom,type,visibiliteAtribut,portee));
-				}
+				System.out.println("Le nouvel attribut a été creer : ");
+				lstAttribut.add(new Attribut(nom,type,visibiliteAtribut,portee));
+			}
 
-				if (ligne.contains("(") && ligne.contains(")") && !ligne.endsWith(";")) // permet de gérer le cas ou c'est une liste ou une définition de classe afin de ne pas entrer danns le if 
-				{ 
-					String[] ligneMethode = ligne.split("\\s+");
-					visibilite     = ligneMethode[0];
-
+			// Détecter les méthodes (abstraites ou non)
+			if (ligne.contains("(") && ligne.contains(")") && 
+			    (!ligne.endsWith(";") || ligne.contains("abstract"))) // Inclure les méthodes abstraites qui se terminent par ;
+			{ 
+				boolean isMethodeAbstract = ligne.contains("abstract");
+				String[] ligneMethode = ligne.split("\\s+");
+				visibilite     = ligneMethode[0];
+					int offset = isMethodeAbstract ? 1 : 0;
 
 					if(ligne.contains("static"))
 					{		
 						portee     = "classe";
-						typeRetour = ligneMethode[2];
-						nomMethode = ligneMethode[3].substring(0, ligneMethode[3].indexOf("("));
+						typeRetour = ligneMethode[2 + offset];
+						nomMethode = ligneMethode[3 + offset].substring(0, ligneMethode[3 + offset].indexOf("("));
 					}
 					else
 					{
@@ -177,8 +186,8 @@ public class Lecture
 						}
 						else
 						{
-							typeRetour = ligneMethode[1];
-							nomMethode = ligneMethode[2].substring(0, ligneMethode[2].indexOf("("));
+							typeRetour = ligneMethode[1 + offset];
+							nomMethode = ligneMethode[2 + offset].substring(0, ligneMethode[2 + offset].indexOf("("));
 						}
 						
 					}
@@ -209,19 +218,19 @@ public class Lecture
 					{
 					
 						System.out.println("Nouvelle méthode ajouté dans la liste");
-						this.lstMethode.add(new Methode(nomConstructeur,typeRetour,visibilite ,new ArrayList<>(lstParametres)));
+						this.lstMethode.add(new Methode(nomConstructeur,typeRetour,visibilite, false, new ArrayList<>(lstParametres)));
 						nomConstructeur = ""; // Réinitialiser
 					}
 					else
 					{
 						System.out.println("Nouvelle méthode ajouté");
-						this.lstMethode.add(new Methode(nomMethode,typeRetour,visibilite ,new ArrayList<>(lstParametres)));
+						this.lstMethode.add(new Methode(nomMethode,typeRetour,visibilite, isMethodeAbstract, new ArrayList<>(lstParametres)));
 					}
 				}
 			}
 		}
 		
-		return new Classe(nomFichier,this.lstAttribut,this.lstMethode);
+			return new Classe(nomFichier, isClasseAbstract, this.lstAttribut, this.lstMethode);
 	}
 
 	public HashMap<String, ArrayList<Classe>> getHashMapClasses()

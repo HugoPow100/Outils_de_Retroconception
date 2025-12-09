@@ -1,9 +1,10 @@
 package metier;
 
-public class Heritage extends Liaison {
+public class Heritage extends Liaison
+{
 
-    public Heritage(String nomAttribut, Classe classeDest, Classe classeOrig) {
-        super(nomAttribut, classeDest, classeOrig);
+    public Heritage(Classe classeDest, Classe classeOrig) {
+        super( classeDest, classeOrig);
     }
 
     @Override

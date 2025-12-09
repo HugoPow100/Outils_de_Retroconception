@@ -7,8 +7,7 @@ public class Attribut {
 	private String visibilite;
 	private String porte;
 
-	public Attribut(String nomAttribut, String type, String visibilite, String porte)
-	{
+	public Attribut(String nomAttribut, String type, String visibilite, String porte) {
 		this.nomAttribut = nomAttribut;
 		this.type = type;
 		this.visibilite = visibilite;
@@ -31,23 +30,22 @@ public class Attribut {
 		return this.porte;
 	}
 
-	public String toString()
-    {
-        String sRet;
+	public String toString() {
+		String sRet;
 
-        sRet = "";
+		sRet = "";
 
-        switch (this.visibilite) {
-            case "public"    -> sRet = "+ ";
-            case "private"   -> sRet = "- ";
-            case "package"   -> sRet = "~ ";
-            case "protected" -> sRet = "# ";
-        }
-        
-        sRet += this.nomAttribut + "\t:";
+		switch (this.visibilite) {
+			case "public" -> sRet = "+ ";
+			case "private" -> sRet = "- ";
+			case "package" -> sRet = "~ ";
+			case "protected" -> sRet = "# ";
+		}
 
-        sRet += this.type;
+		sRet += this.nomAttribut + "\t: ";
 
-        return sRet;
-    }
+		sRet += this.type;
+
+		return sRet;
+	}
 }
