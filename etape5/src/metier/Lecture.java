@@ -432,12 +432,6 @@ public class Lecture
 		lstAssociations = new ArrayList<>(uniques.values());
 	}
 
-
-	
-
-
-
-
 	/**
 	 * Nettoie le type pour retirer List<>, Set<> ou [].
 	 */

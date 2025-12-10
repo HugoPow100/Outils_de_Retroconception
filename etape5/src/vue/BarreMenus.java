@@ -94,7 +94,7 @@ public class BarreMenus extends JMenuBar
         menu.add(afficherAttributsItem);
         menu.add(afficherMethodesItem);
         menu.addSeparator();
-        menu.add(alignerItem);
+        //menu.add(alignerItem);
         menu.add(optimiserItem);
 
         return menu;
