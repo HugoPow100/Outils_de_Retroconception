@@ -152,18 +152,20 @@ public class Lecture {
 				// c'est un attribut, pas une méthode
 				if (!ligne.contains("(") && ligne.endsWith(";")) {
 					// Découper la ligne : visibilité, type, nom
-					String[] ligneAttribut = ligne.split("\\s+"); // séparer par espaces
-					visibiliteAtribut = ligneAttribut[0];
+					Scanner scAttribut = new Scanner(ligne);
+					visibiliteAtribut = scAttribut.next();
 
-					if (ligneAttribut[1].equals("static")) {
+					String motSuivant = scAttribut.next();
+					if (motSuivant.equals("static")) {
 						portee = "classe";
-						type = ligneAttribut[2];
-						nom = ligneAttribut[3].replace(";", ""); // retirer le ;
+						type = scAttribut.next();
+						nom = scAttribut.next().replace(";", ""); // retirer le ;
 					} else {
 						portee = "instance";
-						type = ligneAttribut[1];
-						nom = ligneAttribut[2].replace(";", ""); // retirer le ;
+						type = motSuivant;
+						nom = scAttribut.next().replace(";", ""); // retirer le ;
 					}
+					scAttribut.close();
 
 					System.out.println("Le nouvel attribut a été creer : ");
 					lstAttribut.add(new Attribut(nom, type, visibiliteAtribut, portee));
@@ -172,18 +174,22 @@ public class Lecture {
 				// Détecter les méthodes (abstraites ou non)
 				if (ligne.contains("(") && ligne.contains(")") &&
 						(!ligne.endsWith(";") || ligne.contains("abstract"))) // Inclure les méthodes abstraites qui se
-																				// terminent par ;
+																	// terminent par ;
 				{
 					boolean isMethodeAbstract = ligne.contains("abstract");
-					String[] ligneMethode = ligne.split("\\s+");
-					visibilite = ligneMethode[0];
+					Scanner scMethode = new Scanner(ligne);
+					visibilite = scMethode.next();
 
-					int offset = isMethodeAbstract ? 1 : 0;
+					if (isMethodeAbstract) {
+						scMethode.next(); // skip "abstract"
+					}
 
-					if (ligne.contains("static")) {
+					String motSuivant = scMethode.next();
+					if (motSuivant.equals("static")) {
 						portee = "classe";
-						typeRetour = ligneMethode[2 + offset];
-						nomMethode = ligneMethode[3 + offset].substring(0, ligneMethode[3 + offset].indexOf("("));
+						typeRetour = scMethode.next();
+						String methodAvecParam = scMethode.next();
+						nomMethode = methodAvecParam.substring(0, methodAvecParam.indexOf("("));
 					} else {
 						portee = "instance";
 
@@ -191,30 +197,37 @@ public class Lecture {
 							typeRetour = "";
 							nomConstructeur = "Constructeur";
 						} else {
-							typeRetour = ligneMethode[1 + offset];
-							nomMethode = ligneMethode[2 + offset].substring(0, ligneMethode[2 + offset].indexOf("("));
+							typeRetour = motSuivant;
+							String methodAvecParam = scMethode.next();
+							nomMethode = methodAvecParam.substring(0, methodAvecParam.indexOf("("));
 						}
 
 					}
-
-					String params = ligne.substring(ligne.indexOf("(") + 1, ligne.indexOf(")"));
+					scMethode.close();					String params = ligne.substring(ligne.indexOf("(") + 1, ligne.indexOf(")"));
 
 					lstParametres = new ArrayList<Parametre>(); // Réinitialiser pour chaque méthode
 
 					if (!params.isEmpty()) {
-						String[] listParam = params.split(",");
+						Scanner scParams = new Scanner(params);
+						scParams.useDelimiter(",");
 
-						for (String p : listParam) {
-							String[] pTokens = p.trim().split("\\s+");
-							if (pTokens.length >= 2) {
-								String typeParam = pTokens[0];
-								String nomParam = pTokens[1];
-								parametre = new Parametre(nomParam, typeParam);
-								lstParametres.add(parametre);
-							} else {
-								System.out.println("Paramètre ignoré (format inattendu): " + p);
+						while (scParams.hasNext()) {
+							String paramStr = scParams.next().trim();
+							Scanner scParam = new Scanner(paramStr);
+							
+							if (scParam.hasNext()) {
+								String typeParam = scParam.next();
+								if (scParam.hasNext()) {
+									String nomParam = scParam.next();
+									parametre = new Parametre(nomParam, typeParam);
+									lstParametres.add(parametre);
+								} else {
+									System.out.println("Paramètre ignoré (format inattendu): " + paramStr);
+								}
 							}
+							scParam.close();
 						}
+						scParams.close();
 					}
 
 					if (!nomConstructeur.equals("")) {
