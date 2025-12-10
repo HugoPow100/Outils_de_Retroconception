@@ -202,11 +202,7 @@ public class Lecture {
 
 				System.out.println("L'interface implémenté est " + interfaceImplementee);
 
-				implementing = interfaceImplementee;
-
-
-				
-				
+				implementing = interfaceImplementee;	
 			}
 			
 
@@ -539,7 +535,49 @@ public class Lecture {
 				lstAssociations.add(new Association(
 					classeDest, classeOrig, multDest, multOrig, !bidirectionnel));
 			}
+			nettoyerAssociations();
 		}
+	}
+
+	/**
+	 * Nettoie la liste des associations pour :
+	 * - supprimer les doublons (ex : A→B et B→A)
+	 * - transformer ces doublons en une seule association bidirectionnelle A↔B
+	 * - conserver une seule association unique par couple de classes
+	*/
+	private void nettoyerAssociations() 
+	{
+		// Cette Map va contenir UNE seule association par paire de classes
+		Map<String, Association> uniques = new HashMap<>();
+
+		for (Association asso : lstAssociations) 
+		{
+
+			String origine = asso.getClasseOrig().getNom();
+			String dest    = asso.getClasseDest().getNom();
+
+			String key;
+
+			if (origine.compareTo(dest) < 0) 
+				key = origine + "-" + dest;
+			else
+				key = dest + "-" + origine;
+		
+
+			if (!uniques.containsKey(key)) 
+			{
+				// Première association → on la garde
+				uniques.put(key, asso);
+			}
+			else 
+			{
+				// Une association opposée existe déjà
+				Association exist = uniques.get(key);
+			}
+		}
+
+		// On remplace la liste par la liste unique
+		lstAssociations = new ArrayList<>(uniques.values());
 	}
 
 	// Recupere une classe en fonction du nom
@@ -583,5 +621,10 @@ public class Lecture {
 	public ArrayList<Association> getLstAssociation()
 	{
 		return this.lstAssociations;
+	}
+
+	public ArrayList<Heritage> getLstHeritage()
+	{
+		return this.lstHeritage;
 	}
 }

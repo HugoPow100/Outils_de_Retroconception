@@ -164,10 +164,17 @@ public class Retroconception
 		if (!stereotype.isEmpty()) {
 			System.out.println(centrer(stereotype, largeur));
 		}
-		System.out.println(centrer(motHerite, largeur));
+
+		if (!motHerite.isEmpty())
+		{
+			System.out.println(centrer(motHerite, largeur));
+		}
 		System.out.println(centrer(nomClasse, largeur));
+		if (!classeHerite.isEmpty())
+		{
+			System.out.println(centrer(classeHerite, largeur));
+		}
 		System.out.println(ligne);
-		System.out.println(centrer(classeHerite, largeur));
 
 		// Afficher les attributs
 		if (!attributs.isEmpty()) {
