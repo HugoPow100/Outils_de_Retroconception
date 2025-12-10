@@ -45,20 +45,21 @@ public class LiaisonVue
 
     public LiaisonVue(BlocClasse blocOrigine, BlocClasse blocDestination, String type, boolean unidirectionnel, String multOrig, String multDest) 
     {
-        this.blocOrigine     = blocOrigine;
-        this.blocDestination = blocDestination;
-        this.type            = type;
-        this.unidirectionnel = unidirectionnel;
-        this.multOrig        = multOrig;
-        this.multDest        = multDest;
-        this.sideOrigine = 0;
-        this.sideDestination = 2;
-        this.posRelOrigine = 0.5;
+        this.blocOrigine       = blocOrigine;
+        this.blocDestination   = blocDestination;
+        this.type              = type;
+        this.unidirectionnel   = unidirectionnel;
+        this.multOrig          = multOrig;
+        this.multDest          = multDest;
+        this.sideOrigine       = 0;
+        this.sideDestination   = 2;
+        this.posRelOrigine     = 0.5;
         this.posRelDestination = 0.5;
     }
 
     // 0=DROITE, 1=BAS, 2=GAUCHE, 3=HAUT
-    private Point getPointOnSide(BlocClasse bloc, int side, double posRel) {
+    private Point getPointOnSide(BlocClasse bloc, int side, double posRel) 
+    {
         int x = bloc.getX();
         int y = bloc.getY();
         int w = bloc.getLargeur();
@@ -67,7 +68,8 @@ public class LiaisonVue
         // éviter les coins
         posRel = Math.max(0.1, Math.min(0.9, posRel));
 
-        switch(side) {
+        switch(side) 
+        {
             case 0: // DROITE
                 return new Point(x + w, y + (int)(h * posRel));
             case 1: // BAS
@@ -81,7 +83,8 @@ public class LiaisonVue
     }
 
     // 0=DROITE, 1=BAS, 2=GAUCHE, 3=HAUT
-    private int getClosestSide(Point mouse, BlocClasse bloc) {
+    private int getClosestSide(Point mouse, BlocClasse bloc) 
+    {
         int x = bloc.getX();
         int y = bloc.getY();
         int w = bloc.getLargeur();
@@ -95,12 +98,13 @@ public class LiaisonVue
         int minDist = Math.min(Math.min(distDroite, distGauche), Math.min(distBas, distHaut));
         
         if (minDist == distDroite) return 0;
-        if (minDist == distBas) return 1;
+        if (minDist == distBas)    return 1;
         if (minDist == distGauche) return 2;
         return 3;
     }
 
-    private double getRelativePosFromMouse(Point mouse, BlocClasse bloc, int side) {
+    private double getRelativePosFromMouse(Point mouse, BlocClasse bloc, int side) 
+    {
         int x = bloc.getX();
         int y = bloc.getY();
         int w = bloc.getLargeur();
@@ -126,9 +130,7 @@ public class LiaisonVue
         return Math.max(0.1, Math.min(0.9, posRel));
     }
 
-    /**
-     * Crée un chemin orthogonal (horizontaux/verticaux) entre deux points
-     */
+
     private List<Point> createOrthogonalPath(Point start, Point end, int startSide, int endSide) {
         List<Point> path = new ArrayList<>();
         path.add(start);
@@ -181,16 +183,14 @@ public class LiaisonVue
         return path;
     }
 
-    /**
-     * Calcule la position optimale pour afficher une multiplicité basée sur le côté d'attachement
-     */
-    private Point calculateMultiplicityPosition(Point anchor, int side, int textWidth, int textHeight) {
+    private Point calculateMultiplicityPosition(Point anchor, int side, int textWidth, int textHeight) 
+    {
         int offsetX = 0;
         int offsetY = 0;
         
         switch(side) {
             case 0: // DROITE - texte à droite de l'ancrage
-                offsetX = 10;
+                offsetX = 25;
                 offsetY = -5;
                 break;
             case 1: // BAS - texte en bas de l'ancrage
@@ -198,65 +198,19 @@ public class LiaisonVue
                 offsetY = 15;
                 break;
             case 2: // GAUCHE - texte à gauche de l'ancrage
-                offsetX = -textWidth - 10;
+                offsetX = -textWidth - 25;
                 offsetY = -5;
                 break;
             case 3: // HAUT - texte au-dessus de l'ancrage
                 offsetX = 5;
-                offsetY = -15;
+                offsetY = -25;
                 break;
         }
         
         return new Point(anchor.x + offsetX, anchor.y + offsetY);
     }
 
-    /**
-     * Repositionne un texte de multiplicité pour qu'il ne chevauche aucun bloc
-     */
-    private Point repositionnerTexte(Point position, int textWidth, int textHeight, 
-                                      BlocClasse bloc1, BlocClasse bloc2) {
-        // Si pas de chevauchement, garder la position
-        if (!bloc1.chevaucheTexte(position.x, position.y, textWidth, textHeight) &&
-            !bloc2.chevaucheTexte(position.x, position.y, textWidth, textHeight)) {
-            return position;
-        }
-
-        // Essayer les 4 directions : droite, haut, gauche, bas
-        int[][] directions = {
-            {20, 0},      // droite
-            {0, -15},     // haut
-            {-20, 0},     // gauche
-            {0, 15}       // bas
-        };
-
-        for (int[] dir : directions) {
-            int newX = position.x + dir[0];
-            int newY = position.y + dir[1];
-            
-            if (!bloc1.chevaucheTexte(newX, newY, textWidth, textHeight) &&
-                !bloc2.chevaucheTexte(newX, newY, textWidth, textHeight)) {
-                return new Point(newX, newY);
-            }
-        }
-
-        // Si aucune direction ne fonctionne, augmenter la distance
-        for (int i = 2; i <= 5; i++) {
-            for (int[] dir : directions) {
-                int newX = position.x + (dir[0] * i);
-                int newY = position.y + (dir[1] * i);
-                
-                if (!bloc1.chevaucheTexte(newX, newY, textWidth, textHeight) &&
-                    !bloc2.chevaucheTexte(newX, newY, textWidth, textHeight)) {
-                    return new Point(newX, newY);
-                }
-            }
-        }
-
-        // Fallback : retourner la position originale
-        return position;
-    }
-
-    public void dessiner(Graphics2D g) 
+    public void dessiner(Graphics2D g)
     {
         // Calculer les points d'ancrage basés sur les côtés et positions relatives
         ancrageOrigine = getPointOnSide(blocOrigine, sideOrigine, posRelOrigine);
@@ -294,10 +248,8 @@ public class LiaisonVue
                 
                 // Calculer la position basée sur le côté
                 Point initialPos = calculateMultiplicityPosition(ancrageOrigine, sideOrigine, textWidth, textHeight);
-                Point finalPos = repositionnerTexte(initialPos, textWidth, textHeight, 
-                                                    blocOrigine, blocDestination);
                 
-                g.drawString(multOrig, finalPos.x, finalPos.y);
+                g.drawString(multOrig, initialPos.x, initialPos.y);
             }
 
             // Multiplicité destination
@@ -307,10 +259,8 @@ public class LiaisonVue
                 
                 // Calculer la position basée sur le côté
                 Point initialPos = calculateMultiplicityPosition(ancrageDestination, sideDestination, textWidth, textHeight);
-                Point finalPos = repositionnerTexte(initialPos, textWidth, textHeight, 
-                                                    blocOrigine, blocDestination);
                 
-                g.drawString(multDest, finalPos.x, finalPos.y);
+                g.drawString(multDest, initialPos.x, initialPos.y);
             }
         }
     }

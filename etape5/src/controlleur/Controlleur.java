@@ -52,45 +52,6 @@ public class Controlleur
         return blocs;
     }
 
-    private void creerLiaisonsDepuisAssoc(List<Association> lstAssoc, HashMap<String, BlocClasse> mapBlocsParNom) 
-    {
-        for (Association assoc : lstAssoc) 
-        {
-            String multOrig = (assoc.getMultOrig() != null) ? assoc.getMultOrig().toString() : "";
-            String multDest = (assoc.getMultDest() != null) ? assoc.getMultDest().toString() : "";
-            BlocClasse blocOrigine = mapBlocsParNom.get(assoc.getClasseOrig().getNom());
-            BlocClasse blocDestination = mapBlocsParNom.get(assoc.getClasseDest().getNom());
-
-            LiaisonVue liaison = new LiaisonVue(blocOrigine, blocDestination, "association", assoc.isUnidirectionnel(), multOrig, multDest);
-            liaisons.add(liaison);
-        }
-    }
-
-    private void creerLiaisonsDepuisHerit(List<Heritage> lstHerit, HashMap<String, BlocClasse> mapBlocsParNom) 
-    {
-
-        for (Heritage herit : lstHerit) 
-        {
-            LiaisonVue liaison = new LiaisonVue(mapBlocsParNom.get(herit.getClasseOrig().getNom()), mapBlocsParNom.get(herit.getClasseDest().getNom()), "heritage");
-            liaisons.add(liaison);
-        }
-    }
-    public List<LiaisonVue> getLiaisons() 
-    {
-        return liaisons;
-    }
-
-    public void ajouterLiaison(LiaisonVue liaison) 
-    {
-        liaisons.add(liaison);
-    }
-
-    public void supprimerLiaison(LiaisonVue liaison) 
-    {
-        liaisons.remove(liaison);
-    }
-
-
     private BlocClasse creerBlocAPartirDeClasse(Classe classe, int x, int y) 
     {
         BlocClasse bloc = new BlocClasse(classe.getNom(), x, y);
@@ -139,4 +100,42 @@ public class Controlleur
     }
 
     
+    private void creerLiaisonsDepuisAssoc(List<Association> lstAssoc, HashMap<String, BlocClasse> mapBlocsParNom) 
+    {
+        for (Association assoc : lstAssoc) 
+        {
+            String multOrig = (assoc.getMultOrig() != null) ? assoc.getMultOrig().toString() : "";
+            String multDest = (assoc.getMultDest() != null) ? assoc.getMultDest().toString() : "";
+            BlocClasse blocOrigine = mapBlocsParNom.get(assoc.getClasseOrig().getNom());
+            BlocClasse blocDestination = mapBlocsParNom.get(assoc.getClasseDest().getNom());
+
+            LiaisonVue liaison = new LiaisonVue(blocOrigine, blocDestination, "association", assoc.isUnidirectionnel(), multOrig, multDest);
+            liaisons.add(liaison);
+        }
+    }
+
+    private void creerLiaisonsDepuisHerit(List<Heritage> lstHerit, HashMap<String, BlocClasse> mapBlocsParNom) 
+    {
+
+        for (Heritage herit : lstHerit) 
+        {
+            LiaisonVue liaison = new LiaisonVue(mapBlocsParNom.get(herit.getClasseOrig().getNom()), mapBlocsParNom.get(herit.getClasseDest().getNom()), "heritage");
+            liaisons.add(liaison);
+        }
+    }
+    
+    public List<LiaisonVue> getLiaisons() 
+    {
+        return liaisons;
+    }
+
+    public void ajouterLiaison(LiaisonVue liaison) 
+    {
+        liaisons.add(liaison);
+    }
+
+    public void supprimerLiaison(LiaisonVue liaison) 
+    {
+        liaisons.remove(liaison);
+    }
 }

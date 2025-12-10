@@ -51,10 +51,13 @@ public class PanneauDiagramme extends JPanel
         repaint();
     }
 
-    private void ajouterListenersInteraction() {
-        addMouseListener(new MouseAdapter() {
+    private void ajouterListenersInteraction() 
+    {
+        addMouseListener(new MouseAdapter() 
+        {
             @Override
-            public void mousePressed(MouseEvent e) {
+            public void mousePressed(MouseEvent e) 
+            {
                 pointDernier = e.getPoint();
                 blocEnDeplacement = null;
                 liaisonEnDeplacement = null;
@@ -62,13 +65,16 @@ public class PanneauDiagramme extends JPanel
                 draggingDestinationAnchor = false;
 
                 // Vérifier si on clique sur un point d'ancrage de liaison
-                for (LiaisonVue liaison : liaisons) {
-                    if (liaison.isOnOriginAnchor(e.getPoint())) {
+                for (LiaisonVue liaison : liaisons) 
+                {
+                    if (liaison.isOnOriginAnchor(e.getPoint())) 
+                    {
                         liaisonEnDeplacement = liaison;
                         draggingOriginAnchor = true;
                         return;
                     }
-                    if (liaison.isOnDestinationAnchor(e.getPoint())) {
+                    if (liaison.isOnDestinationAnchor(e.getPoint())) 
+                    {
                         liaisonEnDeplacement = liaison;
                         draggingDestinationAnchor = true;
                         return;
@@ -76,8 +82,10 @@ public class PanneauDiagramme extends JPanel
                 }
 
                 // Sinon, vérifier si on clique sur un bloc
-                for (BlocClasse bloc : blocsClasses) {
-                    if (bloc.contient(e.getX(), e.getY())) {
+                for (BlocClasse bloc : blocsClasses) 
+                {
+                    if (bloc.contient(e.getX(), e.getY())) 
+                    {
                         blocEnDeplacement = bloc;
                         bloc.setSelectionne(true);
                         break;
@@ -88,13 +96,15 @@ public class PanneauDiagramme extends JPanel
             }
 
             @Override
-            public void mouseReleased(MouseEvent e) {
-                if (blocEnDeplacement != null) {
+            public void mouseReleased(MouseEvent e) 
+            {
+                if (blocEnDeplacement != null) 
+                {
                     blocEnDeplacement.setSelectionne(false);
                 }
-                blocEnDeplacement = null;
-                liaisonEnDeplacement = null;
-                draggingOriginAnchor = false;
+                blocEnDeplacement         = null;
+                liaisonEnDeplacement      = null;
+                draggingOriginAnchor      = false;
                 draggingDestinationAnchor = false;
                 repaint();
             }
@@ -133,14 +143,13 @@ public class PanneauDiagramme extends JPanel
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+        // Dessiner les liaisons
+        dessinerLiaisons(g2d);
+
         // Dessiner les blocs
         for (BlocClasse bloc : blocsClasses) {
             bloc.dessiner(g2d);
         }
-
-        // Dessiner les liaisons
-        dessinerLiaisons(g2d);
-
     }
 
     private void dessinerLiaisons(Graphics2D g2d) {
