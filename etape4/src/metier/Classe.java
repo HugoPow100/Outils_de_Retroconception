@@ -6,17 +6,36 @@ public class Classe
 {
 
 	private String             nom;
+	private String classeParente;
+	private boolean isHeritage;
 	private boolean            isAbstract;
+	private boolean isImplementing ;
+	private String implementing;
 	private boolean            isInterface;
 	private boolean            isRecord;
 	private boolean            isEnum;
+	
 	private ArrayList<Attribut> lstAttribut;
 	private ArrayList<Methode> lstMethode;
 
-	public Classe(String nom, boolean isAbstract, boolean isInterface, boolean isRecord, boolean isEnum, ArrayList<Attribut> lstAttribut, ArrayList<Methode> lstMethode)
+	public Classe(String nom, 
+	              String classeParente, 
+	              boolean isAbstract, 
+	              boolean isHeritage, 
+	              boolean isImplementing, 
+				  String implementing,
+	              boolean isInterface, 
+	              boolean isRecord, 
+	              boolean isEnum, 
+	              ArrayList<Attribut> lstAttribut, 
+	              ArrayList<Methode> lstMethode)
 	{
 		this.nom         = nom;
+		this.classeParente = classeParente;
+		this.isHeritage = isHeritage;
 		this.isAbstract  = isAbstract;
+		this.isImplementing = isImplementing;
+		this.implementing = implementing;
 		this.isInterface = isInterface;
 		this.isRecord    = isRecord;
 		this.isEnum      = isEnum;
@@ -34,6 +53,10 @@ public class Classe
         }
 	}
 
+	public String getClasseParente() { return this.classeParente; }
+
+	public boolean getIsHeritage() { return this.isHeritage; }
+	
 	public ArrayList<Attribut> getLstAttribut()	{ return this.lstAttribut; }
 
 	public ArrayList<Methode > getLstMethode () { return this.lstMethode;  }
@@ -42,9 +65,15 @@ public class Classe
 
 	public boolean isAbstract() { return this.isAbstract; }
 
+	public boolean getIsImplementing(){return this.isImplementing;}
+	public String getImplementing(){return this.implementing;}
+
+	
+
     public boolean isInterface() { return this.isInterface; }
 
     public boolean isRecord() { return this.isRecord; }
 
     public boolean isEnum() { return this.isEnum; }
+
 }

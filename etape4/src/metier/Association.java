@@ -22,14 +22,8 @@ public class Association extends Liaison {
         return unidirectionnel;
     }
 
-    public void rendreBidirectionnel() 
-    {
-        this.unidirectionnel = false;
-    }
-
-    public void rendreUnidirectionnel() 
-    {
-        this.unidirectionnel = true;
+    public void setUnidirectionnel(boolean unidirectionnel) {
+        this.unidirectionnel = unidirectionnel;
     }
 
     public Multiplicite getMultOrig() {

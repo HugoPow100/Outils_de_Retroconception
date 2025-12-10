@@ -11,6 +11,7 @@ public class Lecture {
 	private ArrayList<Classe> lstClasse;
 	private ArrayList<Attribut> lstAttribut;
 	private ArrayList<Methode> lstMethode;
+	private ArrayList<Heritage> lstHeritage;
 	private ArrayList<Association> lstAssociations;
 	private ArrayList<String> lstNomFichier;
 
@@ -18,6 +19,7 @@ public class Lecture {
 		this.hashMapClasses = new HashMap<String, Classe>();
 		this.lstAttribut = new ArrayList<Attribut>();
 		this.lstMethode = new ArrayList<Methode>();
+		this.lstHeritage = new ArrayList<Heritage>();
 		this.lstNomFichier = new ArrayList<String>();
 		this.lstAssociations = new ArrayList<Association>();
 
@@ -95,6 +97,26 @@ public class Lecture {
 			}
 
 			genererAssociation();
+
+			for (Classe classe : hashMapClasses.values())
+			{
+				String nomParent = classe.getClasseParente();
+
+				if (nomParent != null && !nomParent.isEmpty())
+				{
+					Classe classParent = getClasse(nomParent);
+
+					if (classParent != null)
+					{
+						Heritage heritage = new Heritage(classParent, classe);
+						lstHeritage.add(heritage);
+
+						System.out.println(heritage);
+					}
+					// Cette classe a bien une classe parente
+					// Maintenant cherche la classe parente et crée Heritage
+				}
+			}
 		} 
 		catch (Exception e) 
 		{
@@ -104,7 +126,7 @@ public class Lecture {
 
 
 	private Classe scanne(Scanner scFic, String nomFichierAvExt)
-	{
+		{
 		Scanner scLigne;
 
 		Classe classe;
@@ -127,10 +149,20 @@ public class Lecture {
 
 		// Variables pour stocker le constructeur
 		String nomConstructeur = "";
+
+		// Variable pour l'heritage
+		String classeParente = null;
 		
 		List<Parametre> lstParametres = new ArrayList<Parametre>();
 
 		String nomFichier = nomFichierAvExt.replace(".java", "");
+		boolean isClasseAbstract = false;
+		boolean isHeritage = false;
+		boolean isImplementing = false;
+		String implementing = "";
+		boolean isInterface = false;
+		boolean isRecord = false;
+		boolean isEnum = false;
 		String nomClasse = nomFichier;
 
 		System.out.println("-----------------------------------------------------");
@@ -141,10 +173,112 @@ public class Lecture {
 			// retire les espaces en début/fin
 			String ligne = scFic.nextLine().trim();
 
-			if (ligne.startsWith("private") || ligne.startsWith("protected") || ligne.startsWith("public") ) {
-				// c'est un attribut, pas une méthode
-				if (!ligne.contains("(") && ligne.endsWith(";"))
+			if (ligne.contains("class") && ligne.contains("extends"))
+			{
+				
+				System.out.println("Passage de isHeritage a True : " + isHeritage);
+				isHeritage = true;
+				System.out.println("Heritage a true ?  : " + isHeritage);
+				
+				System.out.println("DEBUG ligne détectée héritage : " + ligne);
+				String classeOrigine = ligne.substring(ligne.indexOf("extends") + 7).trim();
+				// classeParente = classeOrigine.split("\\s+")[0];
+				Scanner scParent = new Scanner(classeOrigine);
+				scParent.useDelimiter("\\s+");
+				if (scParent.hasNext())
 				{
+					classeParente = scParent.next();
+				}
+				scParent.close();
+			}
+
+			if (ligne.contains("class") && ligne.contains("implements"))
+			{
+
+				System.out.println("Passage de isImplementing à true");
+				isImplementing = true;
+				System.out.println("Implemente a true ? " + isImplementing);
+				String interfaceImplementee = ligne.substring(ligne.indexOf("implements") + 10).trim();
+
+				System.out.println("L'interface implémenté est " + interfaceImplementee);
+
+				implementing = interfaceImplementee;
+
+
+				
+				
+			}
+			
+
+			// Détecter si la classe est abstraite
+			if (ligne.contains("abstract") && ligne.contains("class")) {
+				System.out.println("ligne abstract : " + ligne);
+				isClasseAbstract = true;
+			}
+
+			// Détecter si c'est une interface
+			if (ligne.contains("interface")) {
+				isInterface = true;
+			}
+
+			// Détecter si c'est une enum
+			if (ligne.contains("enum") && ligne.contains("{")) {
+				isEnum = true;
+			}
+
+			// Détecter les valeurs d'enum (constantes)
+			if (isEnum && !ligne.isEmpty() && !ligne.contains("enum") && !ligne.equals("{") && !ligne.equals("}")) {
+				String ligneTrimmed = ligne.trim();
+				if (!ligneTrimmed.startsWith("//") && !ligneTrimmed.startsWith("/*") && 
+					!ligneTrimmed.startsWith("*") && !ligneTrimmed.startsWith("public") && 
+					!ligneTrimmed.startsWith("private") && !ligneTrimmed.startsWith("protected") &&
+					!ligneTrimmed.contains("(") && ligneTrimmed.matches("^[A-Z].*[,;]?$")) {
+					String valeur = ligneTrimmed.replaceAll("[,;]\\s*$", "").trim();
+					if (!valeur.isEmpty()) {
+						lstAttribut.add(new Attribut(valeur, "", "public", "classe"));
+					}
+				}
+			}
+
+			// Détecter si c'est un record
+			if (ligne.contains("record") && ligne.contains("(") && !isRecord) {
+				isRecord = true;
+				int debutParam = ligne.indexOf("(");
+				int finParam = ligne.indexOf(")");
+				if (debutParam != -1 && finParam != -1 && finParam > debutParam) {
+					String params = ligne.substring(debutParam + 1, finParam).trim();
+					List<Parametre> parametresConstructeur = new ArrayList<>();
+					
+					if (!params.isEmpty()) {
+						String[] listParam = params.split(",");
+						for (String p : listParam) {
+							String[] pTokens = p.trim().split("\\s+");
+							if (pTokens.length >= 2) {
+								String typeParam = pTokens[0];
+								String nomParam = pTokens[1];
+								lstAttribut.add(new Attribut(nomParam, typeParam, "private", "instance"));
+								parametresConstructeur.add(new Parametre(nomParam, typeParam));
+								lstMethode.add(new Methode(nomParam, typeParam, "public", false, new ArrayList<>()));
+							}
+						}
+						
+						lstMethode.add(new Methode("Constructeur", "", "public", false, parametresConstructeur));
+					}
+					
+					lstMethode.add(new Methode("equals", "boolean", "public", false, 
+						List.of(new Parametre("obj", "Object"))));
+					lstMethode.add(new Methode("hashCode", "int", "public", false, new ArrayList<>()));
+					lstMethode.add(new Methode("toString", "String", "public", false, new ArrayList<>()));
+				}
+			}
+
+			// Pour les interfaces, détecter aussi les méthodes sans modificateur explicite
+			boolean ligneCommenceParModificateur = ligne.startsWith("private") || ligne.startsWith("protected") || ligne.startsWith("public");
+			boolean estMethodeInterface = isInterface && ligne.contains("(") && ligne.contains(")") && ligne.endsWith(";") && !ligne.contains("{");
+
+			if (ligneCommenceParModificateur || estMethodeInterface) {
+				// c'est un attribut, pas une méthode
+				if (!ligne.contains("(") && ligne.endsWith(";") && ligneCommenceParModificateur) {
 					// Découper la ligne : visibilité, type, nom
 					Scanner scAttribut = new Scanner(ligne);
 					visibiliteAtribut = scAttribut.next();
@@ -167,27 +301,53 @@ public class Lecture {
 
 				// Détecter les méthodes (abstraites ou non)
 				if (ligne.contains("(") && ligne.contains(")") &&
-						(!ligne.endsWith(";") || ligne.contains("abstract"))) // Inclure les méthodes abstraites qui se
-																	// terminent par ;
+						(!ligne.endsWith(";") || ligne.contains("abstract") || estMethodeInterface)) // Inclure les méthodes abstraites et les méthodes d'interface
 				{
-					Scanner scMethode = new Scanner(ligne);
-					visibilite = scMethode.next();
+					boolean isMethodeAbstract = ligne.contains("abstract") || estMethodeInterface;
+					boolean isClasseHeritage = ligne.contains("extends");
 
-					String motSuivant = scMethode.next();
+					Scanner scMethode = new Scanner(ligne);
+					
+					// Pour les interfaces, si pas de modificateur, la visibilité est "public" par défaut
+					if (estMethodeInterface && !ligneCommenceParModificateur) {
+						visibilite = "public";
+					} else {
+						visibilite = scMethode.next();
+					}
+
+					System.out.println(ligne);
+					// System.out.println("AbstractAbstractAbstractAbstractAbstractAbstractAbstract");
+					
+					if (ligne.contains("abstract") && ligneCommenceParModificateur) {
+						scMethode.next(); // skip "abstract"
+					}
+
+					if (isClasseHeritage)
+					{
+						scMethode.next();
+					}
+
+					String motSuivant = "";
+					if (scMethode.hasNext()) {
+						motSuivant = scMethode.next();
+					}
+					
 					if (motSuivant.equals("static")) {
 						portee = "classe";
 						typeRetour = scMethode.next();
-						String methodAvecParam = scMethode.next();
-						int indexParen = methodAvecParam.indexOf("(");
-						if (indexParen != -1) {
-							nomMethode = methodAvecParam.substring(0, indexParen);
-						} else {
-							nomMethode = methodAvecParam;
+						if (scMethode.hasNext()) {
+							String methodAvecParam = scMethode.next();
+							int indexParen = methodAvecParam.indexOf("(");
+							if (indexParen != -1) {
+								nomMethode = methodAvecParam.substring(0, indexParen);
+							} else {
+								nomMethode = methodAvecParam;
+							}
 						}
 					} else {
 						portee = "instance";
 
-						if (ligne.contains(nomFichier)) {
+						if (ligne.contains(nomFichier) && !ligne.contains("record")) {
 							typeRetour = "";
 							nomConstructeur = "Constructeur";
 						} else {
@@ -204,15 +364,7 @@ public class Lecture {
 						}
 
 					}
-					scMethode.close();
-
-					int debutParam = ligne.indexOf("(");
-					int finParam = ligne.indexOf(")");
-					String params = "";
-					
-					if (debutParam != -1 && finParam != -1 && finParam > debutParam) {
-						params = ligne.substring(debutParam + 1, finParam);
-					}
+					scMethode.close();					String params = ligne.substring(ligne.indexOf("(") + 1, ligne.indexOf(")"));
 
 					lstParametres = new ArrayList<Parametre>(); // Réinitialiser pour chaque méthode
 
@@ -243,18 +395,21 @@ public class Lecture {
 
 						System.out.println("Nouvelle méthode ajouté dans la liste");
 						this.lstMethode.add(
-								new Methode(nomConstructeur, typeRetour, visibilite,
+								new Methode(nomConstructeur, typeRetour, visibilite, false,
 										new ArrayList<>(lstParametres)));
 						nomConstructeur = ""; // Réinitialiser
 					} else {
 						System.out.println("Nouvelle méthode ajouté");
-						this.lstMethode.add(new Methode(nomMethode, typeRetour, visibilite, new ArrayList<>(lstParametres)));
+						this.lstMethode
+								.add(new Methode(nomMethode, typeRetour, visibilite, isMethodeAbstract,
+										new ArrayList<>(lstParametres)));
 					}
 				}
 			}
 		}
 
-		return new Classe(nomFichier, this.lstAttribut, this.lstMethode);
+		System.out.println("val isHeritage : " + isHeritage);
+		return new Classe(nomFichier, classeParente, isClasseAbstract, isHeritage, isImplementing, implementing, isInterface, isRecord, isEnum, this.lstAttribut, this.lstMethode);
 	}
 
 
@@ -350,13 +505,13 @@ public class Lecture {
 				String   typeDest   = entry.getKey();
 				int      max        = entry.getValue();
 
-				// Vérifier que la classe existe dans la HashMap
-				if (!hashMapClasses.containsKey(typeDest + ".java")) {
-					continue; // Ignorer si la classe n'existe pas
-				}
+		// Vérifier que la classe existe dans la HashMap
+		if (!hashMapClasses.containsKey(typeDest + ".java")) {
+			continue; // Ignorer si la classe n'existe pas
+		}
 
-				Classe   classeDest = hashMapClasses.get(typeDest + ".java");				
-				Multiplicite multOrig  = new Multiplicite(1,1);
+		Classe   classeDest = hashMapClasses.get(typeDest + ".java");				
+		Multiplicite multOrig  = new Multiplicite(1,1);
 				Multiplicite multDest  = new Multiplicite(1, max);
 
 				// Vérifier si la classe destination référence aussi la classe origine
@@ -384,50 +539,18 @@ public class Lecture {
 				lstAssociations.add(new Association(
 					classeDest, classeOrig, multDest, multOrig, !bidirectionnel));
 			}
-
-			nettoyerAssociations();
 		}
 	}
 
-	/**
-	 * Nettoie la liste des associations pour :
-	 * - supprimer les doublons (ex : A→B et B→A)
-	 * - transformer ces doublons en une seule association bidirectionnelle A↔B
-	 * - conserver une seule association unique par couple de classes
-	*/
-	private void nettoyerAssociations() 
+	// Recupere une classe en fonction du nom
+	private Classe getClasse(String nomFichier)
 	{
-		// Cette Map va contenir UNE seule association par paire de classes
-		Map<String, Association> uniques = new HashMap<>();
-
-		for (Association asso : lstAssociations) 
+		for (Classe classe : hashMapClasses.values())
 		{
-
-			String origine = asso.getClasseOrig().getNom();
-			String dest    = asso.getClasseDest().getNom();
-
-			String key;
-
-			if (origine.compareTo(dest) < 0) 
-				key = origine + "-" + dest;
-			else
-				key = dest + "-" + origine;
-		
-
-			if (!uniques.containsKey(key)) 
-			{
-				// Première association → on la garde
-				uniques.put(key, asso);
-			}
-			else 
-			{
-				// Une association opposée existe déjà
-				Association exist = uniques.get(key);
-			}
+			if (classe.getNom().equals(nomFichier))
+				return classe;
 		}
-
-		// On remplace la liste par la liste unique
-		lstAssociations = new ArrayList<>(uniques.values());
+		return null;
 	}
 
 	/**

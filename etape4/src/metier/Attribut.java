@@ -14,7 +14,6 @@ public class Attribut {
 		this.visibilite = visibilite;
 		this.porte = porte;
 	}
-	
 
 	public String getNomAttribut() {
 		return this.nomAttribut;

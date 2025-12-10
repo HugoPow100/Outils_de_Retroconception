@@ -1,5 +1,6 @@
 package metier;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Methode {
@@ -7,13 +8,14 @@ public class Methode {
 	private String nomMethode;
 	private String retour;
 	private String visibilite;
+	private boolean isAbstract;
 	private List<Parametre> lstParametre;
 
-	public Methode(String nomMethode, String retour, String visibilite, List<Parametre> lstParametre)
-	{
+	public Methode(String nomMethode, String retour, String visibilite, boolean isAbstract, List<Parametre> lstParametre) {
 		this.nomMethode = nomMethode;
 		this.visibilite = visibilite;
 		this.retour = retour;
+		this.isAbstract = isAbstract;
 		this.lstParametre = lstParametre;
 	}
 
@@ -47,6 +49,14 @@ public class Methode {
 
 	public void setLstParametre(List<Parametre> lstParametre) {
 		this.lstParametre = lstParametre;
+	}
+
+	public boolean isAbstract() {
+		return isAbstract;
+	}
+
+	public void setAbstract(boolean isAbstract) {
+		this.isAbstract = isAbstract;
 	}
 
 	public void ajouterParametre(Parametre p) {
@@ -88,9 +98,11 @@ public class Methode {
 		}
 
 		sRet += ")";
-		if (!this.retour.isEmpty() && !this.retour.equals("void"))
-		{
+		if (!this.retour.isEmpty() && !this.retour.equals("void")) {
 			sRet += " : " + this.retour;
+		}
+		if (this.isAbstract) {
+			sRet += " {abstract}";
 		}
 
 		return sRet;

@@ -3,8 +3,10 @@ package metier;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Retroconception {
-	public static void main(String[] args) {
+public class Retroconception
+{
+	public static void main(String[] args)
+	{
 		if (args.length == 0) {
 			System.out.println("Usage: java Retroconception <fichier.java ou dossier>");
 			return;
@@ -17,8 +19,6 @@ public class Retroconception {
 
 		for (String nomFichier : hashMapClasses.keySet()) {
 			Classe classe = hashMapClasses.get(nomFichier);
-			String abstractInfo = classe.isAbstract() ? " (abstract)" : "";
-			System.out.println("\n=== Analyse de la classe " + classe.getNom() + abstractInfo + " ===\n");
 
 			// Affichage détaillé
 			// afficherDetailsClasse(classe);
@@ -78,9 +78,8 @@ public class Retroconception {
 						affichageType = typeRetour;
 					}
 
-					String abstractTag = m.isAbstract() ? "\t{abstract}" : "";
 					System.out.println("méthode : " + m.getNomMethode() + "\tvisibilité : " + m.getVisibilite()
-							+ "\ttype de retour : " + affichageType + abstractTag);
+							+ "\ttype de retour : " + affichageType);
 				} // Afficher les paramètres
 				if (m.getLstParametre().isEmpty()) {
 					System.out.println("paramètres : aucun");
@@ -106,15 +105,14 @@ public class Retroconception {
 		}
 	}
 
-	private static void afficherUML(Classe classe) {
+	private static void afficherUML(Classe classe)
+	{
 		ArrayList<Attribut> attributs = classe.getLstAttribut();
 		ArrayList<Methode> methodes = classe.getLstMethode();
 
 		// Calculer la largeur de la boîte
 		String nomClasse = classe.getNom();
-		if (classe.isAbstract()) {
-			nomClasse = "<<abstract>> " + nomClasse;
-		}
+
 		int largeur = Math.max(50, nomClasse.length() + 10);
 		String ligne = "-".repeat(largeur);
 

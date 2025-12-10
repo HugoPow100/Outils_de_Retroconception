@@ -3,8 +3,10 @@ package metier;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Retroconception {
-	public static void main(String[] args) {
+public class Retroconception
+{
+	public static void main(String[] args)
+	{
 		if (args.length == 0) {
 			System.out.println("Usage: java Retroconception <fichier.java ou dossier>");
 			return;
@@ -13,39 +15,52 @@ public class Retroconception {
 		String cheminFichier = args[0];
 
 		Lecture lecture = new Lecture(cheminFichier);
-		HashMap<String, ArrayList<Classe>> hashMapClasses = lecture.getHashMapClasses();
+		HashMap<String, Classe> hashMapClasses = lecture.getHashMapClasses();
 
 		for (String nomFichier : hashMapClasses.keySet()) {
-			ArrayList<Classe> classes = hashMapClasses.get(nomFichier);
-			for (Classe classe : classes) {
-				String typeInfo = "";
-				String typeElement = "classe";
-				
-				if (classe.isInterface()) {
-					typeInfo = " (interface)";
-					typeElement = "interface";
-				} else if (classe.isRecord()) {
-					typeInfo = " (record)";
-					typeElement = "record";
-				} else if (classe.isEnum()) {
-					typeInfo = " (enum)";
-					typeElement = "enum";
-				} else if (classe.isAbstract()) {
-					typeInfo = " (abstract)";
-				}
-				
-				System.out.println("\n=== Analyse de " + typeElement + " " + classe.getNom() + typeInfo + " ===\n");
+			Classe classe = hashMapClasses.get(nomFichier);
+			String typeInfo = "";
+			String typeElement = "classe";
+			
+			if (classe.isInterface()) {
+				typeInfo = " (interface)";
+				typeElement = "interface";
+			} else if (classe.isRecord()) {
+				typeInfo = " (record)";
+				typeElement = "record";
+			} else if (classe.isEnum()) {
+				typeInfo = " (enum)";
+				typeElement = "enum";
+			} else if (classe.isAbstract()) {
+				typeInfo = " (abstract)";
+			}
+			
+			System.out.println("\n=== Analyse de " + typeElement + " " + classe.getNom() + typeInfo + " ===\n");
 
-				// Affichage détaillé
-				// afficherDetailsClasse(classe);
+			// Affichage détaillé
+			// afficherDetailsClasse(classe);
 
-				// System.out.println();
+			// System.out.println();
 
-				// Affichage UML
-				afficherUML(classe);
+			// Affichage UML
+			afficherUML(classe);
+		}
+
+		// Afficher les associations
+		ArrayList<Association> associations = lecture.getLstAssociation();
+		if (!associations.isEmpty()) {
+			System.out.println("\n=== Associations détectées ===\n");
+			for (Association assoc : associations) {
+				System.out.println(assoc.toString());
 			}
 		}
 	}
+
+	private static boolean estMultiInstance(Association assoc) {
+		String multDest = assoc.getMultDest().toString();
+		return multDest.contains("*") || multDest.matches(".*\\d+\\.\\.\\.\\d+.*");
+	}
+	
 
 	private static void afficherDetailsClasse(Classe classe) {
 		ArrayList<Attribut> attributs = classe.getLstAttribut();
@@ -108,7 +123,8 @@ public class Retroconception {
 		}
 	}
 
-	private static void afficherUML(Classe classe) {
+	private static void afficherUML(Classe classe)
+	{
 		ArrayList<Attribut> attributs = classe.getLstAttribut();
 		ArrayList<Methode> methodes = classe.getLstMethode();
 
@@ -125,16 +141,33 @@ public class Retroconception {
 		} else if (classe.isAbstract()) {
 			stereotype = "<<abstract>>";
 		}
-		
+
+		String motHerite = "";
+		String classeHerite = "";
+		// rentre pas dans le if
+		if (classe.getIsHeritage())
+		{
+			classeHerite = "[ " + classe.getClasseParente() + " ]";
+			motHerite = "<<herite>>";
+		}
+
+		if (classe.getIsImplementing())
+		{
+			classeHerite = "<< Implémente " + classe.getImplementing() + ">>";
+		}
+
 		int largeur = Math.max(50, Math.max(nomClasse.length(), stereotype.length()) + 10);
+		// largeur 50
 		String ligne = "-".repeat(largeur);
 
 		System.out.println(ligne);
 		if (!stereotype.isEmpty()) {
 			System.out.println(centrer(stereotype, largeur));
 		}
+		System.out.println(centrer(motHerite, largeur));
 		System.out.println(centrer(nomClasse, largeur));
 		System.out.println(ligne);
+		System.out.println(centrer(classeHerite, largeur));
 
 		// Afficher les attributs
 		if (!attributs.isEmpty()) {
