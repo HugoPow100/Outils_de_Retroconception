@@ -1,7 +1,9 @@
 package vue;
 
 import java.awt.*;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import javax.swing.*;
 
 public class PanneauProjets extends JPanel {
@@ -12,7 +14,8 @@ public class PanneauProjets extends JPanel {
     public PanneauProjets(FenetrePrincipale fenetrePrincipale) {
         this.fenetrePrincipale = fenetrePrincipale;
         
-        this.cheminDossiers = "sauvegardes/dossiers";
+        this.cheminDossiers = "donnees/projets.xml";
+        //this.cheminDossiers = "sauvegardes/dossiers";
 
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
@@ -47,30 +50,69 @@ public class PanneauProjets extends JPanel {
         add(boutonActualiser, BorderLayout.SOUTH);
     }
 
-    private void chargerProjets(JPanel panelProjets) {
-        File dossier = new File(cheminDossiers);
+    private void chargerProjets(JPanel panelProjets) 
+    {
 
-        if (!dossier.exists() || !dossier.isDirectory()) {
+        File fichier = new File(cheminDossiers);
+
+        if (!fichier.exists()) 
+        {
             JLabel labelErreur = new JLabel("Dossier non trouvé");
             labelErreur.setForeground(Color.RED);
             panelProjets.add(labelErreur);
             return;
         }
 
-        File[] projets = dossier.listFiles(File::isDirectory);
 
-        if (projets == null || projets.length == 0) {
+        try(BufferedReader reader = new BufferedReader(new FileReader(fichier)))
+        {
+            String ligne;
+            boolean vide = true;
+
+            while ((ligne = reader.readLine()) != null) 
+            {
+                ligne = ligne.trim();
+
+                if (!ligne.isEmpty()) 
+                {
+                    File projet          = new File(ligne);
+                    JButton boutonProjet = creerBoutonProjet(projet);
+                    panelProjets.add(boutonProjet);
+                    panelProjets.add(Box.createVerticalStrut(5));
+                    vide = false;
+                }
+            }
+
+            if (vide) 
+            {
+                JLabel labelVide = new JLabel("Aucun projet");
+                labelVide.setForeground(Color.GRAY);
+                panelProjets.add(labelVide);
+            }
+        }
+        catch (Exception e) 
+        {
+            e.printStackTrace();
+            JLabel labelErreur = new JLabel("Erreur lecture fichier");
+            labelErreur.setForeground(Color.RED);
+            panelProjets.add(labelErreur);
+        }
+        /*File[] projets = dossier.listFiles(File::isDirectory);
+
+        if (projets == null || projets.length == 0) 
+        {
             JLabel labelVide = new JLabel("Aucun projet");
             labelVide.setForeground(Color.GRAY);
             panelProjets.add(labelVide);
             return;
         }
 
-        for (File projet : projets) {
+        for (File projet : projets) 
+        {
             JButton boutonProjet = creerBoutonProjet(projet);
             panelProjets.add(boutonProjet);
             panelProjets.add(Box.createVerticalStrut(5));
-        }
+        }*/
     }
 
     private JButton creerBoutonProjet(File projet) {

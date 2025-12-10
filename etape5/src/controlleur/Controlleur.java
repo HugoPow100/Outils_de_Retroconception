@@ -5,15 +5,18 @@ import metier.*;
 import vue.BlocClasse;
 import vue.LiaisonVue;
 
-public class Controlleur {
+public class Controlleur 
+{
     private Lecture lecture;
     private List<LiaisonVue> liaisons;
 
-    public Controlleur() {
+    public Controlleur() 
+    {
         this.liaisons = new ArrayList<>();
     }
 
-    public List<BlocClasse> chargerProjetEnBlocsClasses(String cheminProjet) {
+    public List<BlocClasse> chargerProjetEnBlocsClasses(String cheminProjet) 
+    {
         lecture = new Lecture(cheminProjet);
         liaisons.clear();
 
@@ -26,73 +29,31 @@ public class Controlleur {
         int posX = 50;
         int posY = 50;
 
-        for (Classe classe : hashMapclasses.values()) {
-            if (classe != null) {
+        for (Classe classe : hashMapclasses.values()) 
+        {
+            if (classe != null) 
+            {
                 BlocClasse bloc = creerBlocAPartirDeClasse(classe, posX, posY);
                 blocs.add(bloc);
                 mapBlocsParNom.put(classe.getNom(), bloc);
                 
                 posX += 250;
-                if (posX > 1000) {
+                if (posX > 1000) 
+                {
                     posX = 50;
                     posY += 200;
                 }
             }
         }
 
-        // Créer les liaisons (placeholders pour le moment)
-        //creerLiaisonsPlaceholder(blocs, mapBlocsParNom);
-
-        System.out.println(lecture.getLstAssociation());
-        // Créer les liaisons
-        creerLiaisons(lecture.getLstAssociation(), blocs, mapBlocsParNom);
+        // Créer les liaisons depuis associations, heritages, et interfaces
+        creerLiaisonsDepuisAssoc(lecture.getLstAssociation(), mapBlocsParNom);
 
         return blocs;
     }
 
-    private void creerLiaisons(List<Association> lstAssoc, List<BlocClasse> blocs, HashMap<String, BlocClasse> mapBlocsParNom) {
-
-        for (Association assoc : lstAssoc) 
-        {
-            LiaisonVue liaison = new LiaisonVue(mapBlocsParNom.get(assoc.getClasseOrig().getNom()), mapBlocsParNom.get(assoc.getClasseDest().getNom()));
-            liaisons.add(liaison);
-            System.out.println(liaison);
-            System.out.println(assoc);
-        }
-    }
-
-
-    private void creerLiaisonsPlaceholder(List<BlocClasse> blocs, HashMap<String, BlocClasse> mapBlocsParNom) {
-        // TODO: À remplacer par les liaisons du métier une fois prêtes
-        // Exemple d'associations placeholders
-        if (blocs.size() >= 2) {
-            LiaisonVue association1 = new LiaisonVue(blocs.get(0), blocs.get(1));
-            liaisons.add(association1);
-        }
-        if (blocs.size() >= 3) {
-            LiaisonVue association2 = new LiaisonVue(blocs.get(1), blocs.get(2));
-            liaisons.add(association2);
-        }
-        if (blocs.size() >= 4) {
-            LiaisonVue association3 = new LiaisonVue(blocs.get(2), blocs.get(3));
-            liaisons.add(association3);
-        }
-    }
-
-    public List<LiaisonVue> getLiaisons() {
-        return liaisons;
-    }
-
-    public void ajouterLiaison(LiaisonVue liaison) {
-        liaisons.add(liaison);
-    }
-
-    public void supprimerLiaison(LiaisonVue liaison) {
-        liaisons.remove(liaison);
-    }
-
-
-    private BlocClasse creerBlocAPartirDeClasse(Classe classe, int x, int y) {
+    private BlocClasse creerBlocAPartirDeClasse(Classe classe, int x, int y) 
+    {
         BlocClasse bloc = new BlocClasse(classe.getNom(), x, y);
         
         List<String> attributsStr = new ArrayList<>();
@@ -115,7 +76,8 @@ public class Controlleur {
         }
         
         List<String> methodesStr = new ArrayList<>();
-        for (Methode met : classe.getLstMethode()) {
+        for (Methode met : classe.getLstMethode()) 
+        {
             String visibilite = met.getVisibilite();
 
             switch (visibilite)
@@ -138,4 +100,42 @@ public class Controlleur {
     }
 
     
+    private void creerLiaisonsDepuisAssoc(List<Association> lstAssoc, HashMap<String, BlocClasse> mapBlocsParNom) 
+    {
+        for (Association assoc : lstAssoc) 
+        {
+            String multOrig = (assoc.getMultOrig() != null) ? assoc.getMultOrig().toString() : "";
+            String multDest = (assoc.getMultDest() != null) ? assoc.getMultDest().toString() : "";
+            BlocClasse blocOrigine = mapBlocsParNom.get(assoc.getClasseOrig().getNom());
+            BlocClasse blocDestination = mapBlocsParNom.get(assoc.getClasseDest().getNom());
+
+            LiaisonVue liaison = new LiaisonVue(blocOrigine, blocDestination, "association", assoc.isUnidirectionnel(), multOrig, multDest);
+            liaisons.add(liaison);
+        }
+    }
+
+    private void creerLiaisonsDepuisHerit(List<Heritage> lstHerit, HashMap<String, BlocClasse> mapBlocsParNom) 
+    {
+
+        for (Heritage herit : lstHerit) 
+        {
+            LiaisonVue liaison = new LiaisonVue(mapBlocsParNom.get(herit.getClasseOrig().getNom()), mapBlocsParNom.get(herit.getClasseDest().getNom()), "heritage");
+            liaisons.add(liaison);
+        }
+    }
+    
+    public List<LiaisonVue> getLiaisons() 
+    {
+        return liaisons;
+    }
+
+    public void ajouterLiaison(LiaisonVue liaison) 
+    {
+        liaisons.add(liaison);
+    }
+
+    public void supprimerLiaison(LiaisonVue liaison) 
+    {
+        liaisons.remove(liaison);
+    }
 }

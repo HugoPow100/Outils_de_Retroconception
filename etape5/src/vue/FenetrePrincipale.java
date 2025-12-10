@@ -15,7 +15,7 @@ import javax.swing.SwingUtilities;
 public class FenetrePrincipale extends JFrame 
 {
 
-    private PanneauProjets panneauProjets;
+    private PanneauProjets   panneauProjets;
     private PanneauDiagramme panneauDiagramme;
 
     public FenetrePrincipale() 
@@ -27,7 +27,7 @@ public class FenetrePrincipale extends JFrame
         setLocationRelativeTo(null);
         setResizable(true);
 
-        panneauProjets = new PanneauProjets(this);
+        panneauProjets   = new PanneauProjets(this);
         panneauDiagramme = new PanneauDiagramme();
 
         setLayout(new BorderLayout());
@@ -38,11 +38,12 @@ public class FenetrePrincipale extends JFrame
             panneauProjets,
             panneauDiagramme
         );
+
         splitPane.setDividerLocation(250);
         splitPane.setOneTouchExpandable(true);
 
-        add(splitPane, BorderLayout.CENTER);
-        add(new BarreMenus(this), BorderLayout.NORTH);
+        this.add(splitPane, BorderLayout.CENTER);
+        this.add(new BarreMenus(this), BorderLayout.NORTH);
     }
 
     public void chargerProjet(String cheminProjet) 
@@ -68,23 +69,43 @@ public class FenetrePrincipale extends JFrame
                 fichierSortie = new File(fichierSortie.getParentFile(), fichierSortie.getName() + ".png");
             }
             
-            try {
-            BufferedImage image = new BufferedImage(
-                panneauDiagramme.getWidth(), panneauDiagramme.getHeight(), BufferedImage.TYPE_INT_ARGB
-            );
-            panneauDiagramme.printAll(image.createGraphics());
-            ImageIO.write(image, "png", fichierSortie);
-            System.out.println("Diagramme sauvegardé dans"+fichierSortie);
-            } catch (Exception e) {
+            try 
+            {
+                BufferedImage image = new BufferedImage(
+                panneauDiagramme.getWidth(), panneauDiagramme.getHeight(), BufferedImage.TYPE_INT_ARGB );
+
+                panneauDiagramme.printAll(image.createGraphics());
+                ImageIO.write(image, "png", fichierSortie);
+                System.out.println("Diagramme sauvegardé dans"+fichierSortie);
+            } 
+            catch (Exception e) 
+            {
                 e.printStackTrace();
             }
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) 
+    {
         SwingUtilities.invokeLater(() -> {
             FenetrePrincipale fenetre = new FenetrePrincipale();
             fenetre.setVisible(true);
         });
+    }
+
+    public void affichageAttributs(boolean b)
+    {
+        panneauDiagramme.setAfficherAttributs(b);
+    }
+
+
+    public void affichageMethodes(boolean b)
+    {
+        panneauDiagramme.setAfficherMethodes(b);
+    }
+
+    public void optimiserPositions()
+    {
+        panneauDiagramme.optimiserPositions();
     }
 }

@@ -1,5 +1,6 @@
 public class Chat extends Animal {
     private String couleur;
+    private Collier collier;
 
     public Chat(String nom, int age, String couleur) {
         super(nom, age);

@@ -8,49 +8,52 @@ public class BlocClasse
 {
 
     private String nom;
-    private int x;
-    private int y;
-    private int largeur;
-    private int hauteur;
     private boolean estInterface;
     private boolean estSelectionne;
     private List<String> attributs;
     private List<String> methodes;
 
+    private int x;
+    private int y;
+    private int largeur;
+    private int hauteur;
+
+    private int hauteurCalculee;
+
     // Constantes 
-    private static final int PADDING = 10;
-    private static final int HAUTEUR_ENTETE = 30;
-    private static final int HAUTEUR_LIGNE = 20;
-    private static final Color COULEUR_FOND = new Color(230, 240, 250);
+    private static final int PADDING           = 10;
+    private static final int HAUTEUR_ENTETE    = 30;
+    private static final int HAUTEUR_LIGNE     = 20;
+    private static final Color COULEUR_FOND    = new Color(230, 240, 250);
     private static final Color COULEUR_BORDURE = new Color(0, 0, 0);
-    private static final Color COULEUR_ENTETE = new Color(100, 150, 200);
+    private static final Color COULEUR_ENTETE  = new Color(100, 150, 200);
 
     public BlocClasse(String nom, int x, int y) 
     {
         this.nom = nom;
-        this.x = x;
-        this.y = y;
+        this.x   = x;
+        this.y   = y;
         this.largeur = 200;
         this.hauteur = 150;
-        this.estInterface = false;
+        this.estInterface   = false;
         this.estSelectionne = false;
         this.attributs = new ArrayList<>();
-        this.methodes = new ArrayList<>();
+        this.methodes  = new ArrayList<>();
     }
 
-    public void dessiner(Graphics2D g) 
+    public void dessiner(Graphics2D g, boolean afficherAttributs, boolean afficherMethodes) 
     {
-        int hauteurCalculee = calculerHauteur();
+        hauteurCalculee = calculerHauteur();
         
         g.setColor(COULEUR_FOND);
         g.fillRect(x, y, largeur, hauteurCalculee);
 
         g.setColor(estSelectionne ? Color.BLUE : COULEUR_BORDURE);
-        g.setStroke(new BasicStroke(estSelectionne ? 2 : 1));
+        g.setStroke(new BasicStroke(estSelectionne ? 2 : 1)); // sert à définir l'apparence du trait
         g.drawRect(x, y, largeur, hauteurCalculee);
 
         g.setColor(COULEUR_ENTETE);
-        g.fillRect(x, y, largeur, HAUTEUR_ENTETE);
+        g.fillRect(x, y, largeur, HAUTEUR_ENTETE); 
 
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 12));
@@ -66,9 +69,18 @@ public class BlocClasse
             g.setColor(Color.BLACK);
             g.setFont(new Font("Arial", Font.PLAIN, 9));
 
-            for (String att : attributs) 
+            if (afficherAttributs)
             {
-                g.drawString(att, x + PADDING, yActuel);
+                for (String att : attributs) 
+                {
+                    g.drawString(att, x + PADDING, yActuel);
+                    yActuel += HAUTEUR_LIGNE;
+                }
+                
+            } 
+            else 
+            {
+                g.drawString("...", x + PADDING, yActuel);
                 yActuel += HAUTEUR_LIGNE;
             }
         }
@@ -85,10 +97,18 @@ public class BlocClasse
             g.setColor(Color.BLACK);
             g.setFont(new Font("Arial", Font.PLAIN, 9));
 
-            for (String met : methodes) 
+            if (afficherMethodes)
             {
-                g.drawString(met, x + PADDING, yActuel);
-                yActuel += HAUTEUR_LIGNE;
+                for (String met : methodes) 
+                {
+                    g.drawString(met, x + PADDING, yActuel);
+                    yActuel += HAUTEUR_LIGNE;
+                }
+            }
+            else 
+            {
+                g.drawString("...", x + PADDING, yActuel);
+                    yActuel += HAUTEUR_LIGNE;
             }
         }
     }
@@ -96,79 +116,116 @@ public class BlocClasse
     private int calculerHauteur() 
     {
         int h = HAUTEUR_ENTETE + PADDING;
-        h += attributs.size() * HAUTEUR_LIGNE;
-        if (!attributs.isEmpty() && !methodes.isEmpty()) {
+        h    += attributs.size() * HAUTEUR_LIGNE;
+
+        if (!attributs.isEmpty() && !methodes.isEmpty()) 
+        {
             h += 10;
         }
+
         h += methodes.size() * HAUTEUR_LIGNE;
         h += PADDING;
+
         return Math.max(h, 80);
     }
 
-    // Vérifie si le point donné est dans le bloc.
-    public boolean contient(int px, int py) {
+    // Vérifie si le point donné est dans le bloc
+    public boolean contient(int px, int py) 
+    {
         int hauteurCalculee = calculerHauteur();
-        return px >= x 
-        && px <= x + largeur 
-        && py >= y 
-        && py <= y + hauteurCalculee;
+
+        return px >= x                    &&
+               px <= x + largeur          &&
+               py >= y                    &&
+               py <= y + hauteurCalculee;
     }
 
-    public void deplacer(int dx, int dy) {
+    // Vérifie si un rectangle de texte chevauchent le bloc
+    public boolean chevaucheTexte(int textX, int textY, int textWidth, int textHeight) 
+    {
+        int hauteurCalculee = calculerHauteur();
+        
+        // Vérifier si le rectangle du texte chevauche le rectangle du bloc
+        return !(textX + textWidth < x || 
+                 textX > x + largeur || 
+                 textY > y + hauteurCalculee || 
+                 textY - textHeight < y);
+    }
+
+    public void deplacer(int dx, int dy) 
+    {
         this.x += dx;
         this.y += dy;
     }
 
     // Getters et Setters
-    public String getNom() {
+    public String getNom() 
+    {
         return nom;
     }
 
-    public int getX() {
+    public int getX() 
+    {
         return x;
     }
 
-    public void setX(int x) {
+    public void setX(int x) 
+    {
         this.x = x;
     }
 
-    public int getY() {
+    public int getY() 
+    {
         return y;
     }
 
-    public void setY(int y) {
+    public void setY(int y) 
+    {
         this.y = y;
     }
 
-    public int getLargeur() {
+    public int getLargeur() 
+    {
         return largeur;
     }
 
-    public int getHauteur() {
+    public int getHauteur() 
+    {
         return hauteur;
     }
 
-    public boolean estInterface() {
+    public int getHauteurCalculee() 
+    {
+        return hauteurCalculee;
+    }
+
+    public boolean estInterface() 
+    {
         return estInterface;
     }
 
-    public void setInterface(boolean estInterface) {
+    public void setInterface(boolean estInterface) 
+    {
         this.estInterface = estInterface;
     }
 
-    public boolean estSelectionne() {
+    public boolean estSelectionne() 
+    {
         return estSelectionne;
     }
 
-    public void setSelectionne(boolean selectionne) {
+    public void setSelectionne(boolean selectionne) 
+    {
         estSelectionne = selectionne;
     }
 
-    public void setAttributsAffichage(List<String> attributs) {
+    public void setAttributsAffichage(List<String> attributs) 
+    {
         this.attributs = attributs;
     }
 
-    public void setMethodesAffichage(List<String> methodes) {
+    public void setMethodesAffichage(List<String> methodes) 
+    {
         this.methodes = methodes;
     }
 }
