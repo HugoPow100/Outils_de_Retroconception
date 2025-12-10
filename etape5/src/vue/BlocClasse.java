@@ -41,7 +41,7 @@ public class BlocClasse
         this.methodes  = new ArrayList<>();
     }
 
-    public void dessiner(Graphics2D g) 
+    public void dessiner(Graphics2D g, boolean afficherAttributs, boolean afficherMethodes) 
     {
         hauteurCalculee = calculerHauteur();
         
@@ -69,9 +69,18 @@ public class BlocClasse
             g.setColor(Color.BLACK);
             g.setFont(new Font("Arial", Font.PLAIN, 9));
 
-            for (String att : attributs) 
+            if (afficherAttributs)
             {
-                g.drawString(att, x + PADDING, yActuel);
+                for (String att : attributs) 
+                {
+                    g.drawString(att, x + PADDING, yActuel);
+                    yActuel += HAUTEUR_LIGNE;
+                }
+                
+            } 
+            else 
+            {
+                g.drawString("...", x + PADDING, yActuel);
                 yActuel += HAUTEUR_LIGNE;
             }
         }
@@ -88,10 +97,18 @@ public class BlocClasse
             g.setColor(Color.BLACK);
             g.setFont(new Font("Arial", Font.PLAIN, 9));
 
-            for (String met : methodes) 
+            if (afficherMethodes)
             {
-                g.drawString(met, x + PADDING, yActuel);
-                yActuel += HAUTEUR_LIGNE;
+                for (String met : methodes) 
+                {
+                    g.drawString(met, x + PADDING, yActuel);
+                    yActuel += HAUTEUR_LIGNE;
+                }
+            }
+            else 
+            {
+                g.drawString("...", x + PADDING, yActuel);
+                    yActuel += HAUTEUR_LIGNE;
             }
         }
     }

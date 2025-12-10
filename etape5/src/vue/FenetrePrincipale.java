@@ -92,4 +92,15 @@ public class FenetrePrincipale extends JFrame
             fenetre.setVisible(true);
         });
     }
+
+    public void affichageAttributs(boolean b)
+    {
+        panneauDiagramme.setAfficherAttributs(b);
+    }
+
+
+    public void affichageMethodes(boolean b)
+    {
+        panneauDiagramme.setAfficherMethodes(b);
+    }
 }

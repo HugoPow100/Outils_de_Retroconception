@@ -17,6 +17,9 @@ public class PanneauDiagramme extends JPanel
     private BlocClasse       blocEnDeplacement;
     private Point            pointDernier;
     private Controlleur      controlleur;
+
+    private boolean afficherAttributs = true;
+    private boolean afficherMethodes = true;
     
     // Pour le drag des points d'ancrage de liaisons
     private LiaisonVue liaisonEnDeplacement;
@@ -148,7 +151,7 @@ public class PanneauDiagramme extends JPanel
 
         // Dessiner les blocs
         for (BlocClasse bloc : blocsClasses) {
-            bloc.dessiner(g2d);
+            bloc.dessiner(g2d, this.afficherAttributs, this.afficherMethodes);
         }
     }
 
@@ -172,5 +175,17 @@ public class PanneauDiagramme extends JPanel
 
     public String getCheminProjetCourant() {
         return cheminProjetCourant;
+    }
+    
+    public void setAfficherMethodes(boolean b) 
+    {
+        this.afficherMethodes = b;
+        this.repaint();
+    }
+
+    public void setAfficherAttributs(boolean b) 
+    {
+        this.afficherAttributs = b;
+        this.repaint();
     }
 }

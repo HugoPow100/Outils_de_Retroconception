@@ -1,15 +1,26 @@
 package vue;
 
+import java.io.File;
+
+import javax.lang.model.element.Element;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.text.Document;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.FileWriter;
 
 public class BarreMenus extends JMenuBar 
 {
 
     private FenetrePrincipale fenetrePrincipale;
+
+    private JCheckBoxMenuItem afficherAttributsItem;
+    private JCheckBoxMenuItem afficherMethodesItem;
     
     public BarreMenus(FenetrePrincipale fenetrePrincipale) 
     {
@@ -25,10 +36,10 @@ public class BarreMenus extends JMenuBar
     {
         JMenu menu = new JMenu("Fichier");
 
-        JMenuItem nouvelleItem = new JMenuItem("Nouveau projet");
+        JMenuItem nouvelleItem = new JMenuItem("Nouveau projet ");
         nouvelleItem.addActionListener(e -> actionNouveauProjet());
 
-        JMenuItem ouvrirItem = new JMenuItem("Ouvrir projet");
+        JMenuItem ouvrirItem = new JMenuItem("Ouvrir projet...");
         ouvrirItem.addActionListener(e -> actionOuvrirProjet());
 
         JMenuItem exporterItem = new JMenuItem("Exporter en image");
@@ -41,8 +52,8 @@ public class BarreMenus extends JMenuBar
         quitterItem.addActionListener(e -> System.exit(0));
 
         //menu.add(nouvelleItem);
-        //menu.add(ouvrirItem);
-        //menu.addSeparator();
+        menu.add(ouvrirItem);
+        /////menu.addSeparator();
         menu.add(exporterItem);
         //menu.add(sauvegarderItem);
         menu.addSeparator();
@@ -75,8 +86,8 @@ public class BarreMenus extends JMenuBar
     {
         JMenu menu = new JMenu("Affichage");
 
-        JCheckBoxMenuItem afficherAttributsItem = new JCheckBoxMenuItem("Afficher attributs", true);
-        JCheckBoxMenuItem afficherMethodesItem = new JCheckBoxMenuItem("Afficher méthodes", true);
+        afficherAttributsItem = new JCheckBoxMenuItem("Afficher attributs", true);
+        afficherMethodesItem = new JCheckBoxMenuItem("Afficher méthodes", true);
         JMenuItem alignerItem = new JMenuItem("Aligner les symboles");
         JMenuItem optimiserItem = new JMenuItem("Optimiser les positions");
 
@@ -111,12 +122,64 @@ public class BarreMenus extends JMenuBar
     {
         JOptionPane.showMessageDialog(null, "Pas fini");
     }
-
+        
     private void actionOuvrirProjet() 
     {
-        JOptionPane.showMessageDialog(null, "Pas fini");
+        JFileChooser chooser = new JFileChooser();
+
+        chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+
+        // Afficher la boîte de dialogue
+        int resultat = chooser.showOpenDialog(null); // null = centré à l'écran
+
+        // Si l'utilisateur a choisi un fichier
+        if (resultat == JFileChooser.APPROVE_OPTION) 
+        {
+            File fichierSelectionne = chooser.getSelectedFile();
+            String cheminAbsolu = fichierSelectionne.getAbsolutePath();
+
+            ajoutXML(cheminAbsolu + " " + fichierSelectionne.getName());
+        } 
+        else 
+        {
+            System.out.println("Aucun fichier choisi");
+        }    
     }
 
+    private void SauvegardeProjetXml(String cheminFichierChoisi) 
+    {
+        try 
+        {
+            // Emplacement du fichier XML
+            File fichier = new File("../../donnees/projets.xml");
+
+            // Création du dossier parent si nécessaire
+            if (!fichier.getParentFile().exists()) {
+                fichier.getParentFile().mkdirs();
+            }
+
+            // Création du fichier s'il n'existe pas
+            if (!fichier.exists()) {
+                fichier.createNewFile();
+            }
+
+            // FileWriter avec "true" pour ajouter à la fin
+            FileWriter writer = new FileWriter(fichier, true);
+
+            // Écrire la chaîne avec un retour à la ligne
+            writer.write(ajout + System.lineSeparator());
+
+            // Fermer le writer
+            writer.close();
+
+            System.out.println("Ajout effectué dans : " + fichier.getAbsolutePath());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+        
     private void actionExporter() 
     {
         JOptionPane.showMessageDialog(null, "Pas fini");
@@ -144,12 +207,12 @@ public class BarreMenus extends JMenuBar
 
     private void actionAffichageAttributs() 
     {
-        // À implémenter
+        fenetrePrincipale.affichageAttributs(afficherAttributsItem.getState());
     }
 
     private void actionAffichageMethodes() 
     {
-        // À implémenter
+        fenetrePrincipale.affichageMethodes(afficherAttributsItem.getState());
     }
 
     private void actionAligner() 
@@ -170,4 +233,35 @@ public class BarreMenus extends JMenuBar
             "À propos",
             JOptionPane.INFORMATION_MESSAGE);
     }
+
+    private void ajoutXML(String ajout) {
+    try {
+        // Emplacement du fichier XML
+        File fichier = new File("../../donnees/projets.xml");
+
+        // Création du dossier parent si nécessaire
+        if (!fichier.getParentFile().exists()) {
+            fichier.getParentFile().mkdirs();
+        }
+
+        // Création du fichier s'il n'existe pas
+        if (!fichier.exists()) {
+            fichier.createNewFile();
+        }
+
+        // FileWriter avec "true" pour ajouter à la fin
+        FileWriter writer = new FileWriter(fichier, true);
+
+        // Écrire la chaîne avec un retour à la ligne
+        writer.write(ajout + System.lineSeparator());
+
+        // Fermer le writer
+        writer.close();
+
+        System.out.println("Ajout effectué dans : " + fichier.getAbsolutePath());
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
 }
