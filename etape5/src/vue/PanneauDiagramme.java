@@ -50,6 +50,11 @@ public class PanneauDiagramme extends JPanel
         List<BlocClasse> blocCharges = controlleur.chargerProjetEnBlocsClasses(cheminProjet);
         blocsClasses.addAll(blocCharges);
         liaisons.addAll(controlleur.getLiaisons());
+        
+        // Passer la liste des blocs à toutes les liaisons pour le contournement
+        for (LiaisonVue liaison : liaisons) {
+            liaison.setTousLesBlocs(blocsClasses);
+        }
 
         repaint();
     }

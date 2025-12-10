@@ -12,6 +12,7 @@ public class PanneauProjets extends JPanel {
     public PanneauProjets(FenetrePrincipale fenetrePrincipale) {
         this.fenetrePrincipale = fenetrePrincipale;
         
+        //this.cheminDossiers = "donnees/projets.xml";
         this.cheminDossiers = "sauvegardes/dossiers";
 
         setLayout(new BorderLayout());
@@ -47,10 +48,13 @@ public class PanneauProjets extends JPanel {
         add(boutonActualiser, BorderLayout.SOUTH);
     }
 
-    private void chargerProjets(JPanel panelProjets) {
+    private void chargerProjets(JPanel panelProjets) 
+    {
+
         File dossier = new File(cheminDossiers);
 
-        if (!dossier.exists() || !dossier.isDirectory()) {
+        if (!dossier.exists() || !dossier.isDirectory()) 
+        {
             JLabel labelErreur = new JLabel("Dossier non trouvé");
             labelErreur.setForeground(Color.RED);
             panelProjets.add(labelErreur);
@@ -59,14 +63,16 @@ public class PanneauProjets extends JPanel {
 
         File[] projets = dossier.listFiles(File::isDirectory);
 
-        if (projets == null || projets.length == 0) {
+        if (projets == null || projets.length == 0) 
+        {
             JLabel labelVide = new JLabel("Aucun projet");
             labelVide.setForeground(Color.GRAY);
             panelProjets.add(labelVide);
             return;
         }
 
-        for (File projet : projets) {
+        for (File projet : projets) 
+        {
             JButton boutonProjet = creerBoutonProjet(projet);
             panelProjets.add(boutonProjet);
             panelProjets.add(Box.createVerticalStrut(5));

@@ -28,6 +28,9 @@ public class LiaisonVue
     
     // Rayon pour cliquer sur les points d'ancrage
     private static final int ANCHOR_RADIUS = 5;
+    
+    // Référence à la liste des blocs pour le routage avec évitement
+    private List<BlocClasse> tousLesBlocs = new ArrayList<>();
 
     public LiaisonVue(BlocClasse blocOrigine, BlocClasse blocDestination, String type) 
     {
@@ -170,17 +173,141 @@ public class LiaisonVue
             path.add(new Point(start.x, midY));
         }
 
-        // Segment intermédiaire : aller vers la destination avec le padding
+        // Segment intermédiaire : aller vers la destination avec contournement
         if (startSide == 0 || startSide == 2) { // Sortie horizontale
-            path.add(new Point(midX, midY2));
-            path.add(new Point(midX2, midY2));
+            // Point intermédiaire horizontal
+            int intermediateY = midY2;
+            
+            // Vérifier s'il y a une collision sur la ligne horizontale
+            List<BlocClasse> obstaclesHorizontaux = getObstaclesOnHorizontalLine(midX, midX2, intermediateY);
+            
+            if (!obstaclesHorizontaux.isEmpty()) {
+                // Contourner en passant par le haut ou le bas
+                int deflectY = getDeflectionY(intermediateY, obstaclesHorizontaux);
+                path.add(new Point(midX, deflectY));
+                path.add(new Point(midX2, deflectY));
+                path.add(new Point(midX2, intermediateY));
+            } else {
+                path.add(new Point(midX, intermediateY));
+                path.add(new Point(midX2, intermediateY));
+            }
         } else { // Sortie verticale
-            path.add(new Point(midX2, midY));
-            path.add(new Point(midX2, midY2));
+            // Point intermédiaire vertical
+            int intermediateX = midX2;
+            
+            // Vérifier s'il y a une collision sur la ligne verticale
+            List<BlocClasse> obstaclesVerticals = getObstaclesOnVerticalLine(intermediateX, midY, midY2);
+            
+            if (!obstaclesVerticals.isEmpty()) {
+                // Contourner en passant par la gauche ou la droite
+                int deflectX = getDeflectionX(intermediateX, obstaclesVerticals);
+                path.add(new Point(deflectX, midY));
+                path.add(new Point(deflectX, midY2));
+                path.add(new Point(intermediateX, midY2));
+            } else {
+                path.add(new Point(intermediateX, midY));
+                path.add(new Point(intermediateX, midY2));
+            }
         }
 
         path.add(end);
         return path;
+    }
+    
+    /**
+     * Récupère les blocs qui intersectent une ligne horizontale
+     */
+    private List<BlocClasse> getObstaclesOnHorizontalLine(int x1, int x2, int y) {
+        List<BlocClasse> obstacles = new ArrayList<>();
+        int minX = Math.min(x1, x2);
+        int maxX = Math.max(x1, x2);
+        int margin = 5;
+        
+        for (BlocClasse bloc : tousLesBlocs) {
+            int bx = bloc.getX();
+            int by = bloc.getY();
+            int bw = bloc.getLargeur();
+            int bh = bloc.getHauteurCalculee();
+            
+            // Vérifier si la ligne y traverse le bloc
+            if (y >= by - margin && y <= by + bh + margin &&
+                !(maxX < bx - margin || minX > bx + bw + margin)) {
+                obstacles.add(bloc);
+            }
+        }
+        
+        return obstacles;
+    }
+    
+    /**
+     * Récupère les blocs qui intersectent une ligne verticale
+     */
+    private List<BlocClasse> getObstaclesOnVerticalLine(int x, int y1, int y2) {
+        List<BlocClasse> obstacles = new ArrayList<>();
+        int minY = Math.min(y1, y2);
+        int maxY = Math.max(y1, y2);
+        int margin = 5;
+        
+        for (BlocClasse bloc : tousLesBlocs) {
+            int bx = bloc.getX();
+            int by = bloc.getY();
+            int bw = bloc.getLargeur();
+            int bh = bloc.getHauteurCalculee();
+            
+            // Vérifier si la ligne x traverse le bloc
+            if (x >= bx - margin && x <= bx + bw + margin &&
+                !(maxY < by - margin || minY > by + bh + margin)) {
+                obstacles.add(bloc);
+            }
+        }
+        
+        return obstacles;
+    }
+    
+    /**
+     * Calcule une position Y pour contourner les obstacles horizontaux
+     */
+    private int getDeflectionY(int originalY, List<BlocClasse> obstacles) {
+        int topMin = Integer.MAX_VALUE;
+        int bottomMax = Integer.MIN_VALUE;
+        
+        for (BlocClasse bloc : obstacles) {
+            topMin = Math.min(topMin, bloc.getY());
+            bottomMax = Math.max(bottomMax, bloc.getY() + bloc.getHauteurCalculee());
+        }
+        
+        // Choisir le côté avec plus d'espace
+        int spaceAbove = topMin - 100; // Supposer 100 de marge
+        int spaceBelow = 1000 - bottomMax; // Supposer 1000 de hauteur totale
+        
+        if (spaceAbove > spaceBelow) {
+            return topMin - 20; // Passer au-dessus
+        } else {
+            return bottomMax + 20; // Passer en-dessous
+        }
+    }
+    
+    /**
+     * Calcule une position X pour contourner les obstacles verticaux
+     */
+    private int getDeflectionX(int originalX, List<BlocClasse> obstacles) {
+        int leftMin = Integer.MAX_VALUE;
+        int rightMax = Integer.MIN_VALUE;
+        
+        for (BlocClasse bloc : obstacles) {
+            leftMin = Math.min(leftMin, bloc.getX());
+            rightMax = Math.max(rightMax, bloc.getX() + bloc.getLargeur());
+        }
+        
+        // Choisir le côté avec plus d'espace
+        int spaceLeft = leftMin - 100; // Supposer 100 de marge
+        int spaceRight = 1000 - rightMax; // Supposer 1000 de largeur totale
+        
+        if (spaceLeft > spaceRight) {
+            return leftMin - 20; // Passer à gauche
+        } else {
+            return rightMax + 20; // Passer à droite
+        }
     }
 
     private Point calculateMultiplicityPosition(Point anchor, int side, int textWidth, int textHeight) 
@@ -372,6 +499,13 @@ public class LiaisonVue
      */
     public void setSideDestination(int side) {
         this.sideDestination = side;
+    }
+    
+    /**
+     * Définit la liste de tous les blocs pour l'évitement
+     */
+    public void setTousLesBlocs(List<BlocClasse> blocs) {
+        this.tousLesBlocs = blocs;
     }
 
     // Getters et Setters

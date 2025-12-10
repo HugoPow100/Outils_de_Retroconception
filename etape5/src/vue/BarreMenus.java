@@ -1,18 +1,13 @@
 package vue;
 
 import java.io.File;
-
-import javax.lang.model.element.Element;
+import java.io.FileWriter;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.text.Document;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.FileWriter;
 
 public class BarreMenus extends JMenuBar 
 {
@@ -138,7 +133,7 @@ public class BarreMenus extends JMenuBar
             File fichierSelectionne = chooser.getSelectedFile();
             String cheminAbsolu = fichierSelectionne.getAbsolutePath();
 
-            ajoutXML(cheminAbsolu + " " + fichierSelectionne.getName());
+            SauvegardeProjetXml(cheminAbsolu + " " + fichierSelectionne.getName());
         } 
         else 
         {
@@ -151,7 +146,7 @@ public class BarreMenus extends JMenuBar
         try 
         {
             // Emplacement du fichier XML
-            File fichier = new File("../../donnees/projets.xml");
+            File fichier = new File("donnees/projets.xml");
 
             // Création du dossier parent si nécessaire
             if (!fichier.getParentFile().exists()) {
@@ -167,7 +162,7 @@ public class BarreMenus extends JMenuBar
             FileWriter writer = new FileWriter(fichier, true);
 
             // Écrire la chaîne avec un retour à la ligne
-            writer.write(ajout + System.lineSeparator());
+            writer.write(cheminFichierChoisi + System.lineSeparator());
 
             // Fermer le writer
             writer.close();
@@ -234,34 +229,4 @@ public class BarreMenus extends JMenuBar
             JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void ajoutXML(String ajout) {
-    try {
-        // Emplacement du fichier XML
-        File fichier = new File("../../donnees/projets.xml");
-
-        // Création du dossier parent si nécessaire
-        if (!fichier.getParentFile().exists()) {
-            fichier.getParentFile().mkdirs();
-        }
-
-        // Création du fichier s'il n'existe pas
-        if (!fichier.exists()) {
-            fichier.createNewFile();
-        }
-
-        // FileWriter avec "true" pour ajouter à la fin
-        FileWriter writer = new FileWriter(fichier, true);
-
-        // Écrire la chaîne avec un retour à la ligne
-        writer.write(ajout + System.lineSeparator());
-
-        // Fermer le writer
-        writer.close();
-
-        System.out.println("Ajout effectué dans : " + fichier.getAbsolutePath());
-
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-}
 }
