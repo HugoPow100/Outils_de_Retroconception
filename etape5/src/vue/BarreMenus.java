@@ -40,7 +40,7 @@ public class BarreMenus extends JMenuBar
         JMenuItem exporterItem = new JMenuItem("Exporter en image");
         exporterItem.addActionListener(e -> fenetrePrincipale.sauvegarderDiagramme());
 
-        JMenuItem sauvegarderItem = new JMenuItem("Sauvegarder positions");
+        JMenuItem sauvegarderItem = new JMenuItem("Sauvegarder");
         sauvegarderItem.addActionListener(e -> actionSauvegarder());
 
         JMenuItem quitterItem = new JMenuItem("Quitter");
@@ -50,7 +50,7 @@ public class BarreMenus extends JMenuBar
         menu.add(ouvrirItem);
         /////menu.addSeparator();
         menu.add(exporterItem);
-        //menu.add(sauvegarderItem);
+        menu.add(sauvegarderItem);
         menu.addSeparator();
         menu.add(quitterItem);
 
@@ -182,7 +182,7 @@ public class BarreMenus extends JMenuBar
 
     private void actionSauvegarder() 
     {
-        JOptionPane.showMessageDialog(null, "Pas fini");
+        this.fenetrePrincipale.actionSauvegarder();
     }
 
     private void actionAnnuler() 

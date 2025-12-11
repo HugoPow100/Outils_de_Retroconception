@@ -377,7 +377,7 @@ public class PanneauDiagramme extends JPanel {
         this.repaint();
     }
 
-    public void sauvegarderClasses(List<BlocClasse> blocClasses, String cheminProjet) {
-        controlleur.sauvegarderClasses(blocClasses, cheminProjet);
+    public void actionSauvegarder() {
+        this.controlleur.sauvegarderClasses(this.blocsClasses, cheminProjetCourant);
     }
 }

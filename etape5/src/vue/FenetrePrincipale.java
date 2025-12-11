@@ -124,4 +124,9 @@ public class FenetrePrincipale extends JFrame
     {
         panneauDiagramme.optimiserPositionsLiaisons();
     }
+
+    public void actionSauvegarder()
+    {
+        panneauDiagramme.actionSauvegarder();
+    }
 }
