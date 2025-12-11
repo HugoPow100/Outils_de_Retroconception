@@ -7,42 +7,50 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
-public class PanneauDiagramme extends JPanel 
-{
+public class PanneauDiagramme extends JPanel {
 
     private List<BlocClasse> blocsClasses;
     private List<LiaisonVue> liaisons;
 
-    private String           cheminProjetCourant;
-    private BlocClasse       blocEnDeplacement;
-    private Point            pointDernier;
-    private Controlleur      controlleur;
+    private String cheminProjetCourant;
+    private BlocClasse blocEnDeplacement;
+    private Point pointDernier;
+    private Controlleur controlleur;
 
     private boolean afficherAttributs = true;
     private boolean afficherMethodes = true;
-    
+
     // Pour le drag des points d'ancrage de liaisons
     private LiaisonVue liaisonEnDeplacement;
     private boolean draggingOriginAnchor;
     private boolean draggingDestinationAnchor;
 
-    public PanneauDiagramme() 
-    {
-        this.blocsClasses        = new ArrayList<>();
-        this.liaisons            = new ArrayList<>();
+    // Zoom
+    private double zoomLevel = 1.0;
+    private static final double MIN_ZOOM = 0.1;
+    private static final double MAX_ZOOM = 3.0;
+    private static final double ZOOM_STEP = 0.1;
+    private boolean afficherTextZoom = true;
+    
+    // Pan (déplacement de l'espace de travail)
+    private int panOffsetX = 0;
+    private int panOffsetY = 0;
+    private boolean isPanning = false;
+
+    public PanneauDiagramme() {
+        this.blocsClasses = new ArrayList<>();
+        this.liaisons = new ArrayList<>();
         this.cheminProjetCourant = null;
-        this.controlleur         = new Controlleur();
+        this.controlleur = new Controlleur(this);
 
         setLayout(null);
         setBackground(new Color(255, 255, 255));
         setBorder(BorderFactory.createTitledBorder("Diagramme UML"));
 
-
         ajouterListenersInteraction();
     }
 
-    public void chargerProjet(String cheminProjet) 
-    {
+    public void chargerProjet(String cheminProjet) {
         this.cheminProjetCourant = cheminProjet;
         this.blocsClasses.clear();
         this.liaisons.clear();
@@ -50,7 +58,7 @@ public class PanneauDiagramme extends JPanel
         List<BlocClasse> blocCharges = controlleur.chargerProjetEnBlocsClasses(cheminProjet);
         blocsClasses.addAll(blocCharges);
         liaisons.addAll(controlleur.getLiaisons());
-        
+
         // Passer la liste des blocs à toutes les liaisons pour le contournement
         for (LiaisonVue liaison : liaisons) {
             liaison.setTousLesBlocs(blocsClasses);
@@ -59,13 +67,30 @@ public class PanneauDiagramme extends JPanel
         repaint();
     }
 
-    private void ajouterListenersInteraction() 
-    {
-        addMouseListener(new MouseAdapter() 
-        {
+    private void ajouterListenersInteraction() {
+        addMouseListener(new MouseAdapter() {
             @Override
-            public void mousePressed(MouseEvent e) 
-            {
+            public void mousePressed(MouseEvent e) {
+                // Vérifier si on clique sur le texte de zoom pour le réinitialiser
+                if (e.getX() >= 10 && e.getX() <= 100 && e.getY() >= getHeight() - 20 && e.getY() <= getHeight() - 10) {
+                    zoomLevel = 1.0;
+                    panOffsetX = 0;
+                    panOffsetY = 0;
+                    repaint();
+                    return;
+                }
+                
+                // Vérifier si c'est un clic droit pour commencer le pan
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    isPanning = true;
+                    pointDernier = e.getPoint();
+                    return;
+                }
+                
+                // Convertir les coordonnées écran en coordonnées logiques (avec zoom et pan)
+                double logicalX = (e.getX() - panOffsetX - getWidth() / 2) / zoomLevel + getWidth() / (2 * zoomLevel);
+                double logicalY = (e.getY() - panOffsetY - getHeight() / 2) / zoomLevel + getHeight() / (2 * zoomLevel);
+
                 pointDernier = e.getPoint();
                 blocEnDeplacement = null;
                 liaisonEnDeplacement = null;
@@ -73,16 +98,13 @@ public class PanneauDiagramme extends JPanel
                 draggingDestinationAnchor = false;
 
                 // Vérifier si on clique sur un point d'ancrage de liaison
-                for (LiaisonVue liaison : liaisons) 
-                {
-                    if (liaison.isOnOriginAnchor(e.getPoint())) 
-                    {
+                for (LiaisonVue liaison : liaisons) {
+                    if (liaison.isOnOriginAnchor(e.getPoint())) {
                         liaisonEnDeplacement = liaison;
                         draggingOriginAnchor = true;
                         return;
                     }
-                    if (liaison.isOnDestinationAnchor(e.getPoint())) 
-                    {
+                    if (liaison.isOnDestinationAnchor(e.getPoint())) {
                         liaisonEnDeplacement = liaison;
                         draggingDestinationAnchor = true;
                         return;
@@ -90,10 +112,8 @@ public class PanneauDiagramme extends JPanel
                 }
 
                 // Sinon, vérifier si on clique sur un bloc
-                for (BlocClasse bloc : blocsClasses) 
-                {
-                    if (bloc.contient(e.getX(), e.getY())) 
-                    {
+                for (BlocClasse bloc : blocsClasses) {
+                    if (bloc.contient((int) logicalX, (int) logicalY)) {
                         blocEnDeplacement = bloc;
                         bloc.setSelectionne(true);
                         break;
@@ -104,15 +124,19 @@ public class PanneauDiagramme extends JPanel
             }
 
             @Override
-            public void mouseReleased(MouseEvent e) 
-            {
-                if (blocEnDeplacement != null) 
-                {
+            public void mouseReleased(MouseEvent e) {
+                if (isPanning) {
+                    isPanning = false;
+                    repaint();
+                    return;
+                }
+                
+                if (blocEnDeplacement != null) {
                     blocEnDeplacement.setSelectionne(false);
                 }
-                blocEnDeplacement         = null;
-                liaisonEnDeplacement      = null;
-                draggingOriginAnchor      = false;
+                blocEnDeplacement = null;
+                liaisonEnDeplacement = null;
+                draggingOriginAnchor = false;
                 draggingDestinationAnchor = false;
                 repaint();
             }
@@ -121,6 +145,20 @@ public class PanneauDiagramme extends JPanel
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
+                // Pan avec clic droit
+                if (isPanning) {
+                    int newPanX = panOffsetX + (e.getX() - pointDernier.x);
+                    int newPanY = panOffsetY + (e.getY() - pointDernier.y);
+                    
+                    // Empêcher le pan d'aller dans le négatif
+                    panOffsetX = Math.min(0, newPanX);
+                    panOffsetY = Math.min(0, newPanY);
+                    
+                    pointDernier = e.getPoint();
+                    repaint();
+                    return;
+                }
+                
                 // Drag d'un point d'ancrage de liaison
                 if (liaisonEnDeplacement != null) {
                     if (draggingOriginAnchor) {
@@ -134,97 +172,142 @@ public class PanneauDiagramme extends JPanel
 
                 // Drag d'un bloc
                 if (blocEnDeplacement != null) {
-                    int dx = e.getX() - pointDernier.x;
-                    int dy = e.getY() - pointDernier.y;
+                    // Convertir les déplacements en fonction du zoom
+                    double dx = (e.getX() - pointDernier.x) / zoomLevel;
+                    double dy = (e.getY() - pointDernier.y) / zoomLevel;
 
-                    blocEnDeplacement.deplacer(dx, dy);
-                    pointDernier = e.getPoint();
+                    // Vérifier les limites pour éviter un déplacement hors zone
+                    int newX = blocEnDeplacement.getX() + (int) dx;
+                    int newY = blocEnDeplacement.getY() + (int) dy;
+
+                    // Empêcher le déplacement hors de la zone de travail
+                    if (newX >= 0 && newY >= 0) {
+                        blocEnDeplacement.deplacer((int) dx, (int) dy);
+                        pointDernier = e.getPoint();
+                    } else if (newX >= 0 && newY < 0) {
+                        blocEnDeplacement.deplacer((int) dx, 0);
+                        pointDernier = e.getPoint();
+                    } else if (newX < 0 && newY >= 0) {
+                        blocEnDeplacement.deplacer(0, (int) dy);
+                        pointDernier = e.getPoint();
+                    }
+
                     repaint();
+                }
+            }
+        });
+
+        // Listener pour la molette de souris (zoom)
+        addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (e.isControlDown()) {
+                    double oldZoom = zoomLevel;
+                    zoomLevel -= e.getWheelRotation() * ZOOM_STEP;
+                    zoomLevel = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomLevel));
+
+                    if (zoomLevel != oldZoom) {
+                        repaint();
+                    }
                 }
             }
         });
     }
 
-    public void optimiserPositions()
-    {
+    public void optimiserPositionsClasses() {
         if (blocsClasses.isEmpty()) {
             return;
         }
 
         // organiser les blocs en grille
         organiserEnGrille();
-        
+
+        // Étape 4 : Redessiner
+        repaint();
+
+        System.out.println("Opti pos réalisée");
+    }
+
+    public void optimiserPositionsLiaisons() {
+        if (liaisons.isEmpty()) {
+            return;
+        }
+
         // réinitialiser les positions des ancres pour les liaisons
         reinitialiserAnchages();
-        
+
         // Étape 4 : Redessiner
         repaint();
     }
-    
+
     /**
      * Organise les blocs en une grille régulière avec espacement optimal
      */
-    private void organiserEnGrille()
-    {
+    private void organiserEnGrille() {
         int cols = (int) Math.ceil(Math.sqrt(blocsClasses.size()));
-        int spacing = 250; // Espacement entre les blocs
+        int spacingX = 275; // Espacement entre les blocs
+        int spacingY = 275;
         int startX = 50;
         int startY = 50;
-        
+
+        for (BlocClasse bloc : blocsClasses) {
+            if (spacingY < bloc.getHauteurCalculee()) {
+                spacingY = bloc.getHauteurCalculee();
+            }
+
+        }
+
         for (int i = 0; i < blocsClasses.size(); i++) {
             BlocClasse bloc = blocsClasses.get(i);
             int col = i % cols;
             int row = i / cols;
-            
-            int newX = startX + col * spacing;
-            int newY = startY + row * spacing;
-            
+
+            int newX = startX + col * spacingX;
+            int newY = startY + row * spacingY;
+
             bloc.setX(newX);
             bloc.setY(newY);
         }
     }
-    
-    private void reinitialiserAnchages()
-    {
+
+    private void reinitialiserAnchages() {
         for (LiaisonVue liaison : liaisons) {
             // Réinitialiser les côtés selon la position relative des blocs
             optimiserAncragesPourLiaison(liaison);
         }
     }
-    
-    private void optimiserAncragesPourLiaison(LiaisonVue liaison)
-    {
+
+    private void optimiserAncragesPourLiaison(LiaisonVue liaison) {
         BlocClasse orig = liaison.getBlocOrigine();
         BlocClasse dest = liaison.getBlocDestination();
-        
+
         if (orig == null || dest == null) {
             return;
         }
-        
+
         // Calculer les positions relatives
         int origX = orig.getX() + orig.getLargeur() / 2;
         int origY = orig.getY() + orig.getHauteurCalculee() / 2;
         int destX = dest.getX() + dest.getLargeur() / 2;
         int destY = dest.getY() + dest.getHauteurCalculee() / 2;
-        
+
         // Déterminer le meilleur côté pour l'origine
         int sideOrigine = determinerMeilleurCote(origX, origY, destX, destY);
         liaison.setSideOrigine(sideOrigine);
-        
+
         // Déterminer le meilleur côté pour la destination (généralement opposé)
         int sideDestination = determinerMeilleurCoteDestination(origX, origY, destX, destY);
         liaison.setSideDestination(sideDestination);
     }
-    
+
     /**
      * Détermine le meilleur côté de sortie pour l'origine
      * 0=DROITE, 1=BAS, 2=GAUCHE, 3=HAUT
      */
-    private int determinerMeilleurCote(int origX, int origY, int destX, int destY)
-    {
+    private int determinerMeilleurCote(int origX, int origY, int destX, int destY) {
         int dx = destX - origX;
         int dy = destY - origY;
-        
+
         // Déterminer la direction principale
         if (Math.abs(dx) > Math.abs(dy)) {
             // Direction horizontale
@@ -234,12 +317,11 @@ public class PanneauDiagramme extends JPanel
             return dy > 0 ? 1 : 3; // BAS ou HAUT
         }
     }
-    
-    private int determinerMeilleurCoteDestination(int origX, int origY, int destX, int destY)
-    {
+
+    private int determinerMeilleurCoteDestination(int origX, int origY, int destX, int destY) {
         int dx = destX - origX;
         int dy = destY - origY;
-        
+
         // Déterminer la direction principale et prendre le côté opposé
         if (Math.abs(dx) > Math.abs(dy)) {
             // Direction horizontale
@@ -256,6 +338,14 @@ public class PanneauDiagramme extends JPanel
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+        // Appliquer le pan offset
+        g2d.translate(panOffsetX, panOffsetY);
+        
+        // Appliquer le zoom
+        g2d.translate(getWidth() / 2, getHeight() / 2);
+        g2d.scale(zoomLevel, zoomLevel);
+        g2d.translate(-getWidth() / (2 * zoomLevel), -getHeight() / (2 * zoomLevel));
+
         // Dessiner les liaisons
         dessinerLiaisons(g2d);
 
@@ -263,6 +353,23 @@ public class PanneauDiagramme extends JPanel
         for (BlocClasse bloc : blocsClasses) {
             bloc.dessiner(g2d, this.afficherAttributs, this.afficherMethodes);
         }
+
+        // Afficher le pourcentage de zoom
+        afficherZoomPercentage(g2d);
+    }
+
+    private void afficherZoomPercentage(Graphics2D g2d) {
+        if (!afficherTextZoom) {
+            return;
+        }
+
+        // Réinitialiser la transformation pour afficher le texte sans zoom
+        g2d.setTransform(new java.awt.geom.AffineTransform());
+
+        g2d.setColor(new Color(100, 100, 100));
+        g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+        String zoomText = String.format("Zoom: %d%%", (int) (zoomLevel * 100));
+        g2d.drawString(zoomText, 10, getHeight() - 10);
     }
 
     private void dessinerLiaisons(Graphics2D g2d) {
@@ -278,7 +385,6 @@ public class PanneauDiagramme extends JPanel
         this.repaint();
     }
 
-
     public List<BlocClasse> getBlocsClasses() {
         return blocsClasses;
     }
@@ -286,16 +392,36 @@ public class PanneauDiagramme extends JPanel
     public String getCheminProjetCourant() {
         return cheminProjetCourant;
     }
-    
-    public void setAfficherMethodes(boolean b) 
-    {
+
+    public void setAfficherMethodes(boolean b) {
         this.afficherMethodes = b;
         this.repaint();
     }
 
-    public void setAfficherAttributs(boolean b) 
-    {
+    public void setAfficherAttributs(boolean b) {
         this.afficherAttributs = b;
         this.repaint();
+    }
+
+    public double getZoomLevel() {
+        return zoomLevel;
+    }
+
+    public void setZoomLevel(double zoom) {
+        this.zoomLevel = zoom;
+        this.repaint();
+    }
+
+    public boolean isAfficherTextZoom() {
+        return afficherTextZoom;
+    }
+
+    public void setAfficherTextZoom(boolean afficher) {
+        this.afficherTextZoom = afficher;
+        this.repaint();
+    }
+
+    public void actionSauvegarder() {
+        this.controlleur.sauvegarderClasses(this.blocsClasses, cheminProjetCourant);
     }
 }

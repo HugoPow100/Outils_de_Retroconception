@@ -97,22 +97,7 @@ public class PanneauProjets extends JPanel {
             labelErreur.setForeground(Color.RED);
             panelProjets.add(labelErreur);
         }
-        /*File[] projets = dossier.listFiles(File::isDirectory);
 
-        if (projets == null || projets.length == 0) 
-        {
-            JLabel labelVide = new JLabel("Aucun projet");
-            labelVide.setForeground(Color.GRAY);
-            panelProjets.add(labelVide);
-            return;
-        }
-
-        for (File projet : projets) 
-        {
-            JButton boutonProjet = creerBoutonProjet(projet);
-            panelProjets.add(boutonProjet);
-            panelProjets.add(Box.createVerticalStrut(5));
-        }*/
     }
 
     private JButton creerBoutonProjet(File projet) {

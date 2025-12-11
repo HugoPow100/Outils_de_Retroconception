@@ -71,12 +71,23 @@ public class FenetrePrincipale extends JFrame
             
             try 
             {
+                // Sauvegarder le zoom actuel et le réinitialiser pour l'export
+                double zoomSauvegarde = panneauDiagramme.getZoomLevel();
+                boolean textZoomSauvegarde = panneauDiagramme.isAfficherTextZoom();
+                
+                panneauDiagramme.setZoomLevel(1.0);
+                panneauDiagramme.setAfficherTextZoom(false);
+                
                 BufferedImage image = new BufferedImage(
                 panneauDiagramme.getWidth(), panneauDiagramme.getHeight(), BufferedImage.TYPE_INT_ARGB );
 
                 panneauDiagramme.printAll(image.createGraphics());
                 ImageIO.write(image, "png", fichierSortie);
                 System.out.println("Diagramme sauvegardé dans"+fichierSortie);
+                
+                // Restaurer le zoom et l'affichage du texte
+                panneauDiagramme.setZoomLevel(zoomSauvegarde);
+                panneauDiagramme.setAfficherTextZoom(textZoomSauvegarde);
             } 
             catch (Exception e) 
             {
@@ -104,8 +115,18 @@ public class FenetrePrincipale extends JFrame
         panneauDiagramme.setAfficherMethodes(b);
     }
 
-    public void optimiserPositions()
+    public void optimiserPositionsClasses()
     {
-        panneauDiagramme.optimiserPositions();
+        panneauDiagramme.optimiserPositionsClasses();
+    }
+
+    public void optimiserPositionsLiaisons()
+    {
+        panneauDiagramme.optimiserPositionsLiaisons();
+    }
+
+    public void actionSauvegarder()
+    {
+        panneauDiagramme.actionSauvegarder();
     }
 }

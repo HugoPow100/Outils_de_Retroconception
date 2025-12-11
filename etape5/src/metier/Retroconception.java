@@ -3,8 +3,10 @@ package metier;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Retroconception {
-	public static void main(String[] args) {
+public class Retroconception
+{
+	public static void main(String[] args)
+	{
 		if (args.length == 0) {
 			System.out.println("Usage: java Retroconception <fichier.java ou dossier>");
 			return;
@@ -17,8 +19,23 @@ public class Retroconception {
 
 		for (String nomFichier : hashMapClasses.keySet()) {
 			Classe classe = hashMapClasses.get(nomFichier);
-			String abstractInfo = classe.isAbstract() ? " (abstract)" : "";
-			System.out.println("\n=== Analyse de la classe " + classe.getNom() + abstractInfo + " ===\n");
+			String typeInfo = "";
+			String typeElement = "classe";
+			
+			if (classe.isInterface()) {
+				typeInfo = " (interface)";
+				typeElement = "interface";
+			} else if (classe.isRecord()) {
+				typeInfo = " (record)";
+				typeElement = "record";
+			} else if (classe.isEnum()) {
+				typeInfo = " (enum)";
+				typeElement = "enum";
+			} else if (classe.isAbstract()) {
+				typeInfo = " (abstract)";
+			}
+			
+			System.out.println("\n=== Analyse de " + typeElement + " " + classe.getNom() + typeInfo + " ===\n");
 
 			// Affichage détaillé
 			// afficherDetailsClasse(classe);
@@ -106,39 +123,84 @@ public class Retroconception {
 		}
 	}
 
-	private static void afficherUML(Classe classe) {
+	private static void afficherUML(Classe classe)
+	{
 		ArrayList<Attribut> attributs = classe.getLstAttribut();
 		ArrayList<Methode> methodes = classe.getLstMethode();
 
 		// Calculer la largeur de la boîte
 		String nomClasse = classe.getNom();
-		if (classe.isAbstract()) {
-			nomClasse = "<<abstract>> " + nomClasse;
+		String stereotype = "";
+		
+		if (classe.isInterface()) {
+			stereotype = "<<interface>>";
+		} else if (classe.isRecord()) {
+			stereotype = "<<record>>";
+		} else if (classe.isEnum()) {
+			stereotype = "<<enumeration>>";
+		} else if (classe.isAbstract()) {
+			stereotype = "<<abstract>>";
 		}
-		int largeur = Math.max(50, nomClasse.length() + 10);
+
+		String motHerite = "";
+		String classeHerite = "";
+		// rentre pas dans le if
+		if (classe.getIsHeritage())
+		{
+			classeHerite = "[ " + classe.getClasseParente() + " ]";
+			motHerite = "<<herite>>";
+		}
+
+		if (classe.getIsImplementing())
+		{
+			classeHerite = "<< Implémente " + classe.getImplementing() + ">>";
+		}
+
+		int largeur = Math.max(50, Math.max(nomClasse.length(), stereotype.length()) + 10);
+		// largeur 50
 		String ligne = "-".repeat(largeur);
 
 		System.out.println(ligne);
+		if (!stereotype.isEmpty()) {
+			System.out.println(centrer(stereotype, largeur));
+		}
+
+		if (!motHerite.isEmpty())
+		{
+			System.out.println(centrer(motHerite, largeur));
+		}
 		System.out.println(centrer(nomClasse, largeur));
+		if (!classeHerite.isEmpty())
+		{
+			System.out.println(centrer(classeHerite, largeur));
+		}
 		System.out.println(ligne);
 
 		// Afficher les attributs
 		if (!attributs.isEmpty()) {
 			for (Attribut a : attributs) {
-				System.out.println(a.toString());
+				// Pour les enums, afficher uniquement le nom sans symbole ni type
+				if (classe.isEnum()) {
+					System.out.println(a.getNomAttribut());
+				} else {
+					System.out.println(a.toString());
+				}
 			}
 		}
 
 		System.out.println(ligne);
 
-		// Afficher les méthodes
-		if (!methodes.isEmpty()) {
-			for (Methode m : methodes) {
-				System.out.println(m.toString());
+		// Pour les enums, ne pas afficher la section méthodes
+		if (!classe.isEnum()) {
+			// Afficher les méthodes
+			if (!methodes.isEmpty()) {
+				for (Methode m : methodes) {
+					System.out.println(m.toString());
+				}
 			}
-		}
 
-		System.out.println(ligne);
+			System.out.println(ligne);
+		}
 	}
 
 	private static String centrer(String texte, int largeur) {

@@ -357,7 +357,12 @@ public class LiaisonVue
         }
 
         if (this.type.equals("association") && unidirectionnel) {
-            dessinerFlecheSelonSide(g, ancrageDestination, sideDestination);
+            dessinerFlecheAssociation(g, ancrageDestination, sideDestination);
+        }
+
+
+        if (this.type.equals("heritage")) {
+            dessinerFlecheHeritage(g, ancrageDestination, sideDestination);
         }
         
         // Les points d'ancrage sont invisibles mais draggables
@@ -392,11 +397,61 @@ public class LiaisonVue
         }
     }
 
+        private void dessinerFlecheHeritage(Graphics2D g, Point anchor, int side) {
+            int flecheSize = 10;
+            int x = anchor.x;
+            int y = anchor.y;
+            
+            int px1, py1, px2, py2, px3, py3;
+            
+            switch(side) {
+                case 0: // DROITE
+                    px1 = x + flecheSize;
+                    py1 = y - flecheSize / 2;
+                    px2 = x + flecheSize;
+                    py2 = y + flecheSize / 2;
+                    px3 = x;
+                    py3 = y;
+                    break;
+                case 1: // BAS
+                    px1 = x - flecheSize / 2;
+                    py1 = y + flecheSize;
+                    px2 = x + flecheSize / 2;
+                    py2 = y + flecheSize;
+                    px3 = x;
+                    py3 = y;
+                    break;
+                case 2: // GAUCHE
+                    px1 = x - flecheSize;
+                    py1 = y - flecheSize / 2;
+                    px2 = x - flecheSize;
+                    py2 = y + flecheSize / 2;
+                    px3 = x;
+                    py3 = y;
+                    break;
+                case 3: // HAUT
+                    px1 = x - flecheSize / 2;
+                    py1 = y - flecheSize;
+                    px2 = x + flecheSize / 2;
+                    py2 = y - flecheSize;
+                    px3 = x;
+                    py3 = y;
+                    break;
+                default:
+                    return;
+            }
+            
+            int[] xPoints = {px1, px3, px2};
+            int[] yPoints = {py1, py3, py2};
+            g.drawPolygon(xPoints, yPoints, 3);
+        }
+
+
     /**
      * Dessine une flèche basée sur le côté d'arrivée
      * side: 0=DROITE, 1=BAS, 2=GAUCHE, 3=HAUT
      */
-    private void dessinerFlecheSelonSide(Graphics2D g, Point anchor, int side) {
+    private void dessinerFlecheAssociation(Graphics2D g, Point anchor, int side) {
         int flecheSize = 10;
         int x = anchor.x;
         int y = anchor.y;
@@ -435,22 +490,7 @@ public class LiaisonVue
         g.drawLine(x, y, px1, py1);
         g.drawLine(x, y, px2, py2);
     }
-
-    private void dessinerFlecheSimple(Graphics2D g, int x1, int y1, int x2, int y2) {
-        // Calculer l'angle de la flèche
-        double angle = Math.atan2(y2 - y1, x2 - x1);
-        int flecheSize = 10;
-
-        // Points de la flèche
-        int px2 = (int) (x2 - flecheSize * Math.cos(angle - Math.PI / 6));
-        int py2 = (int) (y2 - flecheSize * Math.sin(angle - Math.PI / 6));
-        int px3 = (int) (x2 - flecheSize * Math.cos(angle + Math.PI / 6));
-        int py3 = (int) (y2 - flecheSize * Math.sin(angle + Math.PI / 6));
-
-        g.drawLine(x2, y2, px2, py2);
-        g.drawLine(x2, y2, px3, py3);
-    }
-
+    
     /**
      * Vérifie si une position de souris est sur le point d'ancrage d'origine
      */

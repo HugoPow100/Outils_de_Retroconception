@@ -139,6 +139,21 @@ public class BlocClasse
                py >= y                    &&
                py <= y + hauteurCalculee;
     }
+    
+    // Vérifie si le point donné est dans le bloc (avec pan offset)
+    public boolean contient(int px, int py, int panOffsetX, int panOffsetY) 
+    {
+        int hauteurCalculee = calculerHauteur();
+        
+        // Appliquer le pan offset inverse pour ramener le point dans le repère du bloc
+        int adjustedX = px - panOffsetX;
+        int adjustedY = py - panOffsetY;
+
+        return adjustedX >= x                    &&
+               adjustedX <= x + largeur          &&
+               adjustedY >= y                    &&
+               adjustedY <= y + hauteurCalculee;
+    }
 
     // Vérifie si un rectangle de texte chevauchent le bloc
     public boolean chevaucheTexte(int textX, int textY, int textWidth, int textHeight) 

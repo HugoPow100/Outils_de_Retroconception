@@ -1,7 +1,6 @@
 package metier;
 
-public class Association extends Liaison 
-{
+public class Association extends Liaison {
 
     private boolean unidirectionnel = false;
     private Multiplicite multOrig;
@@ -11,8 +10,7 @@ public class Association extends Liaison
     private static int nbAssoc;
 
     public Association(Classe classeDest, Classe classeOrig,
-            Multiplicite multDest, Multiplicite multOrig, boolean unidirectionnel) 
-    {
+            Multiplicite multDest, Multiplicite multOrig, boolean unidirectionnel) {
         super(classeDest, classeOrig);
         this.multDest = multDest;
         this.multOrig = multOrig;
@@ -20,38 +18,13 @@ public class Association extends Liaison
         num = ++nbAssoc;
     }
 
-    public boolean updateAssoBidirectionel(Association assosDest)
-	{
-        boolean retour = false;
-        
-        if(this.isUnidirectionnel() && assosDest.isUnidirectionnel())
-        {
-            if(this.classeOrig.getNom().equals(assosDest.getClasseDest().getNom()) 
-            && this.classeDest.getNom().equals(assosDest.getClasseOrig().getNom()))
-            {
-                this.multDest = assosDest.getMultOrig();
-                retour = true;
-            }
-        }
-
-        return retour;
-	}
-    
     public boolean isUnidirectionnel() {
         return unidirectionnel;
     }
 
-
-    public void rendreBidirectionnel() 
-    {
-        this.unidirectionnel = false;
+    public void setUnidirectionnel(boolean unidirectionnel) {
+        this.unidirectionnel = unidirectionnel;
     }
-
-    public void rendreUnidirectionnel() 
-    {
-        this.unidirectionnel = true;
-    }
-
 
     public Multiplicite getMultOrig() {
         return multOrig;

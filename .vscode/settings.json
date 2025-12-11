@@ -4,5 +4,8 @@
         "etape5",
         "etape5/src"
     ],
-    "java.project.referencedLibraries": []
+    "java.project.referencedLibraries": [
+        "test-lib/**/*.jar"
+    ],
+    "java.debug.settings.onBuildFailureProceed": true
 }
