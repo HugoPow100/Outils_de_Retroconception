@@ -87,9 +87,9 @@ public class PanneauDiagramme extends JPanel {
                     return;
                 }
                 
-                // Convertir les coordonnées écran en coordonnées logiques (avec zoom)
-                double logicalX = (e.getX() - getWidth() / 2) / zoomLevel + getWidth() / (2 * zoomLevel);
-                double logicalY = (e.getY() - getHeight() / 2) / zoomLevel + getHeight() / (2 * zoomLevel);
+                // Convertir les coordonnées écran en coordonnées logiques (avec zoom et pan)
+                double logicalX = (e.getX() - panOffsetX - getWidth() / 2) / zoomLevel + getWidth() / (2 * zoomLevel);
+                double logicalY = (e.getY() - panOffsetY - getHeight() / 2) / zoomLevel + getHeight() / (2 * zoomLevel);
 
                 pointDernier = e.getPoint();
                 blocEnDeplacement = null;
