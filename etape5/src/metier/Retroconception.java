@@ -1,5 +1,6 @@
 package metier;
 
+import metier.lecture.Lecture;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -47,7 +48,7 @@ public class Retroconception
 		}
 
 		// Afficher les associations
-		ArrayList<Association> associations = lecture.getLstAssociation();
+		ArrayList<Association> associations = lecture.getLstAssociations();
 		if (!associations.isEmpty()) {
 			System.out.println("\n=== Associations détectées ===\n");
 			for (Association assoc : associations) {

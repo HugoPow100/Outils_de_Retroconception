@@ -1,5 +1,6 @@
 package controlleur;
 
+import metier.lecture.Lecture;
 import java.util.*;
 import metier.lecture.*;
 import metier.GestionSauvegarde;
@@ -13,19 +14,22 @@ import vue.BlocClasse;
 import vue.LiaisonVue;
 import vue.PanneauDiagramme;
 
-public class Controlleur {
+public class Controlleur 
+{
     private Lecture lecture;
     private List<LiaisonVue> liaisons;
     private PanneauDiagramme panneauDiagramme;
     private GestionSauvegarde gestionSauvegarde;
 
-    public Controlleur(PanneauDiagramme panneauDiagramme) {
+    public Controlleur(PanneauDiagramme panneauDiagramme) 
+    {
         this.panneauDiagramme = panneauDiagramme;
         this.liaisons = new ArrayList<>();
         this.gestionSauvegarde = new GestionSauvegarde();
     }
 
-    public List<BlocClasse> chargerProjetEnBlocsClasses(String cheminProjet) {
+    public List<BlocClasse> chargerProjetEnBlocsClasses(String cheminProjet) 
+    {
         lecture = new Lecture(cheminProjet);
         liaisons.clear();
 
