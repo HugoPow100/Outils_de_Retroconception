@@ -1,17 +1,5 @@
 # Outil de Rétroconception Java-UML
 
-## Compilation et exécution
-
-### Pour compiler
-javac -d bin @compile.list
-
-### Pour exécuter
-java -cp bin controlleur.Retroconception  <dossier ou fichier java>
-
-### Les deux 
-linux   : ./run.sh
-windows : ./run.bat
-
 ## 🎯 Objectif
 Développer un outil de rétro-conception permettant de générer des **diagrammes de classes UML** à partir de classes écrites en **Java**.  
 Le projet doit être entièrement codé en Java en utilisant uniquement les bibliothèques du JDK.
@@ -78,30 +66,39 @@ Le projet doit être entièrement codé en Java en utilisant uniquement les bibl
 - Export en image.
 - Outil flexible et extensible.
 
-## Execution
+## Compilation et exécution
+
+Comment compiler le programme 
+### Pour le compiler
+javac -d bin @compile.list
+
+### Pour l'exécuter
+java -cp bin controlleur.Retroconception  <dossier ou fichier java>
+
 ---
+
 Comment exécuter le programme ?
 ### 🪟 Windows
 #### 🗒️ pour un fichier
-./run.bat CheminDufichier.java
+./run.bat <chemin fichier .java>
 exemple :
 ./run.bat ./test/Point.java
 
 #### 📁 pour un dossier
-./run.bat CheminDuDossier/
+./run.bat <dossier projet java>
 exemple :
 ./run.bat ./test/
 
 ### 🐧 Linux
 #### 🗒️ pour un fichier
-./run.bat CheminDufichier.java
+./run.sh <chemin fichier .java>
 exemple :
-./run.bat ./test/Point.java
+./run.sh ./test/Point.java
 
 #### 📁 pour un dossier
-./run.bat CheminDuDossier/
+./run.sh <dossier projet java>
 exemple :
-./run.bat ./test/
+./run.sh ./test/
 
 👨‍💻 Projet académique – IUT du Havre  
 SAE 3.01 – Outil de rétroconception Java-UML
