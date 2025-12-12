@@ -78,6 +78,31 @@ Le projet doit être entièrement codé en Java en utilisant uniquement les bibl
 - Export en image.
 - Outil flexible et extensible.
 
+## Execution
 ---
+Comment exécuter le programme ?
+### 🪟 Windows
+#### 🗒️ pour un fichier
+./run.bat CheminDufichier.java
+exemple :
+./run.bat ./test/Point.java
+
+#### 📁 pour un dossier
+./run.bat CheminDuDossier/
+exemple :
+./run.bat ./test/
+
+### 🐧 Linux
+#### 🗒️ pour un fichier
+./run.bat CheminDufichier.java
+exemple :
+./run.bat ./test/Point.java
+
+#### 📁 pour un dossier
+./run.bat CheminDuDossier/
+exemple :
+./run.bat ./test/
+
 👨‍💻 Projet académique – IUT du Havre  
 SAE 3.01 – Outil de rétroconception Java-UML
+
