@@ -131,30 +131,55 @@ public class Retroconception
 		// Calculer la largeur de la boîte
 		String nomClasse = classe.getNom();
 		String stereotype = "";
+		String nomInterface = classe.getNomInterface();
+
 		
 		if (classe.isInterface()) {
-			stereotype = "<<interface>>";
+			stereotype = "<< interface";
 		} else if (classe.isRecord()) {
-			stereotype = "<<record>>";
+			stereotype = "<< record";
 		} else if (classe.isEnum()) {
-			stereotype = "<<enumeration>>";
+			stereotype = "<< enumeration";
 		} else if (classe.isAbstract()) {
-			stereotype = "<<abstract>>";
+			stereotype = "<< abstract";
 		}
 
 		String motHerite = "";
 		String classeHerite = "";
 		// rentre pas dans le if
-		if (classe.getIsHeritage())
+
+		
+		// System.out.println("Type classe [ debug ] : " + classe.getTypeClasse());
+
+
+		if (classe.getTypeClasse().contains("implements"))
 		{
-			classeHerite = "[ " + classe.getClasseParente() + " ]";
-			motHerite = "<<herite>>";
+			// System.out.println("Classe implémente une interface");
+			classeHerite += "{ " + nomInterface + " }";
+
+			if (!stereotype.isEmpty()) {
+				stereotype += ", implémente";
+			} else {
+				stereotype = "<< implémente";
+			}
 		}
 
-		if (classe.getIsImplementing())
+
+		if (classe.getIsHeritage())
 		{
-			classeHerite = "<< Implémente " + classe.getImplementing() + ">>";
+			classeHerite += "[ " + classe.getClasseParente() + " ]";
+			
+			if (!stereotype.isEmpty()) {
+				stereotype += ", herite";
+			} else {
+				stereotype = "<< herite";
+			}
 		}
+
+		//if (classe.getIsImplementing())
+		//{
+		//	classeHerite = "<< Implémente " + classe.getImplementing() + ">>";
+		//}
 
 		int largeur = Math.max(50, Math.max(nomClasse.length(), stereotype.length()) + 10);
 		// largeur 50
@@ -162,13 +187,14 @@ public class Retroconception
 
 		System.out.println(ligne);
 		if (!stereotype.isEmpty()) {
+			stereotype += " >>";
 			System.out.println(centrer(stereotype, largeur));
 		}
 
-		if (!motHerite.isEmpty())
-		{
-			System.out.println(centrer(motHerite, largeur));
-		}
+		//if (!motHerite.isEmpty())
+		//{
+		//	System.out.println(centrer(motHerite, largeur));
+		//}
 		System.out.println(centrer(nomClasse, largeur));
 		if (!classeHerite.isEmpty())
 		{
@@ -191,14 +217,16 @@ public class Retroconception
 		System.out.println(ligne);
 
 		// Pour les enums, ne pas afficher la section méthodes
-		if (!classe.isEnum()) {
+		if (!classe.isEnum())
+		{
 			// Afficher les méthodes
-			if (!methodes.isEmpty()) {
-				for (Methode m : methodes) {
+			if (!methodes.isEmpty())
+			{
+				for (Methode m : methodes)
+				{
 					System.out.println(m.toString());
 				}
 			}
-
 			System.out.println(ligne);
 		}
 	}

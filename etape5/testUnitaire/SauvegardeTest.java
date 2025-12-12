@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SauvegardeTest 
 {
 
-    private static final String FICHIER_TEST = "donnees/test_projets.xml";
+    private static final String FICHIER_TEST = "donnees/projets.xml";
 
     @BeforeEach
     void setUp() throws IOException 

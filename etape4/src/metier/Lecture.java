@@ -6,7 +6,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.HashMap;
 
-public class Lecture {
+public class Lecture
+{
 	private HashMap<String, Classe> hashMapClasses;
 	private ArrayList<Classe> lstClasse;
 	private ArrayList<Attribut> lstAttribut;
@@ -156,14 +157,12 @@ public class Lecture {
 		List<Parametre> lstParametres = new ArrayList<Parametre>();
 
 		String nomFichier = nomFichierAvExt.replace(".java", "");
-		boolean isClasseAbstract = false;
 		boolean isHeritage = false;
-		boolean isImplementing = false;
-		String implementing = "";
-		boolean isInterface = false;
-		boolean isRecord = false;
-		boolean isEnum = false;
 		String nomClasse = nomFichier;
+		String typeClasse = "";
+
+		// Variables implements
+		String interfaces = "";
 
 		System.out.println("-----------------------------------------------------");
 		System.out.println("On est dans la classe " + nomFichier);
@@ -175,10 +174,9 @@ public class Lecture {
 
 			if (ligne.contains("class") && ligne.contains("extends"))
 			{
+				typeClasse += "extends ";
 				
-				System.out.println("Passage de isHeritage a True : " + isHeritage);
-				isHeritage = true;
-				System.out.println("Heritage a true ?  : " + isHeritage);
+				isHeritage = true ;
 				
 				System.out.println("DEBUG ligne détectée héritage : " + ligne);
 				String classeOrigine = ligne.substring(ligne.indexOf("extends") + 7).trim();
@@ -195,35 +193,29 @@ public class Lecture {
 			if (ligne.contains("class") && ligne.contains("implements"))
 			{
 
-				System.out.println("Passage de isImplementing à true");
-				isImplementing = true;
-				System.out.println("Implemente a true ? " + isImplementing);
-				String interfaceImplementee = ligne.substring(ligne.indexOf("implements") + 10).trim();
+				interfaces = ligne.substring(ligne.indexOf("implements") + 10).trim();
 
-				System.out.println("L'interface implémenté est " + interfaceImplementee);
-
-				implementing = interfaceImplementee;	
+				typeClasse += "implements ";
 			}
-			
 
 			// Détecter si la classe est abstraite
 			if (ligne.contains("abstract") && ligne.contains("class")) {
 				System.out.println("ligne abstract : " + ligne);
-				isClasseAbstract = true;
+				typeClasse += "abstract ";
 			}
 
 			// Détecter si c'est une interface
 			if (ligne.contains("interface")) {
-				isInterface = true;
+				typeClasse += "interface ";
 			}
 
 			// Détecter si c'est une enum
 			if (ligne.contains("enum") && ligne.contains("{")) {
-				isEnum = true;
+				typeClasse += "enum ";
 			}
 
 			// Détecter les valeurs d'enum (constantes)
-			if (isEnum && !ligne.isEmpty() && !ligne.contains("enum") && !ligne.equals("{") && !ligne.equals("}")) {
+			if (typeClasse.contains("enum") && !ligne.isEmpty() && !ligne.contains("enum") && !ligne.equals("{") && !ligne.equals("}")) {
 				String ligneTrimmed = ligne.trim();
 				if (!ligneTrimmed.startsWith("//") && !ligneTrimmed.startsWith("/*") && 
 					!ligneTrimmed.startsWith("*") && !ligneTrimmed.startsWith("public") && 
@@ -231,14 +223,14 @@ public class Lecture {
 					!ligneTrimmed.contains("(") && ligneTrimmed.matches("^[A-Z].*[,;]?$")) {
 					String valeur = ligneTrimmed.replaceAll("[,;]\\s*$", "").trim();
 					if (!valeur.isEmpty()) {
-						lstAttribut.add(new Attribut(valeur, "", "public", "classe"));
+						lstAttribut.add(new Attribut(valeur, "", "public", "classe", true));
 					}
 				}
 			}
 
 			// Détecter si c'est un record
-			if (ligne.contains("record") && ligne.contains("(") && !isRecord) {
-				isRecord = true;
+			if (ligne.contains("record") && ligne.contains("(")) {
+				typeClasse += "record ";
 				int debutParam = ligne.indexOf("(");
 				int finParam = ligne.indexOf(")");
 				if (debutParam != -1 && finParam != -1 && finParam > debutParam) {
@@ -252,7 +244,7 @@ public class Lecture {
 							if (pTokens.length >= 2) {
 								String typeParam = pTokens[0];
 								String nomParam = pTokens[1];
-								lstAttribut.add(new Attribut(nomParam, typeParam, "private", "instance"));
+							lstAttribut.add(new Attribut(nomParam, typeParam, "private", "instance", false));
 								parametresConstructeur.add(new Parametre(nomParam, typeParam));
 								lstMethode.add(new Methode(nomParam, typeParam, "public", false, new ArrayList<>()));
 							}
@@ -270,7 +262,7 @@ public class Lecture {
 
 			// Pour les interfaces, détecter aussi les méthodes sans modificateur explicite
 			boolean ligneCommenceParModificateur = ligne.startsWith("private") || ligne.startsWith("protected") || ligne.startsWith("public");
-			boolean estMethodeInterface = isInterface && ligne.contains("(") && ligne.contains(")") && ligne.endsWith(";") && !ligne.contains("{");
+			boolean estMethodeInterface = typeClasse.contains("interface") && ligne.contains("(") && ligne.contains(")") && ligne.endsWith(";") && !ligne.contains("{");
 
 			if (ligneCommenceParModificateur || estMethodeInterface) {
 				// c'est un attribut, pas une méthode
@@ -279,20 +271,47 @@ public class Lecture {
 					Scanner scAttribut = new Scanner(ligne);
 					visibiliteAtribut = scAttribut.next();
 
+					boolean isFinal = false;
+					boolean isStatic = false;
 					String motSuivant = scAttribut.next();
-					if (motSuivant.equals("static")) {
-						portee = "classe";
-						type = scAttribut.next();
-						nom = scAttribut.next().replace(";", ""); // retirer le ;
-					} else {
-						portee = "instance";
-						type = motSuivant;
-						nom = scAttribut.next().replace(";", ""); // retirer le ;
+					
+					// Détecter final et/ou static
+					while (motSuivant.equals("final") || motSuivant.equals("static")) {
+						if (motSuivant.equals("final")) {
+							isFinal = true;
+						}
+						if (motSuivant.equals("static")) {
+							isStatic = true;
+						}
+						if (scAttribut.hasNext()) {
+							motSuivant = scAttribut.next();
+						} else {
+							break;
+						}
 					}
+					
+					portee = isStatic ? "classe" : "instance";
+					type = motSuivant;
+					
+					// Si le type contient des génériques (comme HashMap<String, Point>)
+					// il faut lire jusqu'au > de fermeture
+					while (type.contains("<") && !type.contains(">")) {
+						type += " " + scAttribut.next();
+					}
+					
+					nom = scAttribut.next().replace(";", ""); // retirer le ;
+					// Extraire juste le nom sans l'initialisation (ex: MAX_SIZE = 100)
+					if (nom.contains("=")) {
+						nom = nom.substring(0, nom.indexOf("=")).trim();
+					}
+					
 					scAttribut.close();
 
+					// Déterminer si c'est une constante : final = {frozen}
+					boolean isConstant = isFinal;
+
 					System.out.println("Le nouvel attribut a été creer : ");
-					lstAttribut.add(new Attribut(nom, type, visibiliteAtribut, portee));
+					lstAttribut.add(new Attribut(nom, type, visibiliteAtribut, portee, isConstant));
 				}
 
 				// Détecter les méthodes (abstraites ou non)
@@ -365,15 +384,46 @@ public class Lecture {
 					lstParametres = new ArrayList<Parametre>(); // Réinitialiser pour chaque méthode
 
 					if (!params.isEmpty()) {
-						Scanner scParams = new Scanner(params);
-						scParams.useDelimiter(",");
-
-						while (scParams.hasNext()) {
-							String paramStr = scParams.next().trim();
+						// Découper les paramètres en tenant compte des génériques
+						ArrayList<String> paramsListe = new ArrayList<>();
+						int niveau = 0;
+						StringBuilder paramActuel = new StringBuilder();
+						
+						for (int i = 0; i < params.length(); i++) {
+							char c = params.charAt(i);
+							
+							if (c == '<') {
+								niveau++;
+								paramActuel.append(c);
+							} else if (c == '>') {
+								niveau--;
+								paramActuel.append(c);
+							} else if (c == ',' && niveau == 0) {
+								// Virgule hors des génériques : nouveau paramètre
+								paramsListe.add(paramActuel.toString().trim());
+								paramActuel = new StringBuilder();
+							} else {
+								paramActuel.append(c);
+							}
+						}
+						// Ajouter le dernier paramètre
+						if (paramActuel.length() > 0) {
+							paramsListe.add(paramActuel.toString().trim());
+						}
+						
+						// Analyser chaque paramètre
+						for (String paramStr : paramsListe) {
 							Scanner scParam = new Scanner(paramStr);
 							
 							if (scParam.hasNext()) {
 								String typeParam = scParam.next();
+								
+								// Si le type contient des génériques (comme HashMap<String, Point>)
+								// il faut lire jusqu'au > de fermeture
+								while (typeParam.contains("<") && !typeParam.contains(">") && scParam.hasNext()) {
+									typeParam += " " + scParam.next();
+								}
+								
 								if (scParam.hasNext()) {
 									String nomParam = scParam.next();
 									parametre = new Parametre(nomParam, typeParam);
@@ -384,7 +434,6 @@ public class Lecture {
 							}
 							scParam.close();
 						}
-						scParams.close();
 					}
 
 					if (!nomConstructeur.equals("")) {
@@ -404,13 +453,16 @@ public class Lecture {
 			}
 		}
 
-		System.out.println("val isHeritage : " + isHeritage);
-		return new Classe(nomFichier, classeParente, isClasseAbstract, isHeritage, isImplementing, implementing, isInterface, isRecord, isEnum, this.lstAttribut, this.lstMethode);
+		//System.out.println("val isHeritage : " + isHeritage);
+		typeClasse = typeClasse.trim().replace(" ","," );
+		System.out.println("typeClasse : " + typeClasse);
+		return new Classe(nomFichier, classeParente, typeClasse, isHeritage, interfaces, lstAttribut, this.lstMethode);
 	}
-
 
 	private void genererAssociation()
 	{
+		ArrayList<Attribut> attributsARetirer = new ArrayList<>();
+
 		for (String nomFichier : hashMapClasses.keySet()) 
 		{
 			Classe classeOrig = hashMapClasses.get(nomFichier);
@@ -433,10 +485,14 @@ public class Lecture {
 				{
 					// Ajoute tel quel
 					listeMultiInstance.add(typeNettoye);
+					attributsARetirer.add(attr);
 				}
 				else // Simple instance
 				{
 					compteur.put(typeNettoye, compteur.getOrDefault(typeNettoye, 0) + 1);
+					if (hashMapClasses.containsKey(typeNettoye + ".java")) {
+						attributsARetirer.add(attr);
+					}
 				}
 			}
 
@@ -470,18 +526,25 @@ public class Lecture {
 
 				// Vérifier si la classe destination référence aussi la classe origine
 				boolean bidirectionnel = false;
-				for (Attribut attrDest : classeDest.getLstAttribut()) {
+				for (Attribut attrDest : classeDest.getLstAttribut()) 
+				{
 					String typeAttrDest = nettoyerType(attrDest.getTypeAttribut().trim());
-					if (typeAttrDest.equals(classeOrig.getNom())) {
+					if (typeAttrDest.equals(classeOrig.getNom())) 
+					{
 						bidirectionnel = true;
 						break;
 					}
 				}
+
 				// Vérifier aussi dans les paramètres des méthodes de la classe destination
-				if (!bidirectionnel) {
-					for (Methode methodeDest : classeDest.getLstMethode()) {
-						for (Parametre paramDest : methodeDest.getLstParametre()) {
-							if (nettoyerType(paramDest.getTypePara()).equals(classeOrig.getNom())) {
+				if (!bidirectionnel) 
+				{
+					for (Methode methodeDest : classeDest.getLstMethode()) 
+					{
+						for (Parametre paramDest : methodeDest.getLstParametre()) 
+						{
+							if (nettoyerType(paramDest.getTypePara()).equals(classeOrig.getNom())) 
+							{
 								bidirectionnel = true;
 								break;
 							}
@@ -501,41 +564,43 @@ public class Lecture {
 				String   typeDest   = entry.getKey();
 				int      max        = entry.getValue();
 
-		// Vérifier que la classe existe dans la HashMap
-		if (!hashMapClasses.containsKey(typeDest + ".java")) {
-			continue; // Ignorer si la classe n'existe pas
-		}
-
-		Classe   classeDest = hashMapClasses.get(typeDest + ".java");				
-		Multiplicite multOrig  = new Multiplicite(1,1);
-				Multiplicite multDest  = new Multiplicite(1, max);
-
-				// Vérifier si la classe destination référence aussi la classe origine
-				boolean bidirectionnel = false;
-				for (Attribut attrDest : classeDest.getLstAttribut()) {
-					String typeAttrDest = nettoyerType(attrDest.getTypeAttribut().trim());
-					if (typeAttrDest.equals(classeOrig.getNom())) {
-						bidirectionnel = true;
-						break;
-					}
-				}
-				// Vérifier aussi dans les paramètres des méthodes de la classe destination
-				if (!bidirectionnel) {
-					for (Methode methodeDest : classeDest.getLstMethode()) {
-						for (Parametre paramDest : methodeDest.getLstParametre()) {
-							if (nettoyerType(paramDest.getTypePara()).equals(classeOrig.getNom())) {
-								bidirectionnel = true;
-								break;
-							}
-						}
-						if (bidirectionnel) break;
-					}
-				}
-
-				lstAssociations.add(new Association(
-					classeDest, classeOrig, multDest, multOrig, !bidirectionnel));
+			// Vérifier que la classe existe dans la HashMap
+			if (!hashMapClasses.containsKey(typeDest + ".java")) {
+				continue; // Ignorer si la classe n'existe pas
 			}
-			nettoyerAssociations();
+
+			Classe   classeDest = hashMapClasses.get(typeDest + ".java");				
+			Multiplicite multOrig  = new Multiplicite(1,1);
+					Multiplicite multDest  = new Multiplicite(1, max);
+
+					// Vérifier si la classe destination référence aussi la classe origine
+					boolean bidirectionnel = false;
+					for (Attribut attrDest : classeDest.getLstAttribut()) {
+						String typeAttrDest = nettoyerType(attrDest.getTypeAttribut().trim());
+						if (typeAttrDest.equals(classeOrig.getNom())) {
+							bidirectionnel = true;
+							break;
+						}
+					}
+					// Vérifier aussi dans les paramètres des méthodes de la classe destination
+					if (!bidirectionnel) {
+						for (Methode methodeDest : classeDest.getLstMethode()) {
+							for (Parametre paramDest : methodeDest.getLstParametre()) {
+								if (nettoyerType(paramDest.getTypePara()).equals(classeOrig.getNom())) {
+									bidirectionnel = true;
+									break;
+								}
+							}
+							if (bidirectionnel) break;
+						}
+					}
+
+					lstAssociations.add(new Association(
+						classeDest, classeOrig, multDest, multOrig, !bidirectionnel));
+				}
+				nettoyerAssociations();
+			// SUPPRESSION DES ATTRIBUTS DE RELATION
+			classeOrig.getLstAttribut().removeAll(attributsARetirer);
 		}
 	}
 
@@ -580,6 +645,21 @@ public class Lecture {
 		lstAssociations = new ArrayList<>(uniques.values());
 	}
 
+	// public Classe getClasseImplements()
+	// {
+	// 	Classe classeImplements = null;
+	// 	for (Classe classe : hashMapClasses.values())
+	// 	{
+	// 		for (Methode methode : this.lstMethode)
+	// 		{
+	// 			if (!methode.getListeInterfaces().isEmpty())
+	// 			{
+
+	// 			}
+	// 		}
+	// 	}
+	// }
+//
 	// Recupere une classe en fonction du nom
 	private Classe getClasse(String nomFichier)
 	{

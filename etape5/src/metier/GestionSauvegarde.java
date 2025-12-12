@@ -3,6 +3,7 @@ package metier;
 import vue.BlocClasse;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -74,15 +75,18 @@ public class GestionSauvegarde {
         return this.cheminDossier;
     }
 
-    public void sauvegarderClasses(List<BlocClasse> blocClasses, String cheminProjet) 
+    public void sauvegarderClasses(List<BlocClasse> listBlocClasses, String cheminProjet) 
     {
+
+        String   basePath               = System.getProperty("user.dir");
+        String   cheminPath             = basePath + "/donnees/";
+
         int      indiceslash            = cheminProjet.lastIndexOf("/");
         String   nomProjetASauv         = cheminProjet.substring(indiceslash +1 ).trim();
 
-        String   fichierLectureEcriture = "donnees/projets.xml";
+        String   fichierLectureEcriture = cheminPath + "projets.xml";
         int      nbrDossierMemeNom      = 0;
   
-
         try (BufferedReader br = new BufferedReader(new FileReader(fichierLectureEcriture))) 
         {
             String ligne;
@@ -91,9 +95,18 @@ public class GestionSauvegarde {
             {
       
                 int    indicePremierSlash = ligne.lastIndexOf("/");
-                int    indicePremierTab   = ligne.indexOf("\t");
+                int    indiceTab          = ligne.indexOf("\t", indicePremierSlash);
 
-                String nomDossierDejaSauv = ligne.substring(indicePremierSlash +1 , indicePremierTab).trim();
+                String nomDossierDejaSauv;
+
+                if(indiceTab != -1)
+                {
+                    nomDossierDejaSauv = ligne.substring(indicePremierSlash +1, indiceTab);
+                }
+                else
+                {
+                    nomDossierDejaSauv = ligne.substring(indicePremierSlash +1).trim();
+                }
                 
                 if(nomDossierDejaSauv.equals(nomProjetASauv))
                 {
@@ -116,14 +129,48 @@ public class GestionSauvegarde {
 
         try(BufferedWriter bw = new BufferedWriter(new FileWriter(fichierLectureEcriture, true))) 
         {
-            String ligneAAjouter = cheminProjet + "\t" + nomProjetASauv;
+            String ligneAAjouter = cheminProjet + "\t" + nomProjetASauv ;
+            String nomProjet     = nomProjetASauv;
+
             if(nbrDossierMemeNom > 0)
             {
-                ligneAAjouter +=  "_" + (nbrDossierMemeNom + 1); 
+                ligneAAjouter +=  "_" + (nbrDossierMemeNom + 1);
+                nomProjet     +=  "_" + (nbrDossierMemeNom + 1);
             }
 
             bw.write(ligneAAjouter);
             bw.newLine();
+
+            sauvegarderCoordProjet(listBlocClasses, nomProjet, cheminProjet);
+
+        } catch (Exception e) 
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void sauvegarderCoordProjet(List<BlocClasse> listBlocClasses, String nomProjet, String cheminProjet)
+    {
+        String   basePath               = System.getProperty("user.dir");
+        String   cheminPath             = basePath + "/donnees/sauvegardes/";
+
+        File file = new File(cheminPath + nomProjet + ".xml");
+
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(file))) 
+        {
+
+            bw.write(cheminProjet);
+            bw.newLine();
+
+            for(BlocClasse blocClasse: listBlocClasses )
+            {
+                bw.write(   blocClasse.getNom().trim() + " " + 
+                            blocClasse.getX()          + " " + 
+                            blocClasse.getY())  ;
+
+                bw.newLine();
+            }
+            
 
         } catch (Exception e) 
         {

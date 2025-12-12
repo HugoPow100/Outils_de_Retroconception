@@ -99,7 +99,7 @@ public class Methode {
 
 		sRet += ")";
 		if (!this.retour.isEmpty() && !this.retour.equals("void")) {
-			sRet += " : " + this.retour;
+			sRet += String.format("%30s", " : ");
 		}
 		if (this.isAbstract) {
 			sRet += " {abstract}";
