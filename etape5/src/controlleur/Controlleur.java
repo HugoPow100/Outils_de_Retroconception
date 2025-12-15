@@ -275,15 +275,5 @@ public class Controlleur
         return lstBlocs;
     }
 
-    public void creerLstInterface(Lecture lecture)
-    {
-        lecture.creerLstInterface();
-    }
-
-    public void afficherLstInterface(Lecture lecture)
-    {
-        lecture.afficherLstInterface();
-    }
-
     
 }

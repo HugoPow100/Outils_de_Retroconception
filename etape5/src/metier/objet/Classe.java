@@ -58,6 +58,7 @@ public class Classe
 
 	public boolean isAbstract() {return this.typeClasse.contains("abstract");}
 
+
 	public boolean isInterface() {return this.typeClasse.contains("interface");}
 
 	public boolean isRecord() {return this.typeClasse.contains("record");}
