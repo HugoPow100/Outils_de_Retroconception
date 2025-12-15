@@ -66,7 +66,7 @@ public class PanneauProjets extends JPanel {
     private void chargerProjets(JPanel panelProjets) 
     {
 
-        File fichier = new File(cheminDossiers);
+        File fichier = new File(this.cheminDossiers);
 
         if (!fichier.exists()) 
         {
@@ -84,7 +84,11 @@ public class PanneauProjets extends JPanel {
 
             while ((ligne = reader.readLine()) != null) 
             {
-                ligne = ligne.trim();
+                //Decoupe la ligne sauvegarder dans Projet.xml pour garder seulement le 
+                //chemin ou est sauvegarder le projet
+                String[] tabLigne = ligne.split("\t");
+
+                ligne = tabLigne[0].trim();
 
                 if (!ligne.isEmpty()) 
                 {

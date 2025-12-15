@@ -60,6 +60,7 @@ public class GestionSauvegarde
                     String nomClass    = ligne.substring(0, premierEspace);
                     String xStr        = ligne.substring(premierEspace + 1, deuxiemeEspace).trim();
                     String yStr        = ligne.substring(deuxiemeEspace + 1).trim();
+                    System.out.println(nomClass + " " + xStr + " " + yStr);
 
                     int    x           = Integer.parseInt(xStr);
                     int    y           = Integer.parseInt(yStr);
@@ -148,7 +149,12 @@ public class GestionSauvegarde
                 ligneAAjouter +=  "_" + (nbrDossierMemeNom + 1);
                 nomProjet     +=  "_" + (nbrDossierMemeNom + 1);
             }
+            else
+            {
 
+            }
+
+            
             bw.write(ligneAAjouter);
             bw.newLine();
 
@@ -192,7 +198,7 @@ public class GestionSauvegarde
 
  
 
-    public HashMap<String, BlocClasse> chargerSaugardeCoord(String nomFichier,  HashMap<String, Classe> mapClass)
+    public HashMap<String, BlocClasse> chargerSauvegardeCoord(String nomFichier,  HashMap<String, Classe> mapClass)
     {
         String   basePath               = System.getProperty("user.dir");
         String   cheminPath             = basePath + "/donnees/sauvegardes/";
@@ -209,6 +215,7 @@ public class GestionSauvegarde
 
                 if(!ligne.contains("/"))
                 {
+
                     String[] tabClass = ligne.split("\\s+");
                     
                     Classe classe     = mapClass.get(tabClass[0].trim());
@@ -216,13 +223,14 @@ public class GestionSauvegarde
                     int    posY       = Integer.parseInt(tabClass[2].trim());
 
                     BlocClasse bloc = this.ctrl.creerBlocAPartirDeClasse(classe, posX, posY);
-                    ctrl.getLstBlocs().add(bloc);
+                    ctrl.ajouterBlockList(bloc);
                     mapBlocsParNom.put(classe.getNom(), bloc);
                 }
             }
         }
         catch (Exception e) 
         {
+            e.printStackTrace();
             e.getMessage();
         }
 

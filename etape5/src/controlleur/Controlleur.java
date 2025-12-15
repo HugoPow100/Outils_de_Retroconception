@@ -1,6 +1,7 @@
 package controlleur;
 
 import java.util.*;
+import java.io.File;
 import metier.lecture.*;
 import metier.objet.*;
 import metier.sauvegarde.*;
@@ -56,20 +57,23 @@ public class Controlleur
     {
         lecture = new Lecture(cheminProjet);
         lstLiaisons.clear();
+        lstBlocs.clear();
 
         // hasmap pour associer les noms de classes aux blocs
         HashMap<String, BlocClasse> mapBlocsParNom  = new HashMap<>();
         HashMap<String, Classe>     hashMapclasses  = lecture.getHashMapClasses();
 
+        String nomDeSauvegardeProjet = estSauvegarde(cheminProjet);
         
-        if(estSauvegarde(cheminProjet))
+        System.out.println(nomDeSauvegardeProjet);
+        if(!nomDeSauvegardeProjet.equals(""))
         {
-            mapBlocsParNom = gestionSauvegarde.chargerSaugardeCoord(cheminProjet, hashMapclasses);   
+            System.out.println(nomDeSauvegardeProjet.equals(""));
+
+            mapBlocsParNom = gestionSauvegarde.chargerSauvegardeCoord(nomDeSauvegardeProjet, hashMapclasses);   
         }
         else
         {
-
-
             int posX    = 50;
             int posY    = 50;
 
@@ -230,22 +234,25 @@ public class Controlleur
      * @param paraCheminDossier
      * @return
      */
-    public boolean estSauvegarde(String paraCheminDossier)
+    public String estSauvegarde(String paraCheminDossier)
     {
         String   basePath               = System.getProperty("user.dir");
         String   cheminPath             = basePath + "/donnees/projets.xml";
 
-        try(Scanner scan = new Scanner(cheminPath)) 
+        try(Scanner scan = new Scanner(new File(cheminPath))) 
         {
             while(scan.hasNextLine())
             {
                 String ligne = scan.nextLine();
 
-                String[] tabCheminProjet = ligne.split(ligne);
+                 System.out.println("ligne lue est sauvegardée : " + ligne);
+                 
+                String[] tabCheminProjet = ligne.split("\t");
 
                 if(tabCheminProjet[0].equals(paraCheminDossier.trim()))
                 {
-                    return true;
+                    System.out.println("NOMMMMMMMMMMMMMMMMMMMMMMMM fichier " + tabCheminProjet[1]);
+                    return tabCheminProjet[1].trim();
                 }
             }
             
@@ -256,7 +263,7 @@ public class Controlleur
             e.getMessage();
         }
 
-        return false;
+        return "";
     }
 
     public void sauvegarderClasses(List<BlocClasse> blocClasses, String cheminProjet) {
@@ -271,8 +278,9 @@ public class Controlleur
         return lstLiaisons;
     }
 
-    public List<BlocClasse> getLstBlocs() {
-        return lstBlocs;
+    public void ajouterBlockList(BlocClasse block)
+    {
+        this.lstBlocs.add(block);
     }
 
     public void creerLstInterface(Lecture lecture)
