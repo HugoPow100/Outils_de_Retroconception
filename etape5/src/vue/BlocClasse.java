@@ -98,6 +98,7 @@ public class BlocClasse
                     // Retirer les codes ANSI pour l'affichage
                     String displayText = att.replace("\u001B[4m", "").replace("\u001B[0m", "");
                     
+                    
                     g.drawString(displayText, x + PADDING, yActuel);
                     
                     // Si l'attribut doit être souligné, tracer une ligne sous le texte

@@ -73,6 +73,7 @@ public class Lecture
 	 */
 	public void afficherLstInterface()
 	{
+		System.out.println("--- Affichage des interfaces ---");
 		for (Interface inter : lstInterface)
 		{
 			System.out.println(inter);
@@ -82,6 +83,7 @@ public class Lecture
 
 	public void creerLstInterface()
 	{
+		System.out.println("--- Création des interfaces ---");
 		for (Classe classe : hashMapClasses.values())
 		{
 			String[] tabNomInterfaces = classe.getNomInterface().split(",");
@@ -90,12 +92,14 @@ public class Lecture
 			{
 				for (String nomInterface : tabNomInterfaces)
 				{
-					nomInterface = nomInterface.trim();
+					nomInterface = nomInterface.replace("{", "").trim();
 					Classe interfaceClasse = getClasse(nomInterface);
+					System.out.println("interface : " + interfaceClasse.getNom());
 
 					if (interfaceClasse != null)
 					{
 						Interface inter = new Interface(interfaceClasse, classe);
+						System.out.println("L'interface a été créér : " + inter);
 						lstInterface.add(inter);
 					}
 					else
@@ -122,9 +126,12 @@ public class Lecture
 		return null;
 	}
 
+	
+
 	// ========== Getters ==========
 
 	public HashMap  <String, Classe> getHashMapClasses() {return this.hashMapClasses;}
 	public ArrayList<Association>    getLstAssociation() {return this.lstAssociations;}
 	public ArrayList<Heritage>       getLstHeritage   () {return this.lstHeritage;}
+	public ArrayList<Interface>       getLstInterfaces  () {return this.lstInterface;}
 }

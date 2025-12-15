@@ -76,10 +76,14 @@ public class Controlleur
             }
         }
 
+
+        creerLstInterface(lecture);
+        afficherLstInterface(lecture);
         // Créer les lstLiaisons depuis associations, heritages, et interfaces
         creerLiaisonsDepuisAssoc        (lecture.getLstAssociation(), mapBlocsParNom);
 
         creerLiaisonsDepuisHerit        (lecture.getLstHeritage(), mapBlocsParNom);
+        creerLiaisonsDepuisInterface(lecture.getLstInterfaces(), mapBlocsParNom);
 
         
 

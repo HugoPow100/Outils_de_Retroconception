@@ -1,11 +1,13 @@
-public class Animal {
+public class Animal 
+{
     private String nom;
     private int age;
 
     private static int nbAnimaux = 0;
     private static final int nbPattes = 4;
     
-    public Animal(String nom, int age) {
+    public Animal(String nom, int age) 
+    {
         this.nom = nom;
         this.age = age;
 
