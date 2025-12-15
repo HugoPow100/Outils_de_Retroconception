@@ -56,6 +56,7 @@ public class Controlleur
     public List<BlocClasse> chargerProjetEnBlocsClasses(String cheminProjet) 
     {
         lecture = new Lecture(cheminProjet);
+        lstBlocs.clear();
         lstLiaisons.clear();
         lstBlocs.clear();
 
@@ -259,7 +260,6 @@ public class Controlleur
         } 
         catch (Exception e) 
         {
-            e.getCause();
             e.getMessage();
         }
 
@@ -281,16 +281,6 @@ public class Controlleur
     public void ajouterBlockList(BlocClasse block)
     {
         this.lstBlocs.add(block);
-    }
-
-    public void creerLstInterface(Lecture lecture)
-    {
-        lecture.creerLstInterface();
-    }
-
-    public void afficherLstInterface(Lecture lecture)
-    {
-        lecture.afficherLstInterface();
     }
 
     

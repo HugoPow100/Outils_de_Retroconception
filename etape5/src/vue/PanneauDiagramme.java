@@ -105,17 +105,34 @@ public class PanneauDiagramme extends JPanel
                     return;
                 }
                 
-                // Vérifier si c'est un clic droit pour commencer le pan
+                // Convertir les coordonnées écran en coordonnées logiques (avec zoom et pan)
+                double logicalX = (e.getX() - panOffsetX - getWidth() / 2) / zoomLevel + getWidth() / (2 * zoomLevel);
+                double logicalY = (e.getY() - panOffsetY - getHeight() / 2) / zoomLevel + getHeight() / (2 * zoomLevel);
+
+                // Clic-droit : affichage plein écran d'une classe ou pan
                 if (e.getButton() == MouseEvent.BUTTON3)
                 {
+                    // Chercher si on clique sur un bloc
+                    BlocClasse blocClique = null;
+                    for (BlocClasse bloc : blocsClasses) {
+                        if (bloc.contient((int) logicalX, (int) logicalY)) {
+                            blocClique = bloc;
+                            break;
+                        }
+                    }
+                    
+                    // Si on clique sur un bloc, basculer son affichage plein écran
+                    if (blocClique != null) {
+                        blocClique.setAffichagePleinEcran(!blocClique.isAffichagePleinEcran());
+                        repaint();
+                        return;
+                    }
+                    
+                    // Sinon, commencer le pan
                     isPanning = true;
                     pointDernier = e.getPoint();
                     return;
                 }
-                
-                // Convertir les coordonnées écran en coordonnées logiques (avec zoom et pan)
-                double logicalX = (e.getX() - panOffsetX - getWidth() / 2) / zoomLevel + getWidth() / (2 * zoomLevel);
-                double logicalY = (e.getY() - panOffsetY - getHeight() / 2) / zoomLevel + getHeight() / (2 * zoomLevel);
 
                 pointDernier = e.getPoint();
                 blocEnDeplacement = null;
@@ -259,10 +276,12 @@ public class PanneauDiagramme extends JPanel
             return;
         }
 
-        // réinitialiser les positions des ancres pour les liaisons
-        reinitialiserAnchages();
+        // Réinitialiser toutes les liaisons avec le nouvel algorithme
+        for (LiaisonVue liaison : liaisons) {
+            liaison.recalculerAncrages();
+        }
 
-        // Étape 4 : Redessiner
+        // Redessiner
         repaint();
     }
 

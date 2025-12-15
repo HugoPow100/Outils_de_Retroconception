@@ -23,6 +23,8 @@ public class Lecture
 		this.lstInterface    = new ArrayList<>();
 
 		analyserFichier(cheminFichier);
+		afficherHeritage();
+		creerLstInterface();
 	}
 
 	/**
@@ -80,29 +82,36 @@ public class Lecture
 	{
 		for (Classe classe : hashMapClasses.values())
 		{
-			String[] tabNomInterfaces = classe.getNomInterface().split(",");
-
-			if (tabNomInterfaces.length > 0 && !tabNomInterfaces[0].isEmpty())
+			String nomInterfacesStr = classe.getNomInterface();
+			
+			// Vérifier que le nom n'est pas vide
+			if (nomInterfacesStr != null && !nomInterfacesStr.isEmpty())
 			{
+				// Diviser les interfaces séparées par des virgules
+				String[] tabNomInterfaces = nomInterfacesStr.split(",");
+				
 				for (String nomInterface : tabNomInterfaces)
 				{
 					nomInterface = nomInterface.trim();
-					Classe interfaceClasse = getClasse(nomInterface);
-
-					if (interfaceClasse != null)
+					
+					// Vérifier que le nom ne contient pas de caractères invalides
+					if (!nomInterface.isEmpty() && !nomInterface.contains("{") && !nomInterface.contains("*"))
 					{
-						Interface inter = new Interface(interfaceClasse, classe);
-						lstInterface.add(inter);
-					}
-					else
-					{
-						System.out.println(" Interface introuvable : " + nomInterface);
+						Classe interfaceClasse = getClasse(nomInterface);
+						
+						if (interfaceClasse != null)
+						{
+							Interface inter = new Interface(interfaceClasse, classe);
+							lstInterface.add(inter);
+						}
+						else
+						{
+							System.out.println("⚠️  Interface introuvable : " + nomInterface);
+						}
 					}
 				}
 			}
 		}
-		
-		afficherLstInterface();
 	}
 
 
