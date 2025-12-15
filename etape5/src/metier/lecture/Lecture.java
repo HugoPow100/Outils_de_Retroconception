@@ -71,7 +71,16 @@ public class Lecture
 	/**
 	 * Affiche les implémentations d'interfaces (version 2).
 	 */
-	public void afficherImplementation()
+	public void afficherLstInterface()
+	{
+		for (Interface inter : lstInterface)
+		{
+			System.out.println(inter);
+		}
+	}
+
+
+	public void creerLstInterface()
 	{
 		for (Classe classe : hashMapClasses.values())
 		{
@@ -88,12 +97,10 @@ public class Lecture
 					{
 						Interface inter = new Interface(interfaceClasse, classe);
 						lstInterface.add(inter);
-
-						System.out.println(inter);
 					}
 					else
 					{
-						System.out.println("⚠ Interface introuvable : " + nomInterface);
+						System.out.println(" Interface introuvable : " + nomInterface);
 					}
 				}
 			}

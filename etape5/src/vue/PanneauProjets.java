@@ -89,10 +89,17 @@ public class PanneauProjets extends JPanel {
                 if (!ligne.isEmpty()) 
                 {
                     File projet          = new File(ligne);
-                    JButton boutonProjet = creerBoutonProjet(projet);
-                    panelProjets.add(boutonProjet);
-                    panelProjets.add(Box.createVerticalStrut(5));
-                    vide = false;
+                    if (projet.exists())
+                    {
+                        //System.out.println("Le projet existe : " + ligne);
+                        
+                        JButton boutonProjet = creerBoutonProjet(projet);
+                        panelProjets.add(boutonProjet);
+                        panelProjets.add(Box.createVerticalStrut(5));
+                        vide = false;
+
+                    }
+                    
                 }
             }
 

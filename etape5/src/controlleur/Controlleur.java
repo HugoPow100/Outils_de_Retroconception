@@ -219,6 +219,16 @@ public class Controlleur
         gestionSauvegarde.sauvegarderClasses(blocClasses, cheminProjet);
     }
 
+    public void creerLstInterface(Lecture lecture)
+    {
+        lecture.creerLstInterface();
+    }
+
+    public void afficherLstInterface(Lecture lecture)
+    {
+        lecture.afficherLstInterface();
+    }
+
     //-----------//
     //  GETTERS  //
     //-----------//
