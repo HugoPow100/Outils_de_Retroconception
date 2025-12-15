@@ -67,11 +67,16 @@ public class Lecture
 	/**
 	 * Affiche les implémentations d'interfaces.
 	 */
+	public void afficherLstInterface()
+	{
+		for (Interface inter : lstInterface)
+		{
+			System.out.println(inter);
+		}
+	}
 
-	/**
-	 * Affiche les implémentations d'interfaces (version 2).
-	 */
-	public void afficherImplementation()
+
+	public void creerLstInterface()
 	{
 		for (Classe classe : hashMapClasses.values())
 		{
@@ -88,17 +93,18 @@ public class Lecture
 					{
 						Interface inter = new Interface(interfaceClasse, classe);
 						lstInterface.add(inter);
-
-						System.out.println(inter);
 					}
 					else
 					{
-						System.out.println("⚠ Interface introuvable : " + nomInterface);
+						System.out.println(" Interface introuvable : " + nomInterface);
 					}
 				}
 			}
 		}
+		
+		afficherLstInterface();
 	}
+
 
 	/**
 	 * Récupère une classe par son nom.
@@ -120,4 +126,5 @@ public class Lecture
 	public HashMap  <String, Classe> getHashMapClasses() {return this.hashMapClasses;}
 	public ArrayList<Association>    getLstAssociation() {return this.lstAssociations;}
 	public ArrayList<Heritage>       getLstHeritage   () {return this.lstHeritage;}
+	public ArrayList<Interface>       getLstInterface () {return this.lstInterface;}
 }
