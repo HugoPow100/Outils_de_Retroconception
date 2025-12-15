@@ -259,10 +259,12 @@ public class PanneauDiagramme extends JPanel
             return;
         }
 
-        // réinitialiser les positions des ancres pour les liaisons
-        reinitialiserAnchages();
+        // Réinitialiser toutes les liaisons avec le nouvel algorithme
+        for (LiaisonVue liaison : liaisons) {
+            liaison.recalculerAncrages();
+        }
 
-        // Étape 4 : Redessiner
+        // Redessiner
         repaint();
     }
 
