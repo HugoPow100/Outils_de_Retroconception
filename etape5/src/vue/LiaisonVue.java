@@ -53,10 +53,9 @@ public class LiaisonVue
         this.multOrig        = "";
         this.multDest        = "";
         this.unidirectionnel = true;
-        this.sideOrigine = 0; // DROITE par défaut
-        this.sideDestination = 2; // GAUCHE par défaut
-        this.posRelOrigine = 0.5;
-        this.posRelDestination = 0.5;
+        
+        // Choisir automatiquement les meilleurs côtés
+        chooseBestSides();
     }
 
     public LiaisonVue(BlocClasse blocOrigine, BlocClasse blocDestination, String type, boolean unidirectionnel, String multOrig, String multDest) 
@@ -67,15 +66,317 @@ public class LiaisonVue
         this.unidirectionnel   = unidirectionnel;
         this.multOrig          = multOrig;
         this.multDest          = multDest;
-        this.sideOrigine       = 0;
-        this.sideDestination   = 2;
-        this.posRelOrigine     = 0.5;
-        this.posRelDestination = 0.5;
+        
+        // Choisir automatiquement les meilleurs côtés
+        chooseBestSides();
     }
 
     //----------------------//
     //      METHODES        //
     //----------------------//
+
+    /**
+     * Recalcule les ancrages optimaux (appelé par le bouton "Optimiser les liaisons uniquement")
+     */
+    public void recalculerAncrages() {
+        chooseBestSides();
+    }
+
+    /**
+     * Choisit automatiquement les meilleurs côtés et positions pour minimiser la DISTANCE TOTALE
+     * et éviter les collisions. PRIORITÉ ABSOLUE aux chemins directs (1 segment).
+     * Parmi les chemins directs équivalents, PRÉFÉRER positions parfaitement centrées sur le plus petit bloc.
+     */
+    private void chooseBestSides() {
+        int bestOrigSide = 0;
+        int bestDestSide = 0;
+        double bestOrigPos = 0.5;
+        double bestDestPos = 0.5;
+        double minDistance = Double.MAX_VALUE;
+        int bestCenterPriority = Integer.MAX_VALUE; // Plus petit = meilleur
+        boolean foundDirect = false;
+        
+        // Déterminer les côtés "naturels" selon la position relative des blocs
+        int ox = blocOrigine.getX() + blocOrigine.getLargeur() / 2;
+        int oy = blocOrigine.getY() + blocOrigine.getHauteurCalculee() / 2;
+        int dx = blocDestination.getX() + blocDestination.getLargeur() / 2;
+        int dy = blocDestination.getY() + blocDestination.getHauteurCalculee() / 2;
+        
+        boolean destIsRight = dx > ox;  // Destination à droite
+        boolean destIsLeft = dx < ox;   // Destination à gauche
+        boolean destIsBelow = dy > oy;  // Destination en bas
+        boolean destIsAbove = dy < oy;  // Destination en haut
+        
+        // PHASE 1 : Recherche EXHAUSTIVE de chemins directs
+        // Tester TOUS les côtés et TOUTES les combinaisons de positions
+        for (int origSide = 0; origSide < 4; origSide++) {
+            for (int destSide = 0; destSide < 4; destSide++) {
+                // Vérifier si c'est une paire de côtés "logique" selon la position relative
+                boolean isNaturalPair = false;
+                if (origSide == 0 && destSide == 2 && destIsRight) isNaturalPair = true; // DROITE -> GAUCHE (dest à droite)
+                if (origSide == 2 && destSide == 0 && destIsLeft) isNaturalPair = true;  // GAUCHE -> DROITE (dest à gauche)
+                if (origSide == 1 && destSide == 3 && destIsBelow) isNaturalPair = true; // BAS -> HAUT (dest en bas)
+                if (origSide == 3 && destSide == 1 && destIsAbove) isNaturalPair = true; // HAUT -> BAS (dest en haut)
+                
+                // Optimisation: tester seulement les paires qui peuvent s'aligner
+                // Côtés opposés (0-2, 2-0, 1-3, 3-1) pour même position
+                boolean samePosPair = (origSide == 0 && destSide == 2) || (origSide == 2 && destSide == 0) ||
+                                      (origSide == 1 && destSide == 3) || (origSide == 3 && destSide == 1);
+                
+                // Côtés perpendiculaires ou adjacents: tester différentes positions
+                boolean canAlign = true;
+                
+                if (samePosPair) {
+                    // Pour les côtés opposés, tester avec LA MÊME position (alignement garanti)
+                    for (double pos = 0.0; pos <= 1.0; pos += 0.01) {
+                        Point start = getPointOnSide(blocOrigine, origSide, pos);
+                        Point end = getPointOnSide(blocDestination, destSide, pos);
+                        
+                        // Vérifier qu'on peut tracer une ligne directe SANS obstacle
+                        boolean canDirect = false;
+                        double directDist = 0;
+                        
+                        if (start.x == end.x) {
+                            canDirect = !hasVerticalObstacleStrict(start.x, start.y, end.y);
+                            directDist = Math.abs(end.y - start.y);
+                        } else if (start.y == end.y) {
+                            canDirect = !hasHorizontalObstacleStrict(start.x, end.x, start.y);
+                            directDist = Math.abs(end.x - start.x);
+                        }
+                        
+                        if (canDirect) {
+                            int centerPriority = calculateCenterPriority(pos);
+                            
+                            // Bonus si c'est une paire naturelle (côtés logiques)
+                            int naturalBonus = isNaturalPair ? -1000 : 0; // -1000 = très haute priorité
+                            int totalPriority = centerPriority + naturalBonus;
+                            
+                            boolean isBetter = false;
+                            if (!foundDirect) {
+                                isBetter = true;
+                            } else if (Math.abs(directDist - minDistance) < 1.0) {
+                                // Distances équivalentes: prioriser 1) côtés naturels, 2) centrage
+                                isBetter = (totalPriority < bestCenterPriority);
+                            } else {
+                                isBetter = (directDist < minDistance);
+                            }
+                            
+                            if (isBetter) {
+                                minDistance = directDist;
+                                bestCenterPriority = totalPriority;
+                                bestOrigSide = origSide;
+                                bestDestSide = destSide;
+                                bestOrigPos = pos;
+                                bestDestPos = pos;
+                                foundDirect = true;
+                            }
+                        }
+                    }
+                } else {
+                    // Pour les autres combinaisons: tester DIFFÉRENTES positions pour trouver un alignement
+                    // Tester avec un pas plus grand pour ne pas exploser le temps de calcul
+                    for (double origPos = 0.0; origPos <= 1.0; origPos += 0.05) {
+                        for (double destPos = 0.0; destPos <= 1.0; destPos += 0.05) {
+                            Point start = getPointOnSide(blocOrigine, origSide, origPos);
+                            Point end = getPointOnSide(blocDestination, destSide, destPos);
+                            
+                            // Vérifier l'alignement (vertical OU horizontal)
+                            boolean aligned = (start.x == end.x) || (start.y == end.y);
+                            if (!aligned) continue;
+                            
+                            // Vérifier qu'on peut tracer une ligne directe SANS obstacle
+                            boolean canDirect = false;
+                            double directDist = 0;
+                            
+                            if (start.x == end.x) {
+                                canDirect = !hasVerticalObstacleStrict(start.x, start.y, end.y);
+                                directDist = Math.abs(end.y - start.y);
+                            } else if (start.y == end.y) {
+                                canDirect = !hasHorizontalObstacleStrict(start.x, end.x, start.y);
+                                directDist = Math.abs(end.x - start.x);
+                            }
+                            
+                            if (canDirect) {
+                                // Pour positions différentes, centrage moyen
+                                int centerPriority = (calculateCenterPriority(origPos) + calculateCenterPriority(destPos)) / 2;
+                                
+                                // Bonus si c'est une paire naturelle (côtés logiques)
+                                int naturalBonus = isNaturalPair ? -1000 : 0;
+                                int totalPriority = centerPriority + naturalBonus;
+                                
+                                boolean isBetter = false;
+                                if (!foundDirect) {
+                                    isBetter = true;
+                                } else if (Math.abs(directDist - minDistance) < 1.0) {
+                                    // Distances équivalentes: prioriser 1) côtés naturels, 2) centrage
+                                    isBetter = (totalPriority < bestCenterPriority);
+                                } else {
+                                    isBetter = (directDist < minDistance);
+                                }
+                                
+                                if (isBetter) {
+                                    minDistance = directDist;
+                                    bestCenterPriority = totalPriority;
+                                    bestOrigSide = origSide;
+                                    bestDestSide = destSide;
+                                    bestOrigPos = origPos;
+                                    bestDestPos = destPos;
+                                    foundDirect = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Si on a trouvé un chemin direct, on l'utilise immédiatement
+        if (foundDirect) {
+            this.sideOrigine = bestOrigSide;
+            this.sideDestination = bestDestSide;
+            this.posRelOrigine = bestOrigPos;
+            this.posRelDestination = bestDestPos;
+            return;
+        }
+        
+        // PHASE 2 : Pas de chemin direct possible, chercher le plus court chemin multi-segments
+        // PRIORISER les côtés naturels même pour les chemins multi-segments
+        for (int origSide = 0; origSide < 4; origSide++) {
+            for (int destSide = 0; destSide < 4; destSide++) {
+                // Vérifier si c'est une paire de côtés "logique" selon la position relative
+                boolean isNaturalPair = false;
+                if (origSide == 0 && destSide == 2 && destIsRight) isNaturalPair = true; // DROITE -> GAUCHE (dest à droite)
+                if (origSide == 2 && destSide == 0 && destIsLeft) isNaturalPair = true;  // GAUCHE -> DROITE (dest à gauche)
+                if (origSide == 1 && destSide == 3 && destIsBelow) isNaturalPair = true; // BAS -> HAUT (dest en bas)
+                if (origSide == 3 && destSide == 1 && destIsAbove) isNaturalPair = true; // HAUT -> BAS (dest en haut)
+                
+                // Tester plusieurs positions sur TOUTE la surface
+                for (double origPos = 0.1; origPos <= 0.9; origPos += 0.1) {
+                    for (double destPos = 0.1; destPos <= 0.9; destPos += 0.1) {
+                        Point start = getPointOnSide(blocOrigine, origSide, origPos);
+                        Point end = getPointOnSide(blocDestination, destSide, destPos);
+                        
+                        List<Point> testPath = createOrthogonalPath(start, end, origSide, destSide);
+                        
+                        if (!pathHasCollisions(testPath)) {
+                            double distance = calculatePathLength(testPath);
+                            
+                            // Appliquer un bonus pour les paires naturelles (réduire la distance de 30%)
+                            double adjustedDistance = isNaturalPair ? distance * 0.7 : distance;
+                            
+                            if (adjustedDistance < minDistance) {
+                                minDistance = adjustedDistance;
+                                bestOrigSide = origSide;
+                                bestDestSide = destSide;
+                                bestOrigPos = origPos;
+                                bestDestPos = destPos;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        this.sideOrigine = bestOrigSide;
+        this.sideDestination = bestDestSide;
+        this.posRelOrigine = bestOrigPos;
+        this.posRelDestination = bestDestPos;
+    }
+    
+    /**
+     * Calcule la longueur totale d'un chemin (somme des distances entre points consécutifs)
+     */
+    private double calculatePathLength(List<Point> path) {
+        if (path.size() < 2) return 0;
+        
+        double totalLength = 0;
+        for (int i = 0; i < path.size() - 1; i++) {
+            Point p1 = path.get(i);
+            Point p2 = path.get(i + 1);
+            totalLength += Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+        }
+        
+        return totalLength;
+    }
+    
+    /**
+     * Calcule la position optimale sur un côté de bloc pour s'aligner vers un autre bloc
+     */
+    private double calculateOptimalPosition(BlocClasse fromBloc, int side, BlocClasse toBloc) {
+        int fromX = fromBloc.getX();
+        int fromY = fromBloc.getY();
+        int fromW = fromBloc.getLargeur();
+        int fromH = fromBloc.getHauteurCalculee();
+        
+        int toX = toBloc.getX() + toBloc.getLargeur() / 2;
+        int toY = toBloc.getY() + toBloc.getHauteurCalculee() / 2;
+        
+        double pos = 0.5; // Par défaut au milieu
+        
+        switch(side) {
+            case 0: // DROITE
+            case 2: // GAUCHE
+                // Aligner verticalement avec le centre du bloc destination
+                int relY = toY - fromY;
+                pos = Math.max(0.2, Math.min(0.8, (double)relY / fromH));
+                break;
+            case 1: // BAS
+            case 3: // HAUT
+                // Aligner horizontalement avec le centre du bloc destination
+                int relX = toX - fromX;
+                pos = Math.max(0.2, Math.min(0.8, (double)relX / fromW));
+                break;
+        }
+        
+        return pos;
+    }
+    
+    /**
+     * Vérifie si un chemin a des collisions avec les blocs (autres que origine et destination)
+     */
+    private boolean pathHasCollisions(List<Point> path) {
+        for (int i = 0; i < path.size() - 1; i++) {
+            Point p1 = path.get(i);
+            Point p2 = path.get(i + 1);
+            
+            // Vérifier chaque segment
+            if (p1.x == p2.x) { // Segment vertical
+                if (hasVerticalObstacle(p1.x, Math.min(p1.y, p2.y), Math.max(p1.y, p2.y))) {
+                    return true;
+                }
+            } else if (p1.y == p2.y) { // Segment horizontal
+                if (hasHorizontalObstacle(Math.min(p1.x, p2.x), Math.max(p1.x, p2.x), p1.y)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Calcule la priorité de centrage d'une position (plus petit = mieux centré)
+     * Niveau 0: 0.5 (milieu exact)
+     * Niveau 1: 0.25, 0.75 (milieu du milieu)
+     * Niveau 2: 0.125, 0.375, 0.625, 0.875 (subdivision encore)
+     * Niveau 3+: toutes les autres positions
+     */
+    private int calculateCenterPriority(double pos) {
+        // Tolérance de 0.01 pour la comparaison flottante
+        final double TOLERANCE = 0.01;
+        
+        // Niveau 0: milieu exact (0.5)
+        if (Math.abs(pos - 0.5) < TOLERANCE) return 0;
+        
+        // Niveau 1: 0.25 et 0.75
+        if (Math.abs(pos - 0.25) < TOLERANCE || Math.abs(pos - 0.75) < TOLERANCE) return 1;
+        
+        // Niveau 2: 0.125, 0.375, 0.625, 0.875
+        if (Math.abs(pos - 0.125) < TOLERANCE || Math.abs(pos - 0.375) < TOLERANCE ||
+            Math.abs(pos - 0.625) < TOLERANCE || Math.abs(pos - 0.875) < TOLERANCE) return 2;
+        
+        // Niveau 3: toutes les autres positions
+        return 1000; // Très basse priorité
+    }
 
     /**
     * Renvoie un point sur un coté d'un {@link BlocClasse}, en fonction d'un coté et d'une position relative
@@ -91,18 +392,18 @@ public class LiaisonVue
         int w = bloc.getLargeur();
         int h = bloc.getHauteurCalculee();
 
-        // éviter les coins
-        posRel = Math.max(0.1, Math.min(0.9, posRel));
+        // AUTORISER TOUTE LA SURFACE du bloc (0.0 à 1.0)
+        posRel = Math.max(0.0, Math.min(1.0, posRel));
 
         switch(side) 
         {
-            case 0: // DROITE
+            case 0: // DROITE - point exactement sur le bord droit
                 return new Point(x + w, y + (int)(h * posRel));
-            case 1: // BAS
+            case 1: // BAS - point exactement sur le bord bas
                 return new Point(x + (int)(w * posRel), y + h);
-            case 2: // GAUCHE
+            case 2: // GAUCHE - point exactement sur le bord gauche
                 return new Point(x, y + (int)(h * posRel));
-            case 3: // HAUT
+            case 3: // HAUT - point exactement sur le bord haut
                 return new Point(x + (int)(w * posRel), y);
         }
         return new Point(x, y);
@@ -170,6 +471,7 @@ public class LiaisonVue
 
     /**
     * Crée une liste de points qui représente un chemin d'un point Start à un point End.
+    * Optimisé pour les chemins directs (1 segment) quand possible
     * @param start Point de départ
     * @param end Point d'arrivée
     * @param startSide Coté de départ du bloc (0=DROITE, 1=BAS, 2=GAUCHE, 3=HAUT)
@@ -179,81 +481,329 @@ public class LiaisonVue
     private List<Point> createOrthogonalPath(Point start, Point end, int startSide, int endSide) {
         List<Point> path = new ArrayList<>();
         path.add(start);
-
-        int padding = 20;
-        int midX = start.x;
-        int midY = start.y;
-        int midX2 = end.x;
-        int midY2 = end.y;
-
-        // Déterminer la direction de sortie selon le côté du départ
-        if (startSide == 0) { // DROITE
-            midX = start.x + padding;
-        } else if (startSide == 2) { // GAUCHE
-            midX = start.x - padding;
-        } else if (startSide == 1) { // BAS
-            midY = start.y + padding;
-        } else { // HAUT
-            midY = start.y - padding;
-        }
-
-        // Déterminer la direction d'arrivée
-        if (endSide == 0) { // DROITE
-            midX2 = end.x + padding;
-        } else if (endSide == 2) { // GAUCHE
-            midX2 = end.x - padding;
-        } else if (endSide == 1) { // BAS
-            midY2 = end.y + padding;
-        } else { // HAUT
-            midY2 = end.y - padding;
-        }
-
-        // Premier segment : sortir du bloc initial
-        if (startSide == 0 || startSide == 2) { // DROITE ou GAUCHE
-            path.add(new Point(midX, start.y));
-        } else { // BAS ou HAUT
-            path.add(new Point(start.x, midY));
-        }
-
-        // Segment intermédiaire : aller vers la destination avec contournement
-        if (startSide == 0 || startSide == 2) { // Sortie horizontale
-            // Point intermédiaire horizontal
-            int intermediateY = midY2;
-            
-            // Vérifier s'il y a une collision sur la ligne horizontale
-            List<BlocClasse> obstaclesHorizontaux = getObstaclesOnHorizontalLine(midX, midX2, intermediateY);
-            
-            if (!obstaclesHorizontaux.isEmpty()) {
-                // Contourner en passant par le haut ou le bas
-                int deflectY = getDeflectionY(intermediateY, obstaclesHorizontaux);
-                path.add(new Point(midX, deflectY));
-                path.add(new Point(midX2, deflectY));
-                path.add(new Point(midX2, intermediateY));
-            } else {
-                path.add(new Point(midX, intermediateY));
-                path.add(new Point(midX2, intermediateY));
+        
+        // PRIORITÉ 1 : Chemin direct (1 segment) si aligné horizontalement ou verticalement
+        if (start.x == end.x) {
+            // Alignement vertical parfait
+            if (!hasVerticalObstacleStrict(start.x, start.y, end.y)) {
+                path.add(end);
+                return path;
             }
-        } else { // Sortie verticale
-            // Point intermédiaire vertical
-            int intermediateX = midX2;
-            
-            // Vérifier s'il y a une collision sur la ligne verticale
-            List<BlocClasse> obstaclesVerticals = getObstaclesOnVerticalLine(intermediateX, midY, midY2);
-            
-            if (!obstaclesVerticals.isEmpty()) {
-                // Contourner en passant par la gauche ou la droite
-                int deflectX = getDeflectionX(intermediateX, obstaclesVerticals);
-                path.add(new Point(deflectX, midY));
-                path.add(new Point(deflectX, midY2));
-                path.add(new Point(intermediateX, midY2));
-            } else {
-                path.add(new Point(intermediateX, midY));
-                path.add(new Point(intermediateX, midY2));
+        } else if (start.y == end.y) {
+            // Alignement horizontal parfait
+            if (!hasHorizontalObstacleStrict(start.x, end.x, start.y)) {
+                path.add(end);
+                return path;
             }
         }
 
+        int padding = 20; // Distance minimale de sortie du bloc
+        
+        // Calculer les points de sortie et d'entrée
+        Point exitPoint = calculateExitPoint(start, startSide, padding);
+        Point entryPoint = calculateEntryPoint(end, endSide, padding);
+        
+        // Ajouter le point de sortie
+        path.add(exitPoint);
+        
+        // Créer le chemin entre sortie et entrée
+        createMiddlePath(path, exitPoint, entryPoint, startSide, endSide);
+        
+        // Ajouter le point d'entrée s'il est différent du dernier point
+        Point lastPoint = path.get(path.size() - 1);
+        if (!lastPoint.equals(entryPoint)) {
+            path.add(entryPoint);
+        }
+        
+        // Ajouter le point final
         path.add(end);
+        
+        // Nettoyer les points redondants
+        path = cleanRedundantPoints(path);
+        
         return path;
+    }
+    
+    /**
+     * Calcule le point de sortie d'un bloc selon le côté
+     */
+    private Point calculateExitPoint(Point start, int side, int padding) {
+        switch(side) {
+            case 0: return new Point(start.x + padding, start.y); // DROITE
+            case 1: return new Point(start.x, start.y + padding); // BAS
+            case 2: return new Point(start.x - padding, start.y); // GAUCHE
+            case 3: return new Point(start.x, start.y - padding); // HAUT
+            default: return start;
+        }
+    }
+    
+    /**
+     * Calcule le point d'entrée vers un bloc selon le côté
+     */
+    private Point calculateEntryPoint(Point end, int side, int padding) {
+        switch(side) {
+            case 0: return new Point(end.x + padding, end.y); // DROITE
+            case 1: return new Point(end.x, end.y + padding); // BAS
+            case 2: return new Point(end.x - padding, end.y); // GAUCHE
+            case 3: return new Point(end.x, end.y - padding); // HAUT
+            default: return end;
+        }
+    }
+    
+    /**
+     * Crée le chemin intermédiaire entre le point de sortie et le point d'entrée
+     * VÉRIFIE TOUJOURS si un chemin direct est possible avant de créer un accordéon
+     */
+    private void createMiddlePath(List<Point> path, Point exit, Point entry, int startSide, int endSide) {
+        // PRIORITÉ ABSOLUE : Vérifier si on peut aller directement de exit à entry
+        if (exit.x == entry.x && !hasVerticalObstacleStrict(exit.x, exit.y, entry.y)) {
+            // Alignement vertical sans obstacle - LIGNE DROITE !
+            return; // On ne fait rien, le chemin sera exit -> entry directement
+        }
+        if (exit.y == entry.y && !hasHorizontalObstacleStrict(exit.x, entry.x, exit.y)) {
+            // Alignement horizontal sans obstacle - LIGNE DROITE !
+            return; // On ne fait rien, le chemin sera exit -> entry directement
+        }
+        
+        // Déterminer si on sort horizontalement ou verticalement
+        boolean exitHorizontal = (startSide == 0 || startSide == 2);
+        boolean entryHorizontal = (endSide == 0 || endSide == 2);
+        
+        if (exitHorizontal && entryHorizontal) {
+            // Sortie et entrée horizontales : vérifier d'abord si une ligne horizontale directe est possible
+            if (exit.y == entry.y && !hasHorizontalObstacleStrict(exit.x, entry.x, exit.y)) {
+                return; // Ligne droite horizontale possible !
+            }
+            
+            // Sinon, passage vertical au milieu
+            int midY = (exit.y + entry.y) / 2;
+            
+            // Vérifier les obstacles
+            if (!getObstaclesOnVerticalLine(exit.x, exit.y, midY).isEmpty() ||
+                !getObstaclesOnVerticalLine(entry.x, midY, entry.y).isEmpty() ||
+                !getObstaclesOnHorizontalLine(exit.x, entry.x, midY).isEmpty()) {
+                midY = findClearHorizontalLine(exit.y, entry.y);
+            }
+            
+            path.add(new Point(exit.x, midY));
+            path.add(new Point(entry.x, midY));
+            
+        } else if (!exitHorizontal && !entryHorizontal) {
+            // Sortie et entrée verticales : vérifier d'abord si une ligne verticale directe est possible
+            if (exit.x == entry.x && !hasVerticalObstacleStrict(exit.x, exit.y, entry.y)) {
+                return; // Ligne droite verticale possible !
+            }
+            
+            // Sinon, passage horizontal au milieu
+            int midX = (exit.x + entry.x) / 2;
+            
+            // Vérifier les obstacles
+            if (!getObstaclesOnHorizontalLine(exit.x, midX, exit.y).isEmpty() ||
+                !getObstaclesOnHorizontalLine(midX, entry.x, entry.y).isEmpty() ||
+                !getObstaclesOnVerticalLine(midX, exit.y, entry.y).isEmpty()) {
+                midX = findClearVerticalLine(exit.x, entry.x);
+            }
+            
+            path.add(new Point(midX, exit.y));
+            path.add(new Point(midX, entry.y));
+            
+        } else {
+            // Sortie et entrée perpendiculaires : chemin en L
+            if (exitHorizontal) {
+                // Sortie horizontale, entrée verticale - vérifier si le L est libre
+                Point corner = new Point(entry.x, exit.y);
+                if (!hasHorizontalObstacleStrict(exit.x, corner.x, exit.y) &&
+                    !hasVerticalObstacleStrict(corner.x, corner.y, entry.y)) {
+                    path.add(corner);
+                } else {
+                    // Essayer l'autre coin
+                    corner = new Point(exit.x, entry.y);
+                    if (!hasVerticalObstacleStrict(exit.x, exit.y, corner.y) &&
+                        !hasHorizontalObstacleStrict(corner.x, entry.x, entry.y)) {
+                        path.add(corner);
+                    } else {
+                        // Fallback : premier coin quand même
+                        path.add(new Point(entry.x, exit.y));
+                    }
+                }
+            } else {
+                // Sortie verticale, entrée horizontale - vérifier si le L est libre
+                Point corner = new Point(exit.x, entry.y);
+                if (!hasVerticalObstacleStrict(exit.x, exit.y, corner.y) &&
+                    !hasHorizontalObstacleStrict(corner.x, entry.x, entry.y)) {
+                    path.add(corner);
+                } else {
+                    // Essayer l'autre coin
+                    corner = new Point(entry.x, exit.y);
+                    if (!hasHorizontalObstacleStrict(exit.x, corner.x, exit.y) &&
+                        !hasVerticalObstacleStrict(corner.x, corner.y, entry.y)) {
+                        path.add(corner);
+                    } else {
+                        // Fallback : premier coin quand même
+                        path.add(new Point(exit.x, entry.y));
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Trouve une ligne horizontale claire entre deux Y
+     */
+    private int findClearHorizontalLine(int y1, int y2) {
+        int minY = Math.min(y1, y2);
+        int maxY = Math.max(y1, y2);
+        
+        // Essayer au milieu d'abord
+        int midY = (minY + maxY) / 2;
+        if (getObstaclesOnHorizontalLine(Integer.MIN_VALUE, Integer.MAX_VALUE, midY).isEmpty()) {
+            return midY;
+        }
+        
+        // Essayer au-dessus
+        for (BlocClasse bloc : tousLesBlocs) {
+            if (bloc != blocOrigine && bloc != blocDestination) {
+                int testY = bloc.getY() - 30;
+                if (testY > minY && testY < maxY) {
+                    return testY;
+                }
+            }
+        }
+        
+        // Par défaut
+        return minY - 30;
+    }
+    
+    /**
+     * Trouve une ligne verticale claire entre deux X
+     */
+    private int findClearVerticalLine(int x1, int x2) {
+        int minX = Math.min(x1, x2);
+        int maxX = Math.max(x1, x2);
+        
+        // Essayer au milieu d'abord
+        int midX = (minX + maxX) / 2;
+        if (getObstaclesOnVerticalLine(midX, Integer.MIN_VALUE, Integer.MAX_VALUE).isEmpty()) {
+            return midX;
+        }
+        
+        // Essayer à gauche
+        for (BlocClasse bloc : tousLesBlocs) {
+            if (bloc != blocOrigine && bloc != blocDestination) {
+                int testX = bloc.getX() - 30;
+                if (testX > minX && testX < maxX) {
+                    return testX;
+                }
+            }
+        }
+        
+        // Par défaut
+        return minX - 30;
+    }
+    
+    /**
+     * Nettoie les points redondants (3 points alignés → 2 points)
+     */
+    private List<Point> cleanRedundantPoints(List<Point> path) {
+        if (path.size() < 3) return path;
+        
+        List<Point> cleaned = new ArrayList<>();
+        cleaned.add(path.get(0));
+        
+        for (int i = 1; i < path.size() - 1; i++) {
+            Point prev = path.get(i - 1);
+            Point curr = path.get(i);
+            Point next = path.get(i + 1);
+            
+            // Garder le point seulement s'il change de direction
+            boolean horizontal = (prev.y == curr.y && curr.y == next.y);
+            boolean vertical = (prev.x == curr.x && curr.x == next.x);
+            
+            if (!horizontal && !vertical) {
+                cleaned.add(curr);
+            }
+        }
+        
+        cleaned.add(path.get(path.size() - 1));
+        return cleaned;
+    }
+    
+    /**
+     * Détecte si un segment horizontal est libre d'obstacles
+     */
+    private boolean hasHorizontalObstacle(int x1, int x2, int y) {
+        return !getObstaclesOnHorizontalLine(x1, x2, y).isEmpty();
+    }
+    
+    /**
+     * Détecte si un segment vertical est libre d'obstacles
+     */
+    private boolean hasVerticalObstacle(int x, int y1, int y2) {
+        return !getObstaclesOnVerticalLine(x, y1, y2).isEmpty();
+    }
+    
+    /**
+     * Détection STRICTE : vérifie qu'une ligne horizontale ne traverse AUCUN bloc
+     * (utilisé pour les chemins directs) - EXCLUT origine et destination
+     */
+    private boolean hasHorizontalObstacleStrict(int x1, int x2, int y) {
+        int minX = Math.min(x1, x2);
+        int maxX = Math.max(x1, x2);
+        
+        for (BlocClasse bloc : tousLesBlocs) {
+            // EXCLURE les blocs origine et destination
+            if (bloc == blocOrigine || bloc == blocDestination) continue;
+            
+            int bx = bloc.getX();
+            int by = bloc.getY();
+            int bw = bloc.getLargeur();
+            int bh = bloc.getHauteurCalculee();
+            
+            // Vérifier que la ligne ne traverse PAS le rectangle du bloc (Y COMPRIS les bords !)
+            // La ligne y doit passer à travers le bloc : by <= y <= by+bh
+            // ET le segment [minX, maxX] doit croiser [bx, bx+bw]
+            if (y >= by && y <= by + bh) {
+                // La ligne traverse la hauteur du bloc
+                if (maxX >= bx && minX <= bx + bw) {
+                    // Le segment horizontal croise le bloc
+                    return true; // OBSTACLE !
+                }
+            }
+        }
+        
+        return false; // Pas d'obstacle
+    }
+    
+    /**
+     * Détection STRICTE : vérifie qu'une ligne verticale ne traverse AUCUN bloc
+     * (utilisé pour les chemins directs) - EXCLUT origine et destination
+     */
+    private boolean hasVerticalObstacleStrict(int x, int y1, int y2) {
+        int minY = Math.min(y1, y2);
+        int maxY = Math.max(y1, y2);
+        
+        for (BlocClasse bloc : tousLesBlocs) {
+            // EXCLURE les blocs origine et destination
+            if (bloc == blocOrigine || bloc == blocDestination) continue;
+            
+            int bx = bloc.getX();
+            int by = bloc.getY();
+            int bw = bloc.getLargeur();
+            int bh = bloc.getHauteurCalculee();
+            
+            // Vérifier que la ligne ne traverse PAS le rectangle du bloc (Y COMPRIS les bords !)
+            // La ligne x doit passer à travers le bloc : bx <= x <= bx+bw
+            // ET le segment [minY, maxY] doit croiser [by, by+bh]
+            if (x >= bx && x <= bx + bw) {
+                // La ligne traverse la largeur du bloc
+                if (maxY >= by && minY <= by + bh) {
+                    // Le segment vertical croise le bloc
+                    return true; // OBSTACLE !
+                }
+            }
+        }
+        
+        return false; // Pas d'obstacle
     }
     
     /**
@@ -267,17 +817,24 @@ public class LiaisonVue
         List<BlocClasse> obstacles = new ArrayList<>();
         int minX = Math.min(x1, x2);
         int maxX = Math.max(x1, x2);
-        int margin = 5;
+        int margin = 10; // Marge pour éviter de coller aux blocs
         
         for (BlocClasse bloc : tousLesBlocs) {
+            // EXCLURE les blocs origine et destination
+            if (bloc == blocOrigine || bloc == blocDestination) continue;
+            
             int bx = bloc.getX();
             int by = bloc.getY();
             int bw = bloc.getLargeur();
             int bh = bloc.getHauteurCalculee();
             
-            // Vérifier si la ligne y traverse le bloc
-            if (y >= by - margin && y <= by + bh + margin &&
-                !(maxX < bx - margin || minX > bx + bw + margin)) {
+            // La ligne horizontale traverse le bloc si:
+            // 1. La ligne y est entre by et by+bh (avec marge)
+            // 2. Le segment horizontal [minX, maxX] croise le bloc [bx, bx+bw] (avec marge)
+            boolean yTraverseBloc = (y >= by - margin && y <= by + bh + margin);
+            boolean xCroiseBloc = !(maxX < bx - margin || minX > bx + bw + margin);
+            
+            if (yTraverseBloc && xCroiseBloc) {
                 obstacles.add(bloc);
             }
         }
@@ -286,10 +843,10 @@ public class LiaisonVue
     }
     
     /**
-    * Renvoie la liste les blocs qui coupent une ligne verticale
+    * Renvoie la liste des blocs qui coupent une ligne verticale
     * @param x Abcisse de la ligne
-    * @param y Ordonnée du début de la ligne
-    * @param y Ordonnée de la fin de la ligne
+    * @param y1 Ordonnée du début de la ligne
+    * @param y2 Ordonnée de la fin de la ligne
     * @return Une {@link List} de {@link BlocClasse}s, qui représente les blocs qui sont sur la ligne donnée.
     */
     private List<BlocClasse> getObstaclesOnVerticalLine(int x, int y1, int y2) 
@@ -297,17 +854,24 @@ public class LiaisonVue
         List<BlocClasse> obstacles = new ArrayList<>();
         int minY = Math.min(y1, y2);
         int maxY = Math.max(y1, y2);
-        int margin = 5;
+        int margin = 10; // Marge pour éviter de coller aux blocs
         
         for (BlocClasse bloc : tousLesBlocs) {
+            // EXCLURE les blocs origine et destination
+            if (bloc == blocOrigine || bloc == blocDestination) continue;
+            
             int bx = bloc.getX();
             int by = bloc.getY();
             int bw = bloc.getLargeur();
             int bh = bloc.getHauteurCalculee();
             
-            // Vérifier si la ligne x traverse le bloc
-            if (x >= bx - margin && x <= bx + bw + margin &&
-                !(maxY < by - margin || minY > by + bh + margin)) {
+            // La ligne verticale traverse le bloc si:
+            // 1. La ligne x est entre bx et bx+bw (avec marge)
+            // 2. Le segment vertical [minY, maxY] croise le bloc [by, by+bh] (avec marge)
+            boolean xTraverseBloc = (x >= bx - margin && x <= bx + bw + margin);
+            boolean yCroiseBloc = !(maxY < by - margin || minY > by + bh + margin);
+            
+            if (xTraverseBloc && yCroiseBloc) {
                 obstacles.add(bloc);
             }
         }
@@ -317,12 +881,11 @@ public class LiaisonVue
     
     /**
     * Calcule une position Y pour contourner les obstacles horizontaux
-    * @param originalY
-    * @param 
-    * @param 
-    * @return 
+    * Choisit le meilleur chemin en fonction de l'espace disponible et de la distance
     */
     private int getDeflectionY(int originalY, List<BlocClasse> obstacles) {
+        if (obstacles.isEmpty()) return originalY;
+        
         int topMin = Integer.MAX_VALUE;
         int bottomMax = Integer.MIN_VALUE;
         
@@ -331,21 +894,27 @@ public class LiaisonVue
             bottomMax = Math.max(bottomMax, bloc.getY() + bloc.getHauteurCalculee());
         }
         
-        // Choisir le côté avec plus d'espace
-        int spaceAbove = topMin - 100; // Supposer 100 de marge
-        int spaceBelow = 1000 - bottomMax; // Supposer 1000 de hauteur totale
+        int margin = 30; // Marge augmentée pour plus d'espace
         
-        if (spaceAbove > spaceBelow) {
-            return topMin - 20; // Passer au-dessus
+        // Calculer la distance au lieu de l'espace absolu
+        int distToTop = Math.abs(originalY - topMin);
+        int distToBottom = Math.abs(originalY - bottomMax);
+        
+        // Préférer le chemin le plus court
+        if (distToTop < distToBottom) {
+            return topMin - margin; // Passer au-dessus
         } else {
-            return bottomMax + 20; // Passer en-dessous
+            return bottomMax + margin; // Passer en-dessous
         }
     }
     
     /**
      * Calcule une position X pour contourner les obstacles verticaux
+     * Choisit le meilleur chemin en fonction de l'espace disponible et de la distance
      */
     private int getDeflectionX(int originalX, List<BlocClasse> obstacles) {
+        if (obstacles.isEmpty()) return originalX;
+        
         int leftMin = Integer.MAX_VALUE;
         int rightMax = Integer.MIN_VALUE;
         
@@ -354,14 +923,17 @@ public class LiaisonVue
             rightMax = Math.max(rightMax, bloc.getX() + bloc.getLargeur());
         }
         
-        // Choisir le côté avec plus d'espace
-        int spaceLeft = leftMin - 100; // Supposer 100 de marge
-        int spaceRight = 1000 - rightMax; // Supposer 1000 de largeur totale
+        int margin = 30; // Marge augmentée pour plus d'espace
         
-        if (spaceLeft > spaceRight) {
-            return leftMin - 20; // Passer à gauche
+        // Calculer la distance au lieu de l'espace absolu
+        int distToLeft = Math.abs(originalX - leftMin);
+        int distToRight = Math.abs(originalX - rightMax);
+        
+        // Préférer le chemin le plus court
+        if (distToLeft < distToRight) {
+            return leftMin - margin; // Passer à gauche
         } else {
-            return rightMax + 20; // Passer à droite
+            return rightMax + margin; // Passer à droite
         }
     }
 
@@ -405,9 +977,13 @@ public class LiaisonVue
         g.setColor(Color.BLACK);
         g.setStroke(new BasicStroke(1));
         
+        // Dessiner chaque segment du chemin (tous strictement horizontaux ou verticaux)
         for (int i = 0; i < path.size() - 1; i++) {
             Point p1 = path.get(i);
             Point p2 = path.get(i + 1);
+            
+            // Vérification : chaque segment doit être soit horizontal (même Y) soit vertical (même X)
+            // Pas de diagonales permises
             g.drawLine(p1.x, p1.y, p2.x, p2.y);
         }
 
@@ -657,6 +1233,42 @@ public class LiaisonVue
      */
     public void setTousLesBlocs(List<BlocClasse> blocs) {
         this.tousLesBlocs = blocs;
+    }
+    
+    /**
+     * Ajuste la position relative pour éviter les superpositions avec d'autres liaisons
+     * @param allLiaisons Liste de toutes les liaisons
+     * @param index Index de cette liaison dans la liste
+     */
+    public void adjustPositionToAvoidOverlap(List<LiaisonVue> allLiaisons, int index) {
+        // Compter combien de liaisons partagent le même côté d'origine
+        List<Integer> sameOriginSide = new ArrayList<>();
+        for (int i = 0; i < allLiaisons.size(); i++) {
+            LiaisonVue other = allLiaisons.get(i);
+            if (other.blocOrigine == this.blocOrigine && other.sideOrigine == this.sideOrigine) {
+                sameOriginSide.add(i);
+            }
+        }
+        
+        // Distribuer uniformément les positions si plusieurs liaisons sur le même côté
+        if (sameOriginSide.size() > 1) {
+            int myPosition = sameOriginSide.indexOf(index);
+            this.posRelOrigine = 0.2 + (0.6 * myPosition / (sameOriginSide.size() - 1));
+        }
+        
+        // Faire de même pour la destination
+        List<Integer> sameDestSide = new ArrayList<>();
+        for (int i = 0; i < allLiaisons.size(); i++) {
+            LiaisonVue other = allLiaisons.get(i);
+            if (other.blocDestination == this.blocDestination && other.sideDestination == this.sideDestination) {
+                sameDestSide.add(i);
+            }
+        }
+        
+        if (sameDestSide.size() > 1) {
+            int myPosition = sameDestSide.indexOf(index);
+            this.posRelDestination = 0.2 + (0.6 * myPosition / (sameDestSide.size() - 1));
+        }
     }
 
     // Getters et Setters
