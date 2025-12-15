@@ -101,6 +101,9 @@ public class Controlleur
     private BlocClasse creerBlocAPartirDeClasse(Classe classe, int x, int y) {
         BlocClasse bloc = new BlocClasse(classe.getNom(), x, y);
 
+        // Définir si c'est une interface
+        bloc.setInterface(classe.isInterface());
+
         // Traitement de la liste des attributs
         List<String> attributsStr = new ArrayList<>();
         for (Attribut att : classe.getLstAttribut()) {

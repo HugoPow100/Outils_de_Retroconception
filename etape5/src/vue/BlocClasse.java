@@ -75,8 +75,24 @@ public class BlocClasse
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 12));
         FontMetrics fm = g.getFontMetrics();
-        int textX = x + (largeur - fm.stringWidth(nom)) / 2;
+        
         int textY = y + HAUTEUR_ENTETE - (HAUTEUR_ENTETE - fm.getAscent()) / 2;
+        
+        // Si c'est une interface, afficher <<interface>> au-dessus du nom
+        if (estInterface) {
+            g.setFont(new Font("Arial", Font.ITALIC, 10));
+            FontMetrics fmSmall = g.getFontMetrics();
+            String interfaceLabel = "<<interface>>";
+            int textXInterface = x + (largeur - fmSmall.stringWidth(interfaceLabel)) / 2;
+            g.drawString(interfaceLabel, textXInterface, textY - 8);
+            
+            // Afficher le nom en-dessous
+            g.setFont(new Font("Arial", Font.BOLD, 12));
+            fm = g.getFontMetrics();
+            textY = y + HAUTEUR_ENTETE - (HAUTEUR_ENTETE - fm.getAscent()) / 2 + 5;
+        }
+        
+        int textX = x + (largeur - fm.stringWidth(nom)) / 2;
         g.drawString(nom, textX, textY);
 
         int yActuel = y + HAUTEUR_ENTETE + PADDING;
@@ -149,6 +165,12 @@ public class BlocClasse
     private int calculerHauteur() 
     {
         int h = HAUTEUR_ENTETE + PADDING;
+        
+        // Ajouter de l'espace pour <<interface>> si nécessaire
+        if (estInterface) {
+            h += 10;
+        }
+        
         h    += attributs.size() * HAUTEUR_LIGNE;
 
         if (!attributs.isEmpty() && !methodes.isEmpty()) 
