@@ -91,7 +91,7 @@ public class PanneauProjets extends JPanel {
                     File projet          = new File(ligne);
                     if (projet.exists())
                     {
-                        System.out.println("Le projet n'existe pas : " + ligne);
+                        //System.out.println("Le projet existe : " + ligne);
                         
                         JButton boutonProjet = creerBoutonProjet(projet);
                         panelProjets.add(boutonProjet);

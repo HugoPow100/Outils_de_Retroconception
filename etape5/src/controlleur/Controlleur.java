@@ -7,6 +7,7 @@ import metier.sauvegarde.*;
 import vue.BlocClasse;
 import vue.FenetrePrincipale;
 import vue.LiaisonVue;
+
 /**
 * Contrôleur qui met en relation le métier et la vue IHM.
 * A accès à la fenêtre principale de la vue, et à la classe de lecture
@@ -97,7 +98,7 @@ public class Controlleur
 
         creerLiaisonsDepuisHerit        (lecture.getLstHeritage(), mapBlocsParNom);
 
-        //creerLiaisonsDepuisInterface  (lecture.getLstInterface(), mapBlocsParNom);
+        creerLiaisonsDepuisInterface  (lecture.getLstInterface(), mapBlocsParNom);
 
         fenetrePrincipale.optimiserPositionsClasses();
 
@@ -114,6 +115,9 @@ public class Controlleur
     public BlocClasse creerBlocAPartirDeClasse(Classe classe, int x, int y) 
     {
         BlocClasse bloc = new BlocClasse(classe.getNom(), x, y);
+
+        // Définir si c'est une interface
+        bloc.setInterface(classe.isInterface());
 
         // Traitement de la liste des attributs
         List<String> attributsStr = new ArrayList<>();
@@ -149,7 +153,8 @@ public class Controlleur
 
         // Traitement de la liste des méthodes
         List<String> methodesStr = new ArrayList<>();
-        for (Methode met : classe.getLstMethode()) {
+        for (Methode met : classe.getLstMethode()) 
+        {
             String visibilite = met.getVisibilite();
 
             switch (visibilite) {
@@ -215,6 +220,7 @@ public class Controlleur
             BlocClasse blocDestination = mapBlocsParNom.get(inter.getClasseDest().getNom());
             LiaisonVue liaison = new LiaisonVue(blocOrigine, blocDestination, "interface");
             lstLiaisons.add(liaison);
+            System.out.println("Interface ajoutée : " + inter);
         }
     }
 
@@ -255,6 +261,16 @@ public class Controlleur
 
     public void sauvegarderClasses(List<BlocClasse> blocClasses, String cheminProjet) {
         gestionSauvegarde.sauvegarderClasses(blocClasses, cheminProjet);
+    }
+
+    public void creerLstInterface(Lecture lecture)
+    {
+        lecture.creerLstInterface();
+    }
+
+    public void afficherLstInterface(Lecture lecture)
+    {
+        lecture.afficherLstInterface();
     }
 
     //-----------//
