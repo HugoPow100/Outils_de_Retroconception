@@ -25,9 +25,9 @@ public class FenetrePrincipale extends JFrame
     //        ATTRIBUTS         //
     //--------------------------//
 
-    private PanneauProjets   panneauProjets;
-    private PanneauDiagramme panneauDiagramme;
-    private Controlleur controlleur;
+    private PanneauProjets      panneauProjets;
+    private PanneauDiagramme    panneauDiagramme;
+    private Controlleur         controlleur;
 
     //-------------------------//
     //      CONSTRUCTEUR       //
@@ -71,7 +71,6 @@ public class FenetrePrincipale extends JFrame
     {
         panneauDiagramme.chargerProjet(cheminProjet);
     }
-
 
     public void sauvegarderDiagramme() 
     {

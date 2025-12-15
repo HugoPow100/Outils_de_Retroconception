@@ -973,9 +973,16 @@ public class LiaisonVue
         // Créer le chemin orthogonal
         List<Point> path = createOrthogonalPath(ancrageOrigine, ancrageDestination, sideOrigine, sideDestination);
 
-        // Trait plein simple pour association
+        // Définir le style de trait selon le type de liaison
         g.setColor(Color.BLACK);
-        g.setStroke(new BasicStroke(1));
+        if (this.type.equals("interface")) {
+            // Pointillés pour les interfaces
+            float[] dashPattern = {5.0f, 5.0f};
+            g.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, dashPattern, 0));
+        } else {
+            // Trait plein pour association et héritage
+            g.setStroke(new BasicStroke(1));
+        }
         
         // Dessiner chaque segment du chemin (tous strictement horizontaux ou verticaux)
         for (int i = 0; i < path.size() - 1; i++) {
@@ -992,8 +999,8 @@ public class LiaisonVue
         }
 
 
-        if (this.type.equals("heritage")) {
-            dessinerFlecheHeritage(g, ancrageDestination, sideDestination);
+        if (this.type.equals("heritage") || this.type.equals("interface")) {
+            dessinerFlecheVide(g, ancrageDestination, sideDestination);
         }
         
         // Les points d'ancrage sont invisibles mais draggables
@@ -1028,11 +1035,10 @@ public class LiaisonVue
         }
     }
 
-        private void dessinerFlecheHeritage(Graphics2D g, Point anchor, int side) {
+        private void dessinerFlecheVide(Graphics2D g, Point anchor, int side) {
             int flecheSize = 10;
             int x = anchor.x;
             int y = anchor.y;
-            
             int px1, py1, px2, py2, px3, py3;
             
             switch(side) {
