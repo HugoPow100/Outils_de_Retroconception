@@ -62,10 +62,10 @@ public class Controlleur
         HashMap<String, Classe>     hashMapclasses  = lecture.getHashMapClasses();
 
         
-        /*if(estSauvegarde(cheminProjet))
-        {*/
+        if(estSauvegarde(cheminProjet))
+        {
             mapBlocsParNom = gestionSauvegarde.chargerSaugardeCoord(cheminProjet, hashMapclasses);   
-        /*}
+        }
         else
         {
 
@@ -89,7 +89,7 @@ public class Controlleur
                     }
                 }
             }
-        }*/
+        }
 
         
 
