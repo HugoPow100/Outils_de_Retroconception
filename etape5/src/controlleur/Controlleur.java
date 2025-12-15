@@ -81,6 +81,8 @@ public class Controlleur
 
         creerLiaisonsDepuisHerit        (lecture.getLstHeritage(), mapBlocsParNom);
 
+        
+
         //creerLiaisonsDepuisInterface  (lecture.getLstInterface(), mapBlocsParNom);
 
         fenetrePrincipale.optimiserPositionsClasses();
@@ -212,6 +214,16 @@ public class Controlleur
 
     public void sauvegarderClasses(List<BlocClasse> blocClasses, String cheminProjet) {
         gestionSauvegarde.sauvegarderClasses(blocClasses, cheminProjet);
+    }
+
+    public void creerLstInterface(Lecture lecture)
+    {
+        lecture.creerLstInterface();
+    }
+
+    public void afficherLstInterface(Lecture lecture)
+    {
+        lecture.afficherLstInterface();
     }
 
     //-----------//
