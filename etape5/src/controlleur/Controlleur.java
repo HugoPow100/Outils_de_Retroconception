@@ -252,7 +252,6 @@ public class Controlleur
         } 
         catch (Exception e) 
         {
-            e.getCause();
             e.getMessage();
         }
 
