@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
-public class PanneauDiagramme extends JPanel {
-
+public class PanneauDiagramme extends JPanel
+{
     //--------------------------//
     //        ATTRIBUTS         //
     //--------------------------//
@@ -56,6 +56,12 @@ public class PanneauDiagramme extends JPanel {
         setLayout(null);
         setBackground(new Color(255, 255, 255));
         setBorder(BorderFactory.createTitledBorder("Diagramme UML"));
+        
+        // Augmenter la taille de la police par défaut pour la bordure
+        Font defaultFont = UIManager.getFont("TitledBorder.font");
+        if (defaultFont != null) {
+            UIManager.put("TitledBorder.font", new Font(defaultFont.getName(), Font.PLAIN, 14));
+        }
 
         ajouterListenersInteraction();
     }
@@ -87,7 +93,11 @@ public class PanneauDiagramme extends JPanel {
             @Override
             public void mousePressed(MouseEvent e) {
                 // Vérifier si on clique sur le texte de zoom pour le réinitialiser
-                if (e.getX() >= 10 && e.getX() <= 100 && e.getY() >= getHeight() - 20 && e.getY() <= getHeight() - 10) {
+                // Zone cliquable : bas-gauche de la fenêtre
+                int padding = 10;
+                int textHeight = 25;
+                if (e.getX() >= padding && e.getX() <= padding + 100 && 
+                    e.getY() >= getHeight() - padding - textHeight && e.getY() <= getHeight() - padding) {
                     zoomLevel = 1.0;
                     panOffsetX = 0;
                     panOffsetY = 0;
@@ -95,16 +105,34 @@ public class PanneauDiagramme extends JPanel {
                     return;
                 }
                 
-                // Vérifier si c'est un clic droit pour commencer le pan
-                if (e.getButton() == MouseEvent.BUTTON3) {
+                // Convertir les coordonnées écran en coordonnées logiques (avec zoom et pan)
+                double logicalX = (e.getX() - panOffsetX - getWidth() / 2) / zoomLevel + getWidth() / (2 * zoomLevel);
+                double logicalY = (e.getY() - panOffsetY - getHeight() / 2) / zoomLevel + getHeight() / (2 * zoomLevel);
+
+                // Clic-droit : affichage plein écran d'une classe ou pan
+                if (e.getButton() == MouseEvent.BUTTON3)
+                {
+                    // Chercher si on clique sur un bloc
+                    BlocClasse blocClique = null;
+                    for (BlocClasse bloc : blocsClasses) {
+                        if (bloc.contient((int) logicalX, (int) logicalY)) {
+                            blocClique = bloc;
+                            break;
+                        }
+                    }
+                    
+                    // Si on clique sur un bloc, basculer son affichage plein écran
+                    if (blocClique != null) {
+                        blocClique.setAffichagePleinEcran(!blocClique.isAffichagePleinEcran());
+                        repaint();
+                        return;
+                    }
+                    
+                    // Sinon, commencer le pan
                     isPanning = true;
                     pointDernier = e.getPoint();
                     return;
                 }
-                
-                // Convertir les coordonnées écran en coordonnées logiques (avec zoom et pan)
-                double logicalX = (e.getX() - panOffsetX - getWidth() / 2) / zoomLevel + getWidth() / (2 * zoomLevel);
-                double logicalY = (e.getY() - panOffsetY - getHeight() / 2) / zoomLevel + getHeight() / (2 * zoomLevel);
 
                 pointDernier = e.getPoint();
                 blocEnDeplacement = null;
@@ -248,10 +276,12 @@ public class PanneauDiagramme extends JPanel {
             return;
         }
 
-        // réinitialiser les positions des ancres pour les liaisons
-        reinitialiserAnchages();
+        // Réinitialiser toutes les liaisons avec le nouvel algorithme
+        for (LiaisonVue liaison : liaisons) {
+            liaison.recalculerAncrages();
+        }
 
-        // Étape 4 : Redessiner
+        // Redessiner
         repaint();
     }
 
@@ -382,9 +412,19 @@ public class PanneauDiagramme extends JPanel {
         g2d.setTransform(new java.awt.geom.AffineTransform());
 
         g2d.setColor(new Color(100, 100, 100));
-        g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+        g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+        FontMetrics fm = g2d.getFontMetrics();
+        
         String zoomText = String.format("Zoom: %d%%", (int) (zoomLevel * 100));
-        g2d.drawString(zoomText, 10, getHeight() - 10);
+        int textWidth = fm.stringWidth(zoomText);
+        int textHeight = fm.getAscent();
+        
+        // Positionner le texte en bas à gauche avec du padding
+        int padding = 10;
+        int x = padding;
+        int y = getHeight() - padding;
+        
+        g2d.drawString(zoomText, x, y);
     }
 
     private void dessinerLiaisons(Graphics2D g2d) {

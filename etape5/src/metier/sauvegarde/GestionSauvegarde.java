@@ -1,5 +1,7 @@
 package metier.sauvegarde;
 
+import metier.objet.Classe;
+import controlleur.Controlleur;
 import vue.BlocClasse;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -8,8 +10,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.List;
 
 public class GestionSauvegarde 
@@ -17,9 +21,11 @@ public class GestionSauvegarde
 
     private Map<String, int[]> hashCoordonnees;
     private String cheminDossier;
+    private Controlleur ctrl;
 
-    public GestionSauvegarde() 
+    public GestionSauvegarde(Controlleur ctrl) 
     {
+        this.ctrl            = ctrl;
         this.hashCoordonnees = new HashMap<String, int[]>();
     }
 
@@ -54,6 +60,7 @@ public class GestionSauvegarde
                     String nomClass    = ligne.substring(0, premierEspace);
                     String xStr        = ligne.substring(premierEspace + 1, deuxiemeEspace).trim();
                     String yStr        = ligne.substring(deuxiemeEspace + 1).trim();
+                    System.out.println(nomClass + " " + xStr + " " + yStr);
 
                     int    x           = Integer.parseInt(xStr);
                     int    y           = Integer.parseInt(yStr);
@@ -142,7 +149,12 @@ public class GestionSauvegarde
                 ligneAAjouter +=  "_" + (nbrDossierMemeNom + 1);
                 nomProjet     +=  "_" + (nbrDossierMemeNom + 1);
             }
+            else
+            {
 
+            }
+
+            
             bw.write(ligneAAjouter);
             bw.newLine();
 
@@ -181,5 +193,47 @@ public class GestionSauvegarde
         {
             e.printStackTrace();
         }
+    }
+
+
+ 
+
+    public HashMap<String, BlocClasse> chargerSauvegardeCoord(String nomFichier,  HashMap<String, Classe> mapClass)
+    {
+        String   basePath               = System.getProperty("user.dir");
+        String   cheminPath             = basePath + "/donnees/sauvegardes/";
+
+        File file = new File(cheminPath + nomFichier + ".xml");
+
+        HashMap<String, BlocClasse> mapBlocsParNom = new HashMap<>();
+
+        try (Scanner scanner = new Scanner(file)) 
+        {
+            while (scanner.hasNextLine()) 
+            {
+                String ligne = scanner.nextLine();
+
+                if(!ligne.contains("/"))
+                {
+
+                    String[] tabClass = ligne.split("\\s+");
+                    
+                    Classe classe     = mapClass.get(tabClass[0].trim());
+                    int    posX       = Integer.parseInt(tabClass[1].trim());
+                    int    posY       = Integer.parseInt(tabClass[2].trim());
+
+                    BlocClasse bloc = this.ctrl.creerBlocAPartirDeClasse(classe, posX, posY);
+                    ctrl.ajouterBlockList(bloc);
+                    mapBlocsParNom.put(classe.getNom(), bloc);
+                }
+            }
+        }
+        catch (Exception e) 
+        {
+            e.printStackTrace();
+            e.getMessage();
+        }
+
+        return mapBlocsParNom;
     }
 }

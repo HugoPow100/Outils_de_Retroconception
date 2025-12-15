@@ -149,6 +149,9 @@ public class BarreMenus extends JMenuBar
             // FileWriter avec "true" pour ajouter à la fin
             FileWriter writer = new FileWriter(fichier, true);
 
+            //Extrai le nom du dossier pour le mettre en bout de ligne
+            //String nomDossier = cheminFichier.substring(cheminFichier.lastIndexOf("/") + 1);
+
             // Écrire la chaîne avec un retour à la ligne
             writer.write(cheminFichier + System.lineSeparator());
 

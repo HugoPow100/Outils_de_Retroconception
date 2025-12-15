@@ -66,6 +66,8 @@ public class ParseurJava
 			if (ligne.contains("class") && ligne.contains("implements"))
 			{
 				interfaces = ligne.substring(ligne.indexOf("implements") + 10).trim();
+				// Nettoyer les caractères superflus (accolades, points-virgules)
+				interfaces = interfaces.replaceAll("[{;].*", "").trim();
 				typeClasse += "implements ";
 			}
 

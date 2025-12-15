@@ -1,12 +1,14 @@
 package controlleur;
 
 import java.util.*;
+import java.io.File;
 import metier.lecture.*;
 import metier.objet.*;
 import metier.sauvegarde.*;
 import vue.BlocClasse;
 import vue.FenetrePrincipale;
 import vue.LiaisonVue;
+
 /**
 * Contrôleur qui met en relation le métier et la vue IHM.
 * A accès à la fenêtre principale de la vue, et à la classe de lecture
@@ -23,6 +25,8 @@ public class Controlleur
     private FenetrePrincipale   fenetrePrincipale;
     private GestionSauvegarde   gestionSauvegarde;
 
+    private List<BlocClasse>    lstBlocs;
+
     //-------------------------//
     //      CONSTRUCTEUR       //
     //-------------------------//
@@ -35,7 +39,9 @@ public class Controlleur
     {
         this.fenetrePrincipale  = fenetrePrincipale;
         this.lstLiaisons        = new ArrayList<>();
-        this.gestionSauvegarde  = new GestionSauvegarde();
+        this.gestionSauvegarde  = new GestionSauvegarde(this);
+
+        this.lstBlocs           = new ArrayList<>();
     }
 
     //----------------------//
@@ -50,42 +56,59 @@ public class Controlleur
     public List<BlocClasse> chargerProjetEnBlocsClasses(String cheminProjet) 
     {
         lecture = new Lecture(cheminProjet);
+        lstBlocs.clear();
         lstLiaisons.clear();
-
-        List<BlocClasse> blocs                  = new ArrayList<>();
-        HashMap<String, Classe> hashMapclasses  = lecture.getHashMapClasses();
+        lstBlocs.clear();
 
         // hasmap pour associer les noms de classes aux blocs
-        HashMap<String, BlocClasse> mapBlocsParNom = new HashMap<>();
+        HashMap<String, BlocClasse> mapBlocsParNom  = new HashMap<>();
+        HashMap<String, Classe>     hashMapclasses  = lecture.getHashMapClasses();
 
-        int posX    = 50;
-        int posY    = 50;
+        String nomDeSauvegardeProjet = estSauvegarde(cheminProjet);
+        
+        System.out.println(nomDeSauvegardeProjet);
+        if(!nomDeSauvegardeProjet.equals(""))
+        {
+            System.out.println(nomDeSauvegardeProjet.equals(""));
 
-        for (Classe classe : hashMapclasses.values()) {
-            if (classe != null) {
-                BlocClasse bloc = creerBlocAPartirDeClasse(classe, posX, posY);
-                blocs.add(bloc);
-                mapBlocsParNom.put(classe.getNom(), bloc);
+            mapBlocsParNom = gestionSauvegarde.chargerSauvegardeCoord(nomDeSauvegardeProjet, hashMapclasses);   
+        }
+        else
+        {
+            int posX    = 50;
+            int posY    = 50;
 
-                posX += 250;
-                if (posX > 1000) 
+            for (Classe classe : hashMapclasses.values()) 
+            {
+                if (classe != null) 
                 {
-                    posX    = 50;
-                    posY    += 200;
+                    BlocClasse bloc = creerBlocAPartirDeClasse(classe, posX, posY);
+                    this.lstBlocs.add(bloc);
+                    mapBlocsParNom.put(classe.getNom(), bloc);
+
+                    posX += 250;
+                    if (posX > 1000) 
+                    {
+                        posX    = 50;
+                        posY    += 200;
+                    }
                 }
             }
         }
+
+        
 
         // Créer les lstLiaisons depuis associations, heritages, et interfaces
         creerLiaisonsDepuisAssoc        (lecture.getLstAssociation(), mapBlocsParNom);
 
         creerLiaisonsDepuisHerit        (lecture.getLstHeritage(), mapBlocsParNom);
+        creerLiaisonsDepuisInterface(lecture.getLstInterfaces(), mapBlocsParNom);
 
-        //creerLiaisonsDepuisInterface  (lecture.getLstInterface(), mapBlocsParNom);
+        creerLiaisonsDepuisInterface  (lecture.getLstInterface(), mapBlocsParNom);
 
         fenetrePrincipale.optimiserPositionsClasses();
 
-        return blocs;
+        return this.lstBlocs;
     }
 
     /**
@@ -95,8 +118,12 @@ public class Controlleur
     * @param y Ordonnée du bloc à créer
     * @return Le bloc classe créé
     */
-    private BlocClasse creerBlocAPartirDeClasse(Classe classe, int x, int y) {
+    public BlocClasse creerBlocAPartirDeClasse(Classe classe, int x, int y) 
+    {
         BlocClasse bloc = new BlocClasse(classe.getNom(), x, y);
+
+        // Définir si c'est une interface
+        bloc.setInterface(classe.isInterface());
 
         // Traitement de la liste des attributs
         List<String> attributsStr = new ArrayList<>();
@@ -132,7 +159,8 @@ public class Controlleur
 
         // Traitement de la liste des méthodes
         List<String> methodesStr = new ArrayList<>();
-        for (Methode met : classe.getLstMethode()) {
+        for (Methode met : classe.getLstMethode()) 
+        {
             String visibilite = met.getVisibilite();
 
             switch (visibilite) {
@@ -198,16 +226,45 @@ public class Controlleur
             BlocClasse blocDestination = mapBlocsParNom.get(inter.getClasseDest().getNom());
             LiaisonVue liaison = new LiaisonVue(blocOrigine, blocDestination, "interface");
             lstLiaisons.add(liaison);
+            System.out.println("Interface ajoutée : " + inter);
         }
     }
 
+
     /**
-     * NON IMPLEMENTÉ, RETURN TOUJOURS FALSE POUR L'INSTANT
-    * Vérifie si le projet spécifié a déjà une sauvegarde dans projets.xml
-    * @param cheminProjet 
-    */
-    public boolean estSauvegardee(String cheminProjet) {
-        return false;
+     * Verifie que il existe une sauvegarde d'un projet deja existant
+     * @param paraCheminDossier
+     * @return
+     */
+    public String estSauvegarde(String paraCheminDossier)
+    {
+        String   basePath               = System.getProperty("user.dir");
+        String   cheminPath             = basePath + "/donnees/projets.xml";
+
+        try(Scanner scan = new Scanner(new File(cheminPath))) 
+        {
+            while(scan.hasNextLine())
+            {
+                String ligne = scan.nextLine();
+
+                 System.out.println("ligne lue est sauvegardée : " + ligne);
+                 
+                String[] tabCheminProjet = ligne.split("\t");
+
+                if(tabCheminProjet[0].equals(paraCheminDossier.trim()))
+                {
+                    System.out.println("NOMMMMMMMMMMMMMMMMMMMMMMMM fichier " + tabCheminProjet[1]);
+                    return tabCheminProjet[1].trim();
+                }
+            }
+            
+        } 
+        catch (Exception e) 
+        {
+            e.getMessage();
+        }
+
+        return "";
     }
 
     public void sauvegarderClasses(List<BlocClasse> blocClasses, String cheminProjet) {
@@ -221,4 +278,11 @@ public class Controlleur
     public List<LiaisonVue> getLiaisons() {
         return lstLiaisons;
     }
+
+    public void ajouterBlockList(BlocClasse block)
+    {
+        this.lstBlocs.add(block);
+    }
+
+    
 }

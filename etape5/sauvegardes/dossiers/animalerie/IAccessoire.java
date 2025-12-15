@@ -1,4 +1,7 @@
-public interface IAccessoire {
+
+
+public interface IAccessoire
+{
     String getNom();
     String getCouleur();
 
