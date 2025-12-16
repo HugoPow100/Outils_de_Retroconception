@@ -61,7 +61,7 @@ public class GestionSauvegarde
 
             while ((ligne = reader.readLine()) != null) 
             {
-                if (ligne.contains("/")) 
+                if (ligne.contains("/") || ligne.contains("\\")) 
                 {
                     this.cheminDossier = ligne.trim();
                     continue;
@@ -108,11 +108,11 @@ public class GestionSauvegarde
         String fichierLectureEcriture = Path.of(ConstantesChemins.DONNEES, "projets.xml").toString();
 
 
-        int      indiceslash            = cheminProjet.lastIndexOf("/");
+        int      indiceslash            = Math.max(cheminProjet.lastIndexOf("/"), cheminProjet.lastIndexOf("\\"));
         String   nomProjetASauv         = cheminProjet.substring(indiceslash + 1).trim();
 
         // Vérifier si le projet est déjà sauvegardé
-        if (this.projetEstSauvegarde(nomProjetASauv)) 
+        if (this.projetEstSauvegarde(cheminProjet)) 
         {
             // Le projet existe : modifier uniquement le fichier de coordonnées
             sauvegarderCoordProjet(listBlocClasses, nomProjetASauv, cheminProjet);
@@ -169,13 +169,8 @@ public class GestionSauvegarde
 
     public boolean fichierDeSauvegardeExiste(String nomIntitule) 
     {
-        /*String   basePath               = System.getProperty("user.dir");
-        String   cheminPath             = basePath + "data/donnees/sauvegardes/" ;*/
-
-        String cheminPath = Path.of(ConstantesChemins.SAUVEGARDES, "projets.xml").toString();
-
-        File file = new File(cheminPath + nomIntitule + ".xml");
-
+        String cheminPath = Path.of(ConstantesChemins.SAUVEGARDES, nomIntitule + ".xml").toString();
+        File file = new File(cheminPath);
         return file.exists();
     }
 
@@ -244,10 +239,15 @@ public class GestionSauvegarde
                 
                 String[] tabLigne = ligne.split("\t");
 
-                System.out.println(tabLigne);
                 if(tabLigne[0].equals(paraCheminDossier.trim()))
                 {
-                    return tabLigne[1].trim();
+                    String intitule = tabLigne[1].trim();
+                    // Extraire juste le nom du projet si c'est un chemin complet
+                    int indiceslash = Math.max(intitule.lastIndexOf("/"), intitule.lastIndexOf("\\"));
+                    if (indiceslash >= 0) {
+                        intitule = intitule.substring(indiceslash + 1);
+                    }
+                    return intitule;
                 }
             }
             
@@ -260,10 +260,7 @@ public class GestionSauvegarde
         return "";
     }
 
-    public boolean projetEstSauvegarde(String nomIntituleSauvegarde) {
-
-        /*String   basePath               = System.getProperty("user.dir");
-        String   cheminPath             = basePath + "data/donnees/projets.xml";*/
+    public boolean projetEstSauvegarde(String cheminProjet) {
 
         String fichierPath = Path.of(ConstantesChemins.DONNEES, "projets.xml").toString();
         
@@ -275,8 +272,8 @@ public class GestionSauvegarde
                 
                 String[] tabLigne = ligne.split("\t");
 
-                System.out.println(tabLigne);
-                if(tabLigne[1].equals(nomIntituleSauvegarde.trim()))
+                // Vérifier si le chemin du projet correspond
+                if(tabLigne.length >= 1 && tabLigne[0].equals(cheminProjet.trim()))
                 {
                     return true;
                 }
@@ -293,11 +290,11 @@ public class GestionSauvegarde
 
     public void sauvegardeProjetXml(String cheminFichier)
     {
-        int indiceslash = cheminFichier.lastIndexOf("/");
+        int indiceslash = Math.max(cheminFichier.lastIndexOf("/"), cheminFichier.lastIndexOf("\\"));
         String nomProjet = cheminFichier.substring(indiceslash + 1).trim();
         
         // Vérifier si le projet est déjà enregistré
-        if (!projetEstSauvegarde(nomProjet))
+        if (!projetEstSauvegarde(cheminFichier))
         {
             // Ajouter le projet à projets.xml
             /*String basePath = System.getProperty("user.dir");
@@ -309,13 +306,18 @@ public class GestionSauvegarde
             
             try
             {
-
+                // Créer les dossiers parents s'ils n'existent pas
+                File parent = fichier.getParentFile();
+                if (parent != null && !parent.exists())
+                {
+                    parent.mkdirs();
+                }
                 
-                /*// Création du fichier s'il n'existe pas
+                // Création du fichier s'il n'existe pas
                 if (!fichier.exists())
                 {
                     fichier.createNewFile();
-                }*/
+                }
                 
                 // Ajouter la ligne au fichier
                 try (FileWriter writer = new FileWriter(fichier, true))

@@ -84,10 +84,12 @@ public class Controleur
         }
 
         // Test si le projet est déjàa présent dans les sauvegardes .xml
-        if (gestionSauvegarde.projetEstSauvegarde(gestionSauvegarde.getIntituleFromLien(cheminProjet))) 
+        String intituleProjet = gestionSauvegarde.getIntituleFromLien(cheminProjet);
+        if (gestionSauvegarde.projetEstSauvegarde(cheminProjet) && 
+            gestionSauvegarde.fichierDeSauvegardeExiste(intituleProjet)) 
         {
             System.out.println("Le projet est sauvegardé. Chargement des coordonées depuis le .xml");
-            Map<String, int[]> coordonneesBlocs = gestionSauvegarde.lireCoordoneesXml(gestionSauvegarde.getIntituleFromLien(cheminProjet) + ".xml");
+            Map<String, int[]> coordonneesBlocs = gestionSauvegarde.lireCoordoneesXml(intituleProjet + ".xml");
             
             for (BlocClasse bloc : lstBlocs) {
                 int[] coordonnees = coordonneesBlocs.get(bloc.getNom());

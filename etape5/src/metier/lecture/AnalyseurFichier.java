@@ -112,6 +112,7 @@ public class AnalyseurFichier
 		catch (Exception e)
 		{
 			e.printStackTrace();
+			throw new RuntimeException("Erreur lors de l'analyse du fichier : " + e.getMessage(), e);
 		}
 
 		return this.hashMapClasses;

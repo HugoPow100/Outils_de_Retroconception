@@ -72,7 +72,7 @@ public class PanneauDiagramme extends JPanel
     //      METHODES        //
     //----------------------//
 
-    public void chargerProjet(String cheminProjet) 
+    public void chargerProjet(String cheminProjet) throws Exception
     {
         this.cheminProjetCourant = cheminProjet;
         this.blocsClasses.clear();
