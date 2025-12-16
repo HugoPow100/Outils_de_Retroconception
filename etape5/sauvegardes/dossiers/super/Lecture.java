@@ -169,7 +169,7 @@ public class Lecture
 					}
 					scAttribut.close();
 
-					System.out.println("Le nouvel attribut a été creer : ");
+					//System.out.println("Le nouvel attribut a été creer : ");
 					lstAttribut.add(new Attribut(nom, type, visibiliteAtribut, portee));
 				}
 
@@ -234,13 +234,13 @@ public class Lecture
 
 					if (!nomConstructeur.equals("")) {
 
-						System.out.println("Nouvelle méthode ajouté dans la liste");
+						//System.out.println("Nouvelle méthode ajouté dans la liste");
 						this.lstMethode.add(
 								new Methode(nomConstructeur, typeRetour, visibilite, false,
 										new ArrayList<>(lstParametres)));
 						nomConstructeur = ""; // Réinitialiser
 					} else {
-						System.out.println("Nouvelle méthode ajouté");
+						//System.out.println("Nouvelle méthode ajouté");
 						this.lstMethode
 								.add(new Methode(nomMethode, typeRetour, visibilite, isMethodeAbstract,
 										new ArrayList<>(lstParametres)));

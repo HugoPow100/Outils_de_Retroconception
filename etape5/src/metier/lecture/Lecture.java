@@ -60,7 +60,7 @@ public class Lecture
 					Heritage heritage = new Heritage(classParent, classe);
 					lstHeritage.add(heritage);
 
-					System.out.println(heritage);
+					//System.out.println(heritage);
 				}
 			}
 		}
@@ -71,6 +71,7 @@ public class Lecture
 	 */
 	public void afficherLstInterface()
 	{
+		System.out.println("--- Affichage des interfaces ---");
 		for (Interface inter : lstInterface)
 		{
 			System.out.println(inter);
@@ -80,6 +81,7 @@ public class Lecture
 
 	public void creerLstInterface()
 	{
+		System.out.println("--- Création des interfaces ---");
 		for (Classe classe : hashMapClasses.values())
 		{
 			String nomInterfacesStr = classe.getNomInterface();
@@ -92,22 +94,19 @@ public class Lecture
 				
 				for (String nomInterface : tabNomInterfaces)
 				{
-					nomInterface = nomInterface.trim();
-					
-					// Vérifier que le nom ne contient pas de caractères invalides
-					if (!nomInterface.isEmpty() && !nomInterface.contains("{") && !nomInterface.contains("*"))
+					nomInterface = nomInterface.replace("{", "").trim();
+					Classe interfaceClasse = getClasse(nomInterface);
+					System.out.println("interface : " + interfaceClasse.getNom());
+
+					if (interfaceClasse != null)
 					{
-						Classe interfaceClasse = getClasse(nomInterface);
-						
-						if (interfaceClasse != null)
-						{
-							Interface inter = new Interface(interfaceClasse, classe);
-							lstInterface.add(inter);
-						}
-						else
-						{
-							System.out.println("⚠️  Interface introuvable : " + nomInterface);
-						}
+						Interface inter = new Interface(interfaceClasse, classe);
+						System.out.println("L'interface a été créér : " + inter);
+						lstInterface.add(inter);
+					}
+					else
+					{
+						System.out.println(" Interface introuvable : " + nomInterface);
 					}
 				}
 			}
@@ -130,10 +129,12 @@ public class Lecture
 		return null;
 	}
 
+	
+
 	// ========== Getters ==========
 
-	public HashMap  <String, Classe> getHashMapClasses() {return this.hashMapClasses;}
-	public ArrayList<Association>    getLstAssociation() {return this.lstAssociations;}
-	public ArrayList<Heritage>       getLstHeritage   () {return this.lstHeritage;}
-	public ArrayList<Interface>       getLstInterface () {return this.lstInterface;}
+	public HashMap  <String, Classe> getHashMapClasses	()	{return this.hashMapClasses;}
+	public ArrayList<Association>    getLstAssociation	()	{return this.lstAssociations;}
+	public ArrayList<Heritage>       getLstHeritage   	()	{return this.lstHeritage;}
+	public ArrayList<Interface>      getLstInterface 	()	{return this.lstInterface;}
 }

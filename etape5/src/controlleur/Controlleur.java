@@ -1,5 +1,6 @@
 package controlleur;
 
+import java.io.File;
 import java.util.*;
 import metier.lecture.*;
 import metier.objet.*;
@@ -57,47 +58,49 @@ public class Controlleur
         lecture = new Lecture(cheminProjet);
         lstBlocs.clear();
         lstLiaisons.clear();
+        lstBlocs.clear();
 
         // hasmap pour associer les noms de classes aux blocs
         HashMap<String, BlocClasse> mapBlocsParNom  = new HashMap<>();
         HashMap<String, Classe>     hashMapclasses  = lecture.getHashMapClasses();
 
+        String nomDeSauvegardeProjet = estSauvegarde(cheminProjet);
         
-        if(estSauvegarde(cheminProjet))
+        System.out.println(nomDeSauvegardeProjet);
+
+        
+        int posX    = 50;
+        int posY    = 50;
+
+        for (Classe classe : hashMapclasses.values()) 
         {
-            mapBlocsParNom = gestionSauvegarde.chargerSaugardeCoord(cheminProjet, hashMapclasses);   
-        }
-        else
-        {
-
-
-            int posX    = 50;
-            int posY    = 50;
-
-            for (Classe classe : hashMapclasses.values()) 
+            if (classe != null) 
             {
-                if (classe != null) 
-                {
-                    BlocClasse bloc = creerBlocAPartirDeClasse(classe, posX, posY);
-                    this.lstBlocs.add(bloc);
-                    mapBlocsParNom.put(classe.getNom(), bloc);
+                BlocClasse bloc = creerBlocAPartirDeClasse(classe, posX, posY);
+                this.lstBlocs.add(bloc);
+                mapBlocsParNom.put(classe.getNom(), bloc);
 
-                    posX += 250;
-                    if (posX > 1000) 
-                    {
-                        posX    = 50;
-                        posY    += 200;
-                    }
+                posX += 250;
+                if (posX > 1000) 
+                {
+                    posX    = 50;
+                    posY    += 200;
                 }
             }
         }
+    
 
+        if(!nomDeSauvegardeProjet.equals(""))
+        {
+            mapBlocsParNom = gestionSauvegarde.chargerSauvegardeCoord(nomDeSauvegardeProjet, mapBlocsParNom);   
+        }
         
 
         // Créer les lstLiaisons depuis associations, heritages, et interfaces
         creerLiaisonsDepuisAssoc        (lecture.getLstAssociation(), mapBlocsParNom);
 
         creerLiaisonsDepuisHerit        (lecture.getLstHeritage(), mapBlocsParNom);
+        creerLiaisonsDepuisInterface(lecture.getLstInterface(), mapBlocsParNom);
 
         creerLiaisonsDepuisInterface  (lecture.getLstInterface(), mapBlocsParNom);
 
@@ -182,7 +185,8 @@ public class Controlleur
     * @param mapBlocsParNom {@link HashMap<String, BlocClasse>} de String, BlocClasse avec le nom de chaque bloc et chaque bloc
     */
     private void creerLiaisonsDepuisAssoc(List<Association> lstAssoc, HashMap<String, BlocClasse> mapBlocsParNom) {
-        for (Association assoc : lstAssoc) {
+        for (Association assoc : lstAssoc) 
+        {
             String multOrig = (assoc.getMultOrig() != null) ? assoc.getMultOrig().toString() : "";
             String multDest = (assoc.getMultDest() != null) ? assoc.getMultDest().toString() : "";
             BlocClasse blocOrigine = mapBlocsParNom.get(assoc.getClasseOrig().getNom());
@@ -190,6 +194,7 @@ public class Controlleur
 
             LiaisonVue liaison = new LiaisonVue(blocOrigine, blocDestination, "association", assoc.isUnidirectionnel(),
                     multOrig, multDest);
+
             lstLiaisons.add(liaison);
         }
     }
@@ -201,10 +206,13 @@ public class Controlleur
     */
     private void creerLiaisonsDepuisHerit(List<Heritage> lstHerit, HashMap<String, BlocClasse> mapBlocsParNom) {
 
-        for (Heritage herit : lstHerit) {
+        for (Heritage herit : lstHerit) 
+        {
             BlocClasse blocOrigine = mapBlocsParNom.get(herit.getClasseOrig().getNom());
             BlocClasse blocDestination = mapBlocsParNom.get(herit.getClasseDest().getNom());
+
             LiaisonVue liaison = new LiaisonVue(blocOrigine, blocDestination, "heritage");
+
             lstLiaisons.add(liaison);
         }
     }
@@ -216,37 +224,42 @@ public class Controlleur
     */
     private void creerLiaisonsDepuisInterface(List<Interface> lstInter, HashMap<String, BlocClasse> mapBlocsParNom) {
 
-        for (Interface inter : lstInter) {
+        for (Interface inter : lstInter) 
+        {
             BlocClasse blocOrigine = mapBlocsParNom.get(inter.getClasseOrig().getNom());
             BlocClasse blocDestination = mapBlocsParNom.get(inter.getClasseDest().getNom());
+
             LiaisonVue liaison = new LiaisonVue(blocOrigine, blocDestination, "interface");
+
             lstLiaisons.add(liaison);
-            System.out.println("Interface ajoutée : " + inter);
         }
     }
 
 
     /**
-     * Verifie que il existe une sauvegarde d'un projet deja existant
+     * Verifie s'il existe une sauvegarde d'un projet deja existant
      * @param paraCheminDossier
-     * @return
+     * @return 
      */
-    public boolean estSauvegarde(String paraCheminDossier)
+    public String get(String paraCheminDossier)
     {
         String   basePath               = System.getProperty("user.dir");
         String   cheminPath             = basePath + "/donnees/projets.xml";
 
-        try(Scanner scan = new Scanner(cheminPath)) 
+        try(Scanner scan = new Scanner(new File(cheminPath))) 
         {
             while(scan.hasNextLine())
             {
                 String ligne = scan.nextLine();
 
-                String[] tabCheminProjet = ligne.split(ligne);
+                System.out.println("ligne lue est sauvegardée : " + ligne);
+                 
+                String[] tabCheminProjet = ligne.split("\t");
 
                 if(tabCheminProjet[0].equals(paraCheminDossier.trim()))
                 {
-                    return true;
+                    System.out.println("NOMMMMMMMMMMMMMMMMMMMMMMMM fichier " + tabCheminProjet[1]);
+                    return tabCheminProjet[1].trim();
                 }
             }
             
@@ -256,7 +269,7 @@ public class Controlleur
             e.getMessage();
         }
 
-        return false;
+        return "";
     }
 
     public void sauvegarderClasses(List<BlocClasse> blocClasses, String cheminProjet) {
@@ -267,12 +280,14 @@ public class Controlleur
     //  GETTERS  //
     //-----------//
 
-    public List<LiaisonVue> getLiaisons() {
+    public List<LiaisonVue> getLiaisons() 
+    {
         return lstLiaisons;
     }
 
-    public List<BlocClasse> getLstBlocs() {
-        return lstBlocs;
+    public void ajouterBlockList(BlocClasse block)
+    {
+        this.lstBlocs.add(block);
     }
 
     

@@ -56,12 +56,15 @@ public class AnalyseurFichier
 			{
 				for (File file : tabFichiers)
 				{
-					lstCheminFich.add(file.getAbsolutePath());
+					if (file.getName().endsWith(".java"))
+					{
+						lstCheminFich.add(file.getAbsolutePath());
 
-					Path p = file.toPath();
-					String nomFichier = String.valueOf(p.getFileName()).replace(".java", "");
+						Path p = file.toPath();
+						String nomFichier = String.valueOf(p.getFileName()).replace(".java", "");
 
-					this.lstNomFichier.add(nomFichier);
+						this.lstNomFichier.add(nomFichier);
+					}
 				}
 
 				// Libére la mémoire

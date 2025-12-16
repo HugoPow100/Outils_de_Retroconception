@@ -4,6 +4,7 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+
 import javax.swing.*;
 
 public class PanneauProjets extends JPanel {
@@ -14,7 +15,6 @@ public class PanneauProjets extends JPanel {
 
     private FenetrePrincipale fenetrePrincipale;
     private String cheminDossiers;
-
 
     //-------------------------//
     //      CONSTRUCTEUR       //
@@ -68,7 +68,7 @@ public class PanneauProjets extends JPanel {
 
         File fichier = new File(cheminDossiers);
 
-        if (!fichier.exists()) 
+        if (!fichier.exists())
         {
             JLabel labelErreur = new JLabel("Dossier non trouvé");
             labelErreur.setForeground(Color.RED);
@@ -76,11 +76,12 @@ public class PanneauProjets extends JPanel {
             return;
         }
 
-
         try(BufferedReader reader = new BufferedReader(new FileReader(fichier)))
         {
             String ligne;
+            String messageInvalide = "Attention le projet a un ou des fichiers non valides \n";
             boolean vide = true;
+            boolean formatValide = true;
 
             while ((ligne = reader.readLine()) != null) 
             {
@@ -89,17 +90,18 @@ public class PanneauProjets extends JPanel {
                 if (!ligne.isEmpty()) 
                 {
                     File projet          = new File(ligne);
+
                     if (projet.exists())
                     {
                         //System.out.println("Le projet existe : " + ligne);
-                        
-                        JButton boutonProjet = creerBoutonProjet(projet);
-                        panelProjets.add(boutonProjet);
-                        panelProjets.add(Box.createVerticalStrut(5));
-                        vide = false;
-
+                        if (projet.isDirectory() || projet.getName().endsWith(".java"))
+                        {
+                            JButton boutonProjet = creerBoutonProjet(projet);
+                            panelProjets.add(boutonProjet);
+                            panelProjets.add(Box.createVerticalStrut(5));
+                            vide = false;
+                        }
                     }
-                    
                 }
             }
 

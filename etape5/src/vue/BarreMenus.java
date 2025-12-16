@@ -121,12 +121,46 @@ public class BarreMenus extends JMenuBar
             File fichierSelectionne = chooser.getSelectedFile();
             String cheminAbsolu = fichierSelectionne.getAbsolutePath();
 
+            verifierFichiersProjet(cheminAbsolu);
+            
             SauvegardeProjetXml(cheminAbsolu);
         } 
         else 
         {
             System.out.println("Aucun fichier choisi");
         }    
+    }
+
+    private void verifierFichiersProjet(String cheminDossiers)
+    {
+        File projet = new File(cheminDossiers);
+<<<<<<< HEAD
+        String messageInvalide = "Attention le projet a un ou des fichiers non valides : ";
+        String messageErreur = "\n( ";
+=======
+        String messageInvalide = "Attention : Fichiers non valides detectés. Uniquement les classes java ont été prises en compte.";
+>>>>>>> 011232b2b9773c6b35d8a42894f6127753fec984
+
+        if (projet.isDirectory())
+        {
+            File[] tabFichiers = projet.listFiles();
+            boolean fichierInvalides = false;
+
+            for (File file : tabFichiers)
+            {
+                if (file.isFile() && !file.getName().endsWith(".java"))
+                {
+                    messageErreur += file.getName() + ", ";
+                    fichierInvalides = true;
+                }
+            }
+
+            messageErreur += ")";
+            if (fichierInvalides)
+            {
+                JOptionPane.showMessageDialog(this,messageInvalide+messageErreur ,"Format invalide",JOptionPane.WARNING_MESSAGE);
+            }
+        }
     }
 
     private void SauvegardeProjetXml(String cheminFichier) 
@@ -148,6 +182,9 @@ public class BarreMenus extends JMenuBar
 
             // FileWriter avec "true" pour ajouter à la fin
             FileWriter writer = new FileWriter(fichier, true);
+
+            //Extrai le nom du dossier pour le mettre en bout de ligne
+            //String nomDossier = cheminFichier.substring(cheminFichier.lastIndexOf("/") + 1);
 
             // Écrire la chaîne avec un retour à la ligne
             writer.write(cheminFichier + System.lineSeparator());

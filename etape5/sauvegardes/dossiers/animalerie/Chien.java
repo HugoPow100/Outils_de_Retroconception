@@ -1,4 +1,5 @@
-public class Chien extends Animal {
+public class Chien extends Animal 
+{
     private String race;
     private Collier collier;
     
