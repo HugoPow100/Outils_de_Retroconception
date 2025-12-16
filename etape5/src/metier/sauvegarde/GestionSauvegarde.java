@@ -89,23 +89,24 @@ public class GestionSauvegarde
 
     public void sauvegarderClasses(List<BlocClasse> listBlocClasses, String cheminProjet) 
     {
-
         String   basePath               = System.getProperty("user.dir");
         String   cheminPath             = basePath + "/donnees/";
 
         int      indiceslash            = cheminProjet.lastIndexOf("/");
         String   nomProjetASauv         = cheminProjet.substring(indiceslash +1 ).trim();
 
+        System.out.println("nomProjetASauv !!!!!!!!!!!!!!!!!!!!!! = " + nomProjetASauv );
+
         String   fichierLectureEcriture = cheminPath + "projets.xml";
         int      nbrDossierMemeNom      = 0;
   
-        try (BufferedReader br = new BufferedReader(new FileReader(fichierLectureEcriture))) 
+        /*try (BufferedReader br = new BufferedReader(new FileReader(fichierLectureEcriture))) 
         {
             String ligne;
 
             while ((ligne = br.readLine()) != null) 
             {
-      
+
                 int    indicePremierSlash = ligne.lastIndexOf("/");
                 int    indiceTab          = ligne.indexOf("\t", indicePremierSlash);
 
@@ -135,34 +136,51 @@ public class GestionSauvegarde
         catch (IOException e) 
         {
             e.printStackTrace();
+        }*/
+
+
+        //Utlise la méthode estSauvegarde dans Controlleur pour regarder si le nom dans 
+        //Projet.xml est le meme dans donnees/sauvegardes
+        if(this.ctrl.estSauvegarde(null, nomProjetASauv).equals(nomProjetASauv))
+        {
+
+            File fichier = new File(cheminProjet);
+
+            if (fichier.exists()) 
+            {
+                boolean supprime = fichier.delete();
+                if (supprime) 
+                {
+                    System.out.println("Fichier supprimé avec succès : " + fichier.getName());
+                    sauvegarderCoordProjet(listBlocClasses, nomProjetASauv, cheminProjet);
+                } 
+                else 
+                {
+                    System.out.println("Impossible de supprimer le fichier : " + fichier.getName());
+                }
+            }
+
         }
-
-
-
-        try(BufferedWriter bw = new BufferedWriter(new FileWriter(fichierLectureEcriture, true))) 
+        else
         {
-            String ligneAAjouter = cheminProjet + "\t" + nomProjetASauv ;
-            String nomProjet     = nomProjetASauv;
-
-            if(nbrDossierMemeNom > 0)
+            try(BufferedWriter bw = new BufferedWriter(new FileWriter(fichierLectureEcriture, true))) 
             {
-                ligneAAjouter +=  "_" + (nbrDossierMemeNom + 1);
-                nomProjet     +=  "_" + (nbrDossierMemeNom + 1);
-            }
-            else
+                String ligneAAjouter = cheminProjet + "\t" + nomProjetASauv;
+                String nomProjet     = nomProjetASauv;
+
+                if(nbrDossierMemeNom > 0)
+                {
+                    ligneAAjouter +=  "_" + (nbrDossierMemeNom + 1);
+                    nomProjet     +=  "_" + (nbrDossierMemeNom + 1);
+                }
+                bw.write(ligneAAjouter + "\n");
+
+                sauvegarderCoordProjet(listBlocClasses, nomProjet, cheminProjet);
+
+            } catch (Exception e) 
             {
-
+                e.printStackTrace();
             }
-
-            
-            bw.write(ligneAAjouter);
-            bw.newLine();
-
-            sauvegarderCoordProjet(listBlocClasses, nomProjet, cheminProjet);
-
-        } catch (Exception e) 
-        {
-            e.printStackTrace();
         }
     }
 

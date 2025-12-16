@@ -64,7 +64,7 @@ public class Controlleur
         HashMap<String, BlocClasse> mapBlocsParNom  = new HashMap<>();
         HashMap<String, Classe>     hashMapclasses  = lecture.getHashMapClasses();
 
-        String nomDeSauvegardeProjet = estSauvegarde(cheminProjet);
+        String nomDeSauvegardeProjet = estSauvegarde(cheminProjet, null);
         
         System.out.println(nomDeSauvegardeProjet);
 
@@ -100,7 +100,7 @@ public class Controlleur
         creerLiaisonsDepuisAssoc        (lecture.getLstAssociation(), mapBlocsParNom);
 
         creerLiaisonsDepuisHerit        (lecture.getLstHeritage(), mapBlocsParNom);
-        creerLiaisonsDepuisInterface(lecture.getLstInterfaces(), mapBlocsParNom);
+        creerLiaisonsDepuisInterface(lecture.getLstInterface(), mapBlocsParNom);
 
         creerLiaisonsDepuisInterface  (lecture.getLstInterface(), mapBlocsParNom);
 
@@ -234,34 +234,70 @@ public class Controlleur
      * @param paraCheminDossier
      * @return
      */
-    public String estSauvegarde(String paraCheminDossier)
+    public String estSauvegarde(String paraCheminDossier, String nomFichierCoord)
     {
-        String   basePath               = System.getProperty("user.dir");
-        String   cheminPath             = basePath + "/donnees/projets.xml";
 
-        try(Scanner scan = new Scanner(new File(cheminPath))) 
+        if(paraCheminDossier!= null)
         {
-            while(scan.hasNextLine())
+            String   basePath               = System.getProperty("user.dir");
+            String   cheminPath             = basePath + "/donnees/projets.xml";
+
+            try(Scanner scan = new Scanner(new File(cheminPath))) 
             {
-                String ligne = scan.nextLine();
-
-                 System.out.println("ligne lue est sauvegardée : " + ligne);
-                 
-                String[] tabCheminProjet = ligne.split("\t");
-
-                if(tabCheminProjet[0].equals(paraCheminDossier.trim()))
+                while(scan.hasNextLine())
                 {
-                    System.out.println("NOMMMMMMMMMMMMMMMMMMMMMMMM fichier " + tabCheminProjet[1]);
-                    return tabCheminProjet[1].trim();
+                    String ligne = scan.nextLine();
+                    
+                    String[] tabCheminProjet = ligne.split("\t");
+
+                    if(tabCheminProjet[0].equals(paraCheminDossier.trim()))
+                    {
+                        return tabCheminProjet[1].trim();
+                    }
+                }
+                
+            } 
+            catch (Exception e) 
+            {
+                e.getMessage();
+            }
+
+        }
+        else
+        {
+            String   basePath               = System.getProperty("user.dir");
+            String   cheminPath             = basePath + "/donnees/sauvegardes/";
+
+            File dossier = new File(cheminPath);
+
+            if (!dossier.exists() || !dossier.isDirectory()) 
+            {
+                System.out.println("Dossier de sauvegardes introuvable");
+                return "";
+            }
+
+            File[] fichiers = dossier.listFiles();
+
+            if (fichiers == null) 
+            {
+                System.out.println("Aucun fichier dans le dossier");
+                return "";
+            }
+
+            for (File f : fichiers) 
+            {
+                if (f.isFile()) 
+                {
+                    System.out.println("Fichier trouvé : " + f.getName());
+
+                    if (f.getName().equals(nomFichierCoord.trim())) 
+                    {
+                        return f.getName();
+                    }
                 }
             }
-            
-        } 
-        catch (Exception e) 
-        {
-            e.getMessage();
         }
-
+        
         return "";
     }
 
