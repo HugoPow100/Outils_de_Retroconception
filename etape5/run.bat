@@ -6,7 +6,7 @@ cd /d "%~dp0"
 
 REM Compiler tous les fichiers Java avec les packages
 echo Compilation du projet...
-javac -d bin src/metier/lecture/*.java src/metier/objet/*.java src/metier/sauvegarde/*.java src/controleur/*.java src/vue/*.java src/vue/liaison/*.java
+javac -d bin src/metier/util/*.java src/metier/lecture/*.java src/metier/objet/*.java src/metier/sauvegarde/*.java src/controleur/*.java src/vue/*.java src/vue/liaison/*.java
 
 if %errorlevel% neq 0 (
     echo.

@@ -18,6 +18,8 @@ src/metier/objet/Parametre.java
 
 src/metier/sauvegarde/GestionSauvegarde.java
 
+src/metier/util/ConstantesChemins.java
+
 src/vue/BarreMenus.java
 src/vue/BlocClasse.java
 src/vue/FenetrePrincipale.java
