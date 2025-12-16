@@ -1,21 +1,22 @@
 src/controleur/Controleur.java
 
 src/metier/lecture/Lecture.java
-src/metier/lecture/AnalyseAssociation.java
-src/metier/lecture/ScannerClasse.java
-src/metier/lecture/UtilLecture.java
+src/metier/lecture/AnalyseurFichier.java
+src/metier/lecture/GenerateurAssociation.java
+src/metier/lecture/ParseurJava.java
+src/metier/lecture/UtilitaireType.java
 
-src/metier/Association.java
-src/metier/Attribut.java
-src/metier/Classe.java
-src/metier/GestionSauvegarde.java
-src/metier/Heritage.java
-src/metier/Interface.java
-src/metier/Liaison.java
-src/metier/Methode.java
-src/metier/Multiplicite.java
-src/metier/Parametre.java
-src/metier/Retroconception.java
+src/metier/objet/Association.java
+src/metier/objet/Attribut.java
+src/metier/objet/Classe.java
+src/metier/objet/Heritage.java
+src/metier/objet/Interface.java
+src/metier/objet/Liaison.java
+src/metier/objet/Methode.java
+src/metier/objet/Multiplicite.java
+src/metier/objet/Parametre.java
+
+src/metier/sauvegarde/GestionSauvegarde.java
 
 src/vue/BarreMenus.java
 src/vue/BlocClasse.java

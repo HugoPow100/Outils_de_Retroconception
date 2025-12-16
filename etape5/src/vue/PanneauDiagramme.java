@@ -396,6 +396,11 @@ public class PanneauDiagramme extends JPanel
         g2d.scale(zoomLevel, zoomLevel);
         g2d.translate(-getWidth() / (2 * zoomLevel), -getHeight() / (2 * zoomLevel));
 
+        // Mettre à jour la liste de toutes les liaisons pour détecter les intersections
+        for (LiaisonVue liaison : liaisons) {
+            liaison.setToutesLesLiaisons(liaisons);
+        }
+        
         // Dessiner les liaisons
         dessinerLiaisons(g2d);
 
@@ -436,7 +441,6 @@ public class PanneauDiagramme extends JPanel
         for (LiaisonVue liaison : liaisons) {
             liaison.dessiner(g2d);
         }
-        repaint();
     }
 
     public List<BlocClasse> getBlocsClasses() {
