@@ -1,7 +1,7 @@
 public class Collier implements IAccessoire {
     private Chat proprietaire;
     private String nom;
-    private String couleur;
+    protected String couleur;
 
     @Override
     public void setNom(String nom) {
@@ -21,5 +21,11 @@ public class Collier implements IAccessoire {
     @Override
     public String getCouleur() {
         return couleur;
+    }
+
+    public void test( int nombre, 
+    int nb2 ) 
+    {
+
     }
 }
