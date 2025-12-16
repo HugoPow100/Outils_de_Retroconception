@@ -39,6 +39,9 @@ public class LiaisonVue
     
     // Référence à la liste des blocs pour le routage avec évitement
     private List<BlocClasse>    tousLesBlocs = new ArrayList<>();
+    
+    // Référence à toutes les liaisons pour éviter les ancrages en doublon
+    private List<LiaisonVue>    toutesLesLiaisons = new ArrayList<>();
 
 
     //--------------------------//
@@ -83,17 +86,25 @@ public class LiaisonVue
     }
 
     /**
-     * Choisit automatiquement les meilleurs côtés et positions pour minimiser la DISTANCE TOTALE
-     * et éviter les collisions. PRIORITÉ ABSOLUE aux chemins directs (1 segment).
-     * Parmi les chemins directs équivalents, PRÉFÉRER positions parfaitement centrées sur le plus petit bloc.
+     * Définit la liste de toutes les liaisons du diagramme pour éviter les doublons d'ancrages
+     */
+    public void setToutesLesLiaisons(List<LiaisonVue> liaisons) {
+        this.toutesLesLiaisons = liaisons;
+    }
+
+    /**
+     * Choisit automatiquement les meilleurs côtés et positions pour MINIMISER LE NOMBRE DE SEGMENTS.
+     * PRIORITÉ ABSOLUE : moins de points = mieux (1 segment >> 2 segments >> 3 segments, etc.)
+     * En cas d'égalité sur le nombre de points : distance minimale, côtés naturels, puis centrage.
      */
     private void chooseBestSides() {
         int bestOrigSide = 0;
         int bestDestSide = 0;
         double bestOrigPos = 0.5;
         double bestDestPos = 0.5;
+        int minSegments = Integer.MAX_VALUE;  // CRITÈRE PRINCIPAL : nombre de segments
         double minDistance = Double.MAX_VALUE;
-        int bestCenterPriority = Integer.MAX_VALUE; // Plus petit = meilleur
+        int bestCenterPriority = Integer.MAX_VALUE;
         boolean foundDirect = false;
         
         // Déterminer les côtés "naturels" selon la position relative des blocs
@@ -129,6 +140,12 @@ public class LiaisonVue
                 if (samePosPair) {
                     // Pour les côtés opposés, tester avec LA MÊME position (alignement garanti)
                     for (double pos = 0.0; pos <= 1.0; pos += 0.01) {
+                        // VÉRIFIER si cet ancrage est déjà utilisé par une autre liaison
+                        if (isAnchorOccupied(blocOrigine, origSide, pos) || 
+                            isAnchorOccupied(blocDestination, destSide, pos)) {
+                            continue; // Ancrage déjà pris, passer au suivant
+                        }
+                        
                         Point start = getPointOnSide(blocOrigine, origSide, pos);
                         Point end = getPointOnSide(blocDestination, destSide, pos);
                         
@@ -151,17 +168,29 @@ public class LiaisonVue
                             int naturalBonus = isNaturalPair ? -1000 : 0; // -1000 = très haute priorité
                             int totalPriority = centerPriority + naturalBonus;
                             
+                            // CRITÈRES DE COMPARAISON (par ordre de priorité):
+                            // 1. Nombre de segments (1 segment = 2 points)
+                            // 2. Côtés naturels et centrage (totalPriority)
+                            // 3. Distance minimale
                             boolean isBetter = false;
+                            int numSegments = 1; // Chemin direct = 1 segment
+                            
                             if (!foundDirect) {
                                 isBetter = true;
-                            } else if (Math.abs(directDist - minDistance) < 1.0) {
-                                // Distances équivalentes: prioriser 1) côtés naturels, 2) centrage
-                                isBetter = (totalPriority < bestCenterPriority);
-                            } else {
-                                isBetter = (directDist < minDistance);
+                            } else if (numSegments < minSegments) {
+                                // Moins de segments : toujours mieux !
+                                isBetter = true;
+                            } else if (numSegments == minSegments) {
+                                // Même nombre de segments : comparer priorité puis distance
+                                if (totalPriority < bestCenterPriority) {
+                                    isBetter = true;
+                                } else if (totalPriority == bestCenterPriority && directDist < minDistance) {
+                                    isBetter = true;
+                                }
                             }
                             
                             if (isBetter) {
+                                minSegments = numSegments;
                                 minDistance = directDist;
                                 bestCenterPriority = totalPriority;
                                 bestOrigSide = origSide;
@@ -177,6 +206,12 @@ public class LiaisonVue
                     // Tester avec un pas plus grand pour ne pas exploser le temps de calcul
                     for (double origPos = 0.0; origPos <= 1.0; origPos += 0.05) {
                         for (double destPos = 0.0; destPos <= 1.0; destPos += 0.05) {
+                            // VÉRIFIER si ces ancrages sont déjà utilisés par une autre liaison
+                            if (isAnchorOccupied(blocOrigine, origSide, origPos) || 
+                                isAnchorOccupied(blocDestination, destSide, destPos)) {
+                                continue; // Au moins un ancrage déjà pris, passer au suivant
+                            }
+                            
                             Point start = getPointOnSide(blocOrigine, origSide, origPos);
                             Point end = getPointOnSide(blocDestination, destSide, destPos);
                             
@@ -204,17 +239,29 @@ public class LiaisonVue
                                 int naturalBonus = isNaturalPair ? -1000 : 0;
                                 int totalPriority = centerPriority + naturalBonus;
                                 
+                                // CRITÈRES DE COMPARAISON (par ordre de priorité):
+                                // 1. Nombre de segments (1 segment = 2 points)
+                                // 2. Côtés naturels et centrage (totalPriority)
+                                // 3. Distance minimale
                                 boolean isBetter = false;
+                                int numSegments = 1; // Chemin direct = 1 segment
+                                
                                 if (!foundDirect) {
                                     isBetter = true;
-                                } else if (Math.abs(directDist - minDistance) < 1.0) {
-                                    // Distances équivalentes: prioriser 1) côtés naturels, 2) centrage
-                                    isBetter = (totalPriority < bestCenterPriority);
-                                } else {
-                                    isBetter = (directDist < minDistance);
+                                } else if (numSegments < minSegments) {
+                                    // Moins de segments : toujours mieux !
+                                    isBetter = true;
+                                } else if (numSegments == minSegments) {
+                                    // Même nombre de segments : comparer priorité puis distance
+                                    if (totalPriority < bestCenterPriority) {
+                                        isBetter = true;
+                                    } else if (totalPriority == bestCenterPriority && directDist < minDistance) {
+                                        isBetter = true;
+                                    }
                                 }
                                 
                                 if (isBetter) {
+                                    minSegments = numSegments;
                                     minDistance = directDist;
                                     bestCenterPriority = totalPriority;
                                     bestOrigSide = origSide;
@@ -253,19 +300,51 @@ public class LiaisonVue
                 // Tester plusieurs positions sur TOUTE la surface
                 for (double origPos = 0.1; origPos <= 0.9; origPos += 0.1) {
                     for (double destPos = 0.1; destPos <= 0.9; destPos += 0.1) {
+                        // VÉRIFIER si ces ancrages sont déjà utilisés par une autre liaison
+                        if (isAnchorOccupied(blocOrigine, origSide, origPos) || 
+                            isAnchorOccupied(blocDestination, destSide, destPos)) {
+                            continue; // Au moins un ancrage déjà pris, passer au suivant
+                        }
+                        
                         Point start = getPointOnSide(blocOrigine, origSide, origPos);
                         Point end = getPointOnSide(blocDestination, destSide, destPos);
                         
                         List<Point> testPath = createOrthogonalPath(start, end, origSide, destSide);
                         
                         if (!pathHasCollisions(testPath)) {
+                            int numSegments = testPath.size() - 1; // Nombre de segments
                             double distance = calculatePathLength(testPath);
                             
-                            // Appliquer un bonus pour les paires naturelles (réduire la distance de 30%)
-                            double adjustedDistance = isNaturalPair ? distance * 0.7 : distance;
+                            // Bonus pour les paires naturelles (réduction de priorité)
+                            int naturalBonus = isNaturalPair ? -1000 : 0;
                             
-                            if (adjustedDistance < minDistance) {
-                                minDistance = adjustedDistance;
+                            // CRITÈRES DE COMPARAISON (par ordre de priorité):
+                            // 1. Nombre de segments (moins = mieux)
+                            // 2. Côtés naturels
+                            // 3. Distance minimale
+                            boolean isBetter = false;
+                            
+                            if (numSegments < minSegments) {
+                                // Moins de segments : TOUJOURS mieux !
+                                isBetter = true;
+                            } else if (numSegments == minSegments) {
+                                // Même nombre de segments : comparer naturel puis distance
+                                if (isNaturalPair && bestCenterPriority >= 0) {
+                                    // Paire naturelle vs non-naturelle : prendre naturelle
+                                    isBetter = true;
+                                } else if ((isNaturalPair && bestCenterPriority < 0) || (!isNaturalPair && bestCenterPriority >= 0)) {
+                                    // Même statut naturel : comparer distance
+                                    isBetter = (distance < minDistance);
+                                } else {
+                                    // Non-naturelle vs naturelle : ne pas prendre
+                                    isBetter = false;
+                                }
+                            }
+                            
+                            if (isBetter) {
+                                minSegments = numSegments;
+                                minDistance = distance;
+                                bestCenterPriority = naturalBonus;
                                 bestOrigSide = origSide;
                                 bestDestSide = destSide;
                                 bestOrigPos = origPos;
@@ -376,6 +455,121 @@ public class LiaisonVue
         
         // Niveau 3: toutes les autres positions
         return 1000; // Très basse priorité
+    }
+
+    /**
+     * Vérifie si un point d'ancrage est déjà utilisé par une autre liaison
+     * @param bloc Le bloc sur lequel vérifier
+     * @param side Le côté du bloc (0=DROITE, 1=BAS, 2=GAUCHE, 3=HAUT)
+     * @param pos La position relative (0.0 à 1.0)
+     * @return true si l'ancrage est déjà occupé
+     */
+    private boolean isAnchorOccupied(BlocClasse bloc, int side, double pos) {
+        final double TOLERANCE = 0.02; // Tolérance de 2% pour considérer qu'un ancrage est occupé
+        
+        for (LiaisonVue autre : toutesLesLiaisons) {
+            if (autre == this) continue; // Ignorer soi-même
+            
+            // Vérifier l'origine de l'autre liaison
+            if (autre.blocOrigine == bloc && autre.sideOrigine == side) {
+                if (Math.abs(autre.posRelOrigine - pos) < TOLERANCE) {
+                    return true; // Ancrage déjà utilisé !
+                }
+            }
+            
+            // Vérifier la destination de l'autre liaison
+            if (autre.blocDestination == bloc && autre.sideDestination == side) {
+                if (Math.abs(autre.posRelDestination - pos) < TOLERANCE) {
+                    return true; // Ancrage déjà utilisé !
+                }
+            }
+        }
+        
+        return false; // Ancrage libre
+    }
+
+    /**
+     * Détecte si deux segments se croisent et retourne le point d'intersection
+     * Détecte les croisements RÉELS où les segments se traversent mutuellement
+     * @return Le point d'intersection ou null si pas d'intersection
+     */
+    private Point getSegmentIntersection(Point a1, Point a2, Point b1, Point b2) {
+        // Vérifier si les segments sont orthogonaux (l'un horizontal, l'autre vertical)
+        boolean a_horizontal = (a1.y == a2.y);
+        boolean b_horizontal = (b1.y == b2.y);
+        
+        // Les deux segments sont parallèles : pas d'intersection
+        if (a_horizontal == b_horizontal) return null;
+        
+        if (a_horizontal) {
+            // Segment A horizontal, segment B vertical
+            int ay = a1.y;
+            int bx = b1.x;
+            
+            // Vérifier si le point (bx, ay) est sur les deux segments
+            int minAx = Math.min(a1.x, a2.x);
+            int maxAx = Math.max(a1.x, a2.x);
+            int minBy = Math.min(b1.y, b2.y);
+            int maxBy = Math.max(b1.y, b2.y);
+            
+            // Le segment B doit croiser strictement le segment A en position interne
+            // ET le segment A doit croiser le segment B
+            if (bx > minAx && bx < maxAx && ay >= minBy && ay <= maxBy) {
+                return new Point(bx, ay);
+            }
+        } else {
+            // Segment A vertical, segment B horizontal
+            int ax = a1.x;
+            int by = b1.y;
+            
+            // Vérifier si le point (ax, by) est sur les deux segments
+            int minAy = Math.min(a1.y, a2.y);
+            int maxAy = Math.max(a1.y, a2.y);
+            int minBx = Math.min(b1.x, b2.x);
+            int maxBx = Math.max(b1.x, b2.x);
+            
+            // Le segment A doit croiser strictement le segment B en position interne
+            // ET le segment B doit croiser le segment A
+            if (ax > minBx && ax < maxBx && by >= minAy && by <= maxAy) {
+                return new Point(ax, by);
+            }
+        }
+        
+        return null; // Pas d'intersection
+    }
+
+    /**
+     * Trouve tous les points d'intersection entre cette liaison et les autres
+     * @param myPath Le chemin de cette liaison
+     * @return Liste des points d'intersection
+     */
+    private List<Point> findIntersections(List<Point> myPath) {
+        List<Point> intersections = new ArrayList<>();
+        
+        for (LiaisonVue autre : toutesLesLiaisons) {
+            if (autre == this) continue; // Ignorer soi-même
+            
+            // Obtenir le chemin de l'autre liaison
+            Point autreOrigine = getPointOnSide(autre.blocOrigine, autre.sideOrigine, autre.posRelOrigine);
+            Point autreDestination = getPointOnSide(autre.blocDestination, autre.sideDestination, autre.posRelDestination);
+            List<Point> autrePath = createOrthogonalPath(autreOrigine, autreDestination, autre.sideOrigine, autre.sideDestination);
+            
+            // Tester chaque segment de cette liaison contre chaque segment de l'autre
+            for (int i = 0; i < myPath.size() - 1; i++) {
+                for (int j = 0; j < autrePath.size() - 1; j++) {
+                    Point intersection = getSegmentIntersection(
+                        myPath.get(i), myPath.get(i + 1),
+                        autrePath.get(j), autrePath.get(j + 1)
+                    );
+                    
+                    if (intersection != null) {
+                        intersections.add(intersection);
+                    }
+                }
+            }
+        }
+        
+        return intersections;
     }
 
     /**
@@ -973,6 +1167,9 @@ public class LiaisonVue
         // Créer le chemin orthogonal
         List<Point> path = createOrthogonalPath(ancrageOrigine, ancrageDestination, sideOrigine, sideDestination);
 
+        // Trouver les intersections avec les autres liaisons
+        List<Point> intersections = findIntersections(path);
+
         // Définir le style de trait selon le type de liaison
         g.setColor(Color.BLACK);
         if (this.type.equals("interface")) {
@@ -984,14 +1181,42 @@ public class LiaisonVue
             g.setStroke(new BasicStroke(1));
         }
         
-        // Dessiner chaque segment du chemin (tous strictement horizontaux ou verticaux)
+        // Dessiner chaque segment du chemin avec des ponts aux intersections
         for (int i = 0; i < path.size() - 1; i++) {
             Point p1 = path.get(i);
             Point p2 = path.get(i + 1);
             
-            // Vérification : chaque segment doit être soit horizontal (même Y) soit vertical (même X)
-            // Pas de diagonales permises
-            g.drawLine(p1.x, p1.y, p2.x, p2.y);
+            // Vérifier si ce segment a des intersections
+            List<Point> segmentIntersections = new ArrayList<>();
+            for (Point inter : intersections) {
+                // Vérifier si l'intersection est sur ce segment (PAS aux extrémités exactes)
+                boolean horizontalSegment = (p1.y == p2.y);
+                boolean verticalSegment = (p1.x == p2.x);
+                
+                if (horizontalSegment && inter.y == p1.y) {
+                    // Segment horizontal : vérifier que l'intersection est STRICTEMENT à l'intérieur
+                    int minX = Math.min(p1.x, p2.x);
+                    int maxX = Math.max(p1.x, p2.x);
+                    if (inter.x > minX + 1 && inter.x < maxX - 1) {
+                        segmentIntersections.add(inter);
+                    }
+                } else if (verticalSegment && inter.x == p1.x) {
+                    // Segment vertical : vérifier que l'intersection est STRICTEMENT à l'intérieur
+                    int minY = Math.min(p1.y, p2.y);
+                    int maxY = Math.max(p1.y, p2.y);
+                    if (inter.y > minY + 1 && inter.y < maxY - 1) {
+                        segmentIntersections.add(inter);
+                    }
+                }
+            }
+            
+            if (segmentIntersections.isEmpty()) {
+                // Pas d'intersection : dessiner normalement
+                g.drawLine(p1.x, p1.y, p2.x, p2.y);
+            } else {
+                // Il y a des intersections : dessiner avec des ponts
+                drawLineWithBridges(g, p1, p2, segmentIntersections);
+            }
         }
 
         if (this.type.equals("association") && unidirectionnel) {
@@ -1033,6 +1258,71 @@ public class LiaisonVue
                 g.drawString(multDest, initialPos.x, initialPos.y);
             }
         }
+    }
+
+    /**
+     * Dessine une ligne avec des ponts (arcs) aux points d'intersection
+     * IMPORTANT: Les ponts ne sont dessinés QUE sur les segments VERTICAUX
+     * @param g Graphics2D
+     * @param p1 Point de début
+     * @param p2 Point de fin
+     * @param intersections Liste des points d'intersection sur ce segment
+     */
+    private void drawLineWithBridges(Graphics2D g, Point p1, Point p2, List<Point> intersections) {
+        final int BRIDGE_SIZE = 8; // Taille du pont
+        
+        // Déterminer si le segment est horizontal ou vertical
+        boolean horizontal = (p1.y == p2.y);
+        
+        // Si le segment est HORIZONTAL : dessiner normalement SANS pont
+        if (horizontal) {
+            g.drawLine(p1.x, p1.y, p2.x, p2.y);
+            return;
+        }
+        
+        // Le segment est VERTICAL : dessiner avec des ponts
+        // Les intersections ont déjà été filtrées dans dessiner(), pas besoin de re-filtrer
+        
+        if (intersections.isEmpty()) {
+            // Pas d'intersection : dessiner normalement
+            g.drawLine(p1.x, p1.y, p2.x, p2.y);
+            return;
+        }
+        
+        // Trier les intersections selon l'ordre sur le segment (du haut vers le bas ou inverse)
+        intersections.sort((a, b) -> {
+            if (p1.y < p2.y) {
+                return Integer.compare(a.y, b.y); // Tri croissant
+            } else {
+                return Integer.compare(b.y, a.y); // Tri décroissant
+            }
+        });
+        
+        // Dessiner le segment en morceaux avec des ponts
+        Point current = p1;
+        
+        for (Point inter : intersections) {
+            // Dessiner jusqu'AVANT le pont (s'arrêter AVANT l'intersection)
+            if (current.y < inter.y) {
+                g.drawLine(current.x, current.y, inter.x, inter.y - BRIDGE_SIZE / 2);
+            } else {
+                g.drawLine(current.x, current.y, inter.x, inter.y + BRIDGE_SIZE / 2);
+            }
+            
+            // Dessiner le pont (petit arc vertical)
+            g.drawArc(inter.x - BRIDGE_SIZE / 2, inter.y - BRIDGE_SIZE / 2, 
+                     BRIDGE_SIZE, BRIDGE_SIZE, 90, 180);
+            
+            // Continuer APRÈS le pont
+            if (current.y < inter.y) {
+                current = new Point(inter.x, inter.y + BRIDGE_SIZE / 2);
+            } else {
+                current = new Point(inter.x, inter.y - BRIDGE_SIZE / 2);
+            }
+        }
+        
+        // Dessiner le dernier morceau jusqu'au point final
+        g.drawLine(current.x, current.y, p2.x, p2.y);
     }
 
         private void dessinerFlecheVide(Graphics2D g, Point anchor, int side) {
