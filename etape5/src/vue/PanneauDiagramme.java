@@ -276,6 +276,11 @@ public class PanneauDiagramme extends JPanel
             return;
         }
 
+        // D'abord, passer la liste de toutes les liaisons à chaque liaison
+        for (LiaisonVue liaison : liaisons) {
+            liaison.setToutesLesLiaisons(liaisons);
+        }
+        
         // Réinitialiser toutes les liaisons avec le nouvel algorithme
         for (LiaisonVue liaison : liaisons) {
             liaison.recalculerAncrages();
