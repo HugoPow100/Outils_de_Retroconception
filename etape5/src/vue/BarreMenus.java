@@ -134,8 +134,12 @@ public class BarreMenus extends JMenuBar
     private void verifierFichiersProjet(String cheminDossiers)
     {
         File projet = new File(cheminDossiers);
+<<<<<<< HEAD
         String messageInvalide = "Attention le projet a un ou des fichiers non valides : ";
         String messageErreur = "\n( ";
+=======
+        String messageInvalide = "Attention : Fichiers non valides detectés. Uniquement les classes java ont été prises en compte.";
+>>>>>>> 011232b2b9773c6b35d8a42894f6127753fec984
 
         if (projet.isDirectory())
         {

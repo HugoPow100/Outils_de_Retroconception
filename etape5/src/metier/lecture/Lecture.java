@@ -133,8 +133,8 @@ public class Lecture
 
 	// ========== Getters ==========
 
-	public HashMap  <String, Classe> getHashMapClasses() {return this.hashMapClasses;}
-	public ArrayList<Association>    getLstAssociation() {return this.lstAssociations;}
-	public ArrayList<Heritage>       getLstHeritage   () {return this.lstHeritage;}
-	public ArrayList<Interface>       getLstInterface () {return this.lstInterface;}
+	public HashMap  <String, Classe> getHashMapClasses	()	{return this.hashMapClasses;}
+	public ArrayList<Association>    getLstAssociation	()	{return this.lstAssociations;}
+	public ArrayList<Heritage>       getLstHeritage   	()	{return this.lstHeritage;}
+	public ArrayList<Interface>      getLstInterface 	()	{return this.lstInterface;}
 }
