@@ -86,68 +86,6 @@ public class GestionSauvegarde
         return this.cheminDossier;
     }
 
-    public String calcNomIntitule(String nomIntituleBrut) 
-    {
-        //System.out.println("Debut du calcNomIntitule");
-        String fichierLectureEcriture = System.getProperty("user.dir") + "/donnees/projets.xml";
-        int nbrDossierMemeNom = 0;
-        String nomIntitule = nomIntituleBrut;
-
-        //Cette partie incrémente le conteur nbrDossierMemeNom dans projet.xml
-        try (BufferedReader br = new BufferedReader(new FileReader(fichierLectureEcriture))) 
-        {
-            //System.out.println("Je suis dans le try avec le buffered reader : " + br);
-            String ligne;
-
-            while ((ligne = br.readLine()) != null) 
-            {
-                //System.out.println("Lecture de la ligne : " + ligne);
-
-                int    indicePremierSlash = ligne.lastIndexOf("/");
-                int    indiceTab          = ligne.indexOf("\t", indicePremierSlash);
-
-                String nomDossierDejaSauv;
-
-                if(indiceTab != -1)
-                {                  
-                    nomDossierDejaSauv = ligne.substring(indicePremierSlash +1, indiceTab);
-                     //System.out.println("indiceTab != -1 :" + nomDossierDejaSauv);  
-                }
-                else
-                {
-                    nomDossierDejaSauv = ligne.substring(indicePremierSlash +1).trim();
-                    //System.out.println("indiceTab = -1 : " + nomDossierDejaSauv);
-                }
-                
-                if(nomDossierDejaSauv.equals(nomIntituleBrut))
-                {
-                    nbrDossierMemeNom ++;
-                    //System.out.println("nomDossierDejaSauv.equals(nomIntituleBrut) :" + nbrDossierMemeNom);
-                }
-
-            }
-
-            //System.out.println("nbr dossier meme nom : " + nbrDossierMemeNom);
-
-            if(nbrDossierMemeNom > 0)
-            {
-                nomIntitule +=  "_" + (nbrDossierMemeNom + 1);
-            }
-
-        } 
-        catch (FileNotFoundException e) 
-        {
-            //System.out.println(e);
-            // Si le fichier n'existe pas encore, on peut l'ignorer
-        } 
-        catch (IOException e) 
-        {
-            e.printStackTrace();
-        }
-
-        //System.out.println("nom intitulé retourné : " + nomIntitule);
-        return nomIntitule;
-    }
     
 
     public void sauvegarderClasses(List<BlocClasse> listBlocClasses, String cheminProjet) 
@@ -328,54 +266,41 @@ public class GestionSauvegarde
 
     public void sauvegardeProjetXml(String cheminFichier)
     {
-        try 
-        {
-            // Emplacement
-            File fichier = new File("donnees/projets.xml");
-
-            // Création du dossier parent si nécessaire
-            if (!fichier.getParentFile().exists())
-            {
-                fichier.getParentFile().mkdirs();
-            }
-
-            // Création du fichier s'il n'existe pas
-            if (!fichier.exists()) fichier.createNewFile();
-
-            // FileWriter avec "true" pour ajouter à la fin
-            FileWriter writer = new FileWriter(fichier, true);
-
-            //Extrai le nom du dossier pour le mettre en bout de ligne
-            String nomDossier = cheminFichier.substring(cheminFichier.lastIndexOf("/") + 1);
-
-
-            //
-            String nomIntituleSauvegarde = getIntituleFromLien(cheminFichier);
+        int indiceslash = cheminFichier.lastIndexOf("/");
+        String nomProjet = cheminFichier.substring(indiceslash + 1).trim();
         
-            System.out.println("Nom de l'intitulé : " + getIntituleFromLien(cheminFichier) );
-
-            if (!this.fichierDeSauvegardeExiste(cheminFichier))
+        // Vérifier si le projet est déjà enregistré
+        if (!projetEstSauvegarde(nomProjet))
+        {
+            // Ajouter le projet à projets.xml
+            String basePath = System.getProperty("user.dir");
+            String fichierPath = basePath + "/donnees/projets.xml";
+            File fichier = new File(fichierPath);
+            
+            try
             {
-                List<BlocClasse> lstBlocClasses = ctrl.chargerProjetEnBlocsClasses(cheminFichier); 
-
-                for (BlocClasse bc : lstBlocClasses) System.out.println("Bloc classe généré  : "+ bc);
-                System.out.println("On va sauvegarder le projet");
-
-                this.sauvegarderCoordProjet(lstBlocClasses, calcNomIntitule(cheminFichier.substring(cheminFichier.lastIndexOf("/") +1 ).trim()), cheminFichier);
+                // Création du dossier parent si nécessaire
+                if (!fichier.getParentFile().exists())
+                {
+                    fichier.getParentFile().mkdirs();
+                }
+                
+                // Création du fichier s'il n'existe pas
+                if (!fichier.exists())
+                {
+                    fichier.createNewFile();
+                }
+                
+                // Ajouter la ligne au fichier
+                try (FileWriter writer = new FileWriter(fichier, true))
+                {
+                    writer.write(cheminFichier + "\t" + nomProjet + System.lineSeparator());
+                }
             }
-
-
-
-            // Écrire la chaîne avec un retour à la ligne
-            writer.write(cheminFichier + "\t" + calcNomIntitule(nomDossier) + System.lineSeparator());
-
-            // Fermer le writer
-            writer.close();
-
-            //System.out.println("ICI ICI LA LA LA LA 67 Ajout effectué dans : " + fichier.getAbsolutePath());
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 }

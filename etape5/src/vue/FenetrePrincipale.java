@@ -70,6 +70,8 @@ public class FenetrePrincipale extends JFrame
     public void chargerProjet(String cheminProjet) 
     {
         panneauDiagramme.chargerProjet(cheminProjet);
+        // Enregistrer le projet au premier chargement
+        controlleur.sauvegardeProjetXml(cheminProjet);
     }
 
     public void sauvegarderDiagramme() 
@@ -148,12 +150,6 @@ public class FenetrePrincipale extends JFrame
     {
         panneauDiagramme.actionSauvegarder();
     }
-
-    public void sauvegardeProjetXml(String cheminProjet)
-    {
-        controlleur.sauvegardeProjetXml(cheminProjet);
-    }
-
 
     /**
     * Méthodes passerelle au controlleur
