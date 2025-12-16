@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 
 import javax.swing.*;
+import java.util.ArrayList;
 
 public class PanneauProjets extends JPanel {
 
