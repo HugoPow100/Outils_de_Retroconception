@@ -61,27 +61,7 @@ public class Controleur
 
         // hasmap pour associer les noms de classes aux blocs
         HashMap<String, BlocClasse> mapBlocsParNom  = new HashMap<>();
-        HashMap<String, Classe>     hashMapclasses  = lecture.getHashMapClasses();
-
-        int posX    = 50;
-        int posY    = 50;
-
-        for (Classe classe : hashMapclasses.values()) 
-        {
-            if (classe != null) 
-            {
-                BlocClasse bloc = creerBlocAPartirDeClasse(classe, posX, posY);
-                this.lstBlocs.add(bloc);
-                mapBlocsParNom.put(classe.getNom(), bloc);
-
-                posX += 250;
-                if (posX > 1000) 
-                {
-                    posX    = 50;
-                    posY    += 200;
-                }
-            }
-        }
+        
 
         // Test si le projet est déjàa présent dans les sauvegardes .xml
         String intituleProjet = gestionSauvegarde.getIntituleFromLien(cheminProjet);
@@ -101,17 +81,44 @@ public class Controleur
             {
                 mapBlocsParNom.put(bloc.getNom(), bloc);
             }
-
-        } else {
+            
+            //On charge les liaisons depuis le XML
+            gestionSauvegarde.lectureLiaison(cheminProjet, blocsCharges);
+        } 
+        else 
+        {
             System.out.println("Le projet n'est pas sauvegardé. On garde les coordonées par défaut");
+
+            HashMap<String, Classe>     hashMapclasses  = lecture.getHashMapClasses();
+
+            int posX    = 50;
+            int posY    = 50;
+
+            for (Classe classe : hashMapclasses.values()) 
+            {
+                if (classe != null) 
+                {
+                    BlocClasse bloc = creerBlocAPartirDeClasse(classe, posX, posY);
+                    this.lstBlocs.add(bloc);
+                    mapBlocsParNom.put(classe.getNom(), bloc);
+
+                    posX += 250;
+                    if (posX > 1000) 
+                    {
+                        posX    = 50;
+                        posY    += 200;
+                    }
+                }
+            }
+                
+            // Créer les lstLiaisons depuis associations, heritages, et interfaces
+            this.lstLiaisons = creerLiaisonsDepuisAssoc        (lecture.getLstAssociation(), mapBlocsParNom, this.lstLiaisons);
+
+            this.lstLiaisons = creerLiaisonsDepuisHerit        (lecture.getLstHeritage(), mapBlocsParNom, this.lstLiaisons);
+
+            this.lstLiaisons = creerLiaisonsDepuisInterface    (lecture.getLstInterface(), mapBlocsParNom, this.lstLiaisons);
         }
             
-        // Créer les lstLiaisons depuis associations, heritages, et interfaces
-        creerLiaisonsDepuisAssoc        (lecture.getLstAssociation(), mapBlocsParNom);
-
-        creerLiaisonsDepuisHerit        (lecture.getLstHeritage(), mapBlocsParNom);
-
-        creerLiaisonsDepuisInterface    (lecture.getLstInterface(), mapBlocsParNom);
 
         fenetrePrincipale.optimiserPositionsClasses();
 
@@ -208,7 +215,7 @@ public class Controleur
     * @param lstAssoc La list d'{@link Association}s sur laquelle baser les lstLiaisons
     * @param mapBlocsParNom {@link HashMap<String, BlocClasse>} de String, BlocClasse avec le nom de chaque bloc et chaque bloc
     */
-    private void creerLiaisonsDepuisAssoc(List<Association> lstAssoc, HashMap<String, BlocClasse> mapBlocsParNom) 
+    private List<LiaisonVue> creerLiaisonsDepuisAssoc(List<Association> lstAssoc, HashMap<String, BlocClasse> mapBlocsParNom, List<LiaisonVue> lstLiaisons) 
     {
         for (Association assoc : lstAssoc) 
         {
@@ -222,6 +229,8 @@ public class Controleur
 
             lstLiaisons.add(liaison);
         }
+
+        return lstLiaisons;
     }
 
     /**
@@ -229,7 +238,7 @@ public class Controleur
     * @param lstAssoc La list d'{@link Heritage}s sur laquelle baser les lstLiaisons
     * @param mapBlocsParNom {@link HashMap<String, BlocClasse>} de String, BlocClasse avec le nom de chaque bloc et chaque bloc
     */
-    private void creerLiaisonsDepuisHerit(List<Heritage> lstHerit, HashMap<String, BlocClasse> mapBlocsParNom) {
+    private List<LiaisonVue>  creerLiaisonsDepuisHerit(List<Heritage> lstHerit, HashMap<String, BlocClasse> mapBlocsParNom, List<LiaisonVue> lstLiaisons) {
 
         for (Heritage herit : lstHerit) 
         {
@@ -240,6 +249,8 @@ public class Controleur
 
             lstLiaisons.add(liaison);
         }
+
+        return lstLiaisons;
     }
 
     /**
@@ -247,7 +258,7 @@ public class Controleur
     * @param lstAssoc La list d'{@link Interface}s sur laquelle baser les lstLiaisons
     * @param mapBlocsParNom {@link HashMap<String, BlocClasse>} de String, BlocClasse avec le nom de chaque bloc et chaque bloc
     */
-    private void creerLiaisonsDepuisInterface(List<Interface> lstInter, HashMap<String, BlocClasse> mapBlocsParNom) {
+    private List<LiaisonVue>  creerLiaisonsDepuisInterface(List<Interface> lstInter, HashMap<String, BlocClasse> mapBlocsParNom, List<LiaisonVue> lstLiaisons) {
 
         for (Interface inter : lstInter) 
         {
@@ -258,6 +269,8 @@ public class Controleur
 
             lstLiaisons.add(liaison);
         }
+
+        return lstLiaisons;
     }
 
 
