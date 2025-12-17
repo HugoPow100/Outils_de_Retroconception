@@ -491,6 +491,6 @@ public class PanneauDiagramme extends JPanel
     }
 
     public void actionSauvegarder() {
-        this.fenetrePrincipale.sauvegarderClasses(this.blocsClasses, cheminProjetCourant);
+        this.fenetrePrincipale.sauvegarderClasses(this.blocsClasses, this.liaisons, cheminProjetCourant);
     }
 }

@@ -265,8 +265,8 @@ public class Controleur
     }
 
 
-    public void sauvegarderClasses(List<BlocClasse> blocClasses, String cheminProjet) {
-        gestionSauvegarde.sauvegarderClasses(blocClasses, cheminProjet);
+    public void sauvegarderClasses(List<BlocClasse> listBlocClasses, List <LiaisonVue> listLiaison, String cheminProjet) {
+        gestionSauvegarde.sauvegarderClasses(listBlocClasses, listLiaison, cheminProjet);
     }
 
     public void ajouterBlockList(BlocClasse block)
