@@ -3,7 +3,6 @@ package vue.liaison;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-
 import vue.BlocClasse;
 
 /**
@@ -15,11 +14,13 @@ public class LiaisonVue {
 
     // Attributs principaux
     private String type;
+    private BlocClasse blocOrigine;
+    private BlocClasse blocDestination;
+
     private boolean unidirectionnel;
     private String multOrig;
     private String multDest;
-    private BlocClasse blocOrigine;
-    private BlocClasse blocDestination;
+
     private Point ancrageOrigine;
     private Point ancrageDestination;
     private double posRelOrigine;
