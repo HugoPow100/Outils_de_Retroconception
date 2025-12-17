@@ -4,6 +4,7 @@ import metier.util.test_structure_projet.VerificationStructureProjet;
 import controleur.Controleur;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -44,6 +45,14 @@ public class FenetrePrincipale extends JFrame
         setMinimumSize(new Dimension(700,400));
         setLocationRelativeTo(null);
         setResizable(true);
+
+        // Charger et définir l'icône de la fenêtre
+        try {
+            Image icon = ImageIO.read(new File("src/res/uml_icon.png"));
+            setIconImage(icon);
+        } catch (Exception e) {
+            System.err.println("Impossible de charger l'icône: " + e.getMessage());
+        }
 
         panneauProjets   = new PanneauProjets(this);
         panneauDiagramme = new PanneauDiagramme(this);
