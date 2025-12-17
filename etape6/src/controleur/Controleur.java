@@ -65,9 +65,8 @@ public class Controleur
 
         // Test si le projet est déjàa présent dans les sauvegardes .xml
         String intituleProjet = gestionSauvegarde.getIntituleFromLien(cheminProjet);
-        //if (gestionSauvegarde.projetEstSauvegarde(cheminProjet) && 
-        //    gestionSauvegarde.fichierDeSauvegardeExiste(intituleProjet)) 
-        if (false)
+        if (gestionSauvegarde.projetEstSauvegarde(cheminProjet) && 
+            gestionSauvegarde.fichierDeSauvegardeExiste(intituleProjet)) 
         {
             System.out.println("Le projet est sauvegardé. Chargement complet depuis le .xml");
             Map<String, BlocClasse> blocsCharges = gestionSauvegarde.chargerBlocsClasses(intituleProjet);
@@ -84,7 +83,7 @@ public class Controleur
             }
             
             //On charge les liaisons depuis le XML
-            //gestionSauvegarde.lectureLiaison(cheminProjet, blocsCharges);
+            this.lstLiaisons = gestionSauvegarde.lectureLiaison(cheminProjet, blocsCharges);
         } 
         else 
         {
@@ -118,11 +117,11 @@ public class Controleur
             this.lstLiaisons = creerLiaisonsDepuisHerit        (lecture.getLstHeritage(), mapBlocsParNom, this.lstLiaisons);
 
             this.lstLiaisons = creerLiaisonsDepuisInterface    (lecture.getLstInterface(), mapBlocsParNom, this.lstLiaisons);
+
+            fenetrePrincipale.optimiserPositionsClasses();
+            fenetrePrincipale.optimiserPositionsLiaisons();
         }
             
-
-        fenetrePrincipale.optimiserPositionsClasses();
-
         return this.lstBlocs;
     }
 

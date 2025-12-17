@@ -28,6 +28,7 @@ public class GestionSauvegarde
 
 	private String cheminDossier;
 	private Controleur ctrl;
+	private final String S_LIAISON = "---- Liaisons ----";
 
 
 	//-------------------------//
@@ -148,60 +149,86 @@ public class GestionSauvegarde
 	{
 		List<LiaisonVue> lstLiaisons = new ArrayList<>();
 
-		String chemin = Path.of(ConstantesChemins.SAUVEGARDES , dossierFichSelec).toString();
+		String chemin = Path.of(ConstantesChemins.SAUVEGARDES , this.getIntituleFromLien(dossierFichSelec)).toString() + ".xml";
+		
 
 		try (BufferedReader br = new BufferedReader(new FileReader(chemin))) 
 		{
 			String ligne;
+			boolean lectureLiaisons = false;
+
 
 			// on commence a lire :D
 			while ((ligne = br.readLine()) != null) 
 			{
 
 				ligne = ligne.trim();
-				if(!ligne.equals(""))
-				if (ligne.isEmpty()) continue;
+				
+				if (ligne.isEmpty())       continue;
 				if (ligne.startsWith("#")) continue;
 
-				String[] tabLigne = ligne.split("\\s+");
-				if (tabLigne.length < 10) continue;
+				// Détection du début des liaisons
+				if (ligne.equals(S_LIAISON)) 
+				{
+					lectureLiaisons = true;
+					continue;
+				}
 
-				String typeLiaison       = tabLigne[0].trim();
+				// Tant qu’on n’est pas dans la section liaisons, on ignore
+				if (!lectureLiaisons) continue;
+
+				String[] tabLigne = ligne.split("\t");
+				if (tabLigne.length < 8) continue;
+
+				String     typeLiaison   = tabLigne[0].trim();
 				BlocClasse blocOrig      = hashMapBlocClass.get(tabLigne[2].trim());
 				BlocClasse blocDest      = hashMapBlocClass.get(tabLigne[5].trim());
 
-				String Bidirectionnalite = typeLiaison.substring(typeLiaison.indexOf("_") +1).trim();
+				System.out.println("Ligne analysée : " + typeLiaison + ", orig : " + blocOrig.getNom() + ", dest : " + blocDest.getNom());
 
+				LiaisonVue liaisonVue;
 
 				if(typeLiaison.equals("association_uni") || 
 					typeLiaison.equals("association_bi"))
 				{
-					if(Bidirectionnalite.equals("uni"))
+					if(typeLiaison.equals("association_uni"))
 					{
-						LiaisonVue liaisonVue = new LiaisonVue(blocOrig, blocDest, "association",
+						 liaisonVue = new LiaisonVue(blocOrig, blocDest, "association",
 																	true,
 																	tabLigne[8].trim(),
 																	tabLigne[9].trim()
 																	);
-						lstLiaisons.add(liaisonVue);
 					}
 					else
 					{
-						LiaisonVue liaisonVue = new LiaisonVue(blocOrig, blocDest, "association",
+						 liaisonVue = new LiaisonVue(blocOrig, blocDest, "association",
 																	false,
 																	tabLigne[8].trim(),
 																	tabLigne[9].trim()
 																	);
-						lstLiaisons.add(liaisonVue);
+	
 					}
 
+					lstLiaisons.add(liaisonVue);
 					
 				}
 				else
 				{
-					LiaisonVue liaisonVue =  new LiaisonVue(blocOrig, blocDest, typeLiaison);
+					liaisonVue =  new LiaisonVue(blocOrig, blocDest, typeLiaison);
 					lstLiaisons.add(liaisonVue);
+
 				}
+
+					liaisonVue.setPosRelOrig(Double.parseDouble(tabLigne[4].trim()));
+					liaisonVue.setPosRelDest(Double.parseDouble(tabLigne[7].trim()));
+					
+
+					int numPositionPointOrig = convertirPosition(tabLigne[3].trim());
+					int numPositionPointDest = convertirPosition(tabLigne[6].trim());
+
+					liaisonVue.setSideOrigine(numPositionPointOrig);
+					liaisonVue.setSideDestination(numPositionPointDest);
+
 			}
 
 		} 
@@ -213,6 +240,17 @@ public class GestionSauvegarde
 		return lstLiaisons;
 	}
 
+	private int convertirPosition (String position) 
+	{
+		return switch (position) 
+		{
+			case "TOP"    -> 0;
+			case "RIGHT"  -> 1;
+			case "BOTTOM" -> 2;
+			case "LEFT"   -> 3;
+			default       -> -1;
+		};
+    };
 	/**
 	* Charge les blocs de classe depuis un fichier de sauvegarde au nouveau format
 	* @param nomProjet Le nom du projet à charger
@@ -450,8 +488,15 @@ public class GestionSauvegarde
             int id = 0;
             // Écrire les informations de toutes les liaisons
             for (LiaisonVue liaisonVue : listLiaison) 
-            {
-                bw.write(liaisonVue.getType() + "\t" + 
+            {	
+				String type = liaisonVue.getType();
+				if(type.equals("association")){
+					if(liaisonVue.isUnidirectionnel()){
+						type = type + "_uni";
+					} else {type = type + "_bi";}
+				}
+				
+                bw.write(type + "\t" + 
                          id + "\t" + 
                          liaisonVue.getBlocOrigine().getNom() + "\t" + 
                          liaisonVue.getSideOrig() + "\t" + 

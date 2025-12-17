@@ -495,4 +495,9 @@ public class LiaisonVue {
     public double getNivOrig() { return posRelOrigine; }
     
     public double getNivDest() { return posRelDestination; }
+
+
+    public void setPosRelOrig(double posRel) { this.posRelOrigine = posRel; }
+    
+    public void setPosRelDest(double posRel) { this.posRelDestination = posRel; }
 }
