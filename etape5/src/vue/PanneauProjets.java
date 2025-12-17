@@ -14,19 +14,18 @@ public class PanneauProjets extends JPanel {
     //--------------------------//
 
     private FenetrePrincipale fenetrePrincipale;
-    private String cheminDossiers;
-    private JPanel panelProjets;
+    private String            cheminDossiers   ;
+    private JPanel            panelProjets     ;
 
     //-------------------------//
     //      CONSTRUCTEUR       //
     //-------------------------//
     
-    public PanneauProjets(FenetrePrincipale fenetrePrincipale) {
+    public PanneauProjets(FenetrePrincipale fenetrePrincipale)
+    {
         this.fenetrePrincipale = fenetrePrincipale;
         
-        this.cheminDossiers = "data/donnees/projets.xml";
-        //this.cheminDossiers = "sauvegardes/dossiers";
-
+        this.cheminDossiers    = "data/donnees/projets.xml";
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
         setBorder(BorderFactory.createTitledBorder("Projets"));
@@ -45,8 +44,8 @@ public class PanneauProjets extends JPanel {
         chargerProjets(panelProjets);
 
         JScrollPane scrollPane = new JScrollPane(panelProjets);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy  (JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER  );
         add(scrollPane, BorderLayout.CENTER);
 
         //actualiser la liste
@@ -69,7 +68,6 @@ public class PanneauProjets extends JPanel {
 
     private void chargerProjets(JPanel panelProjets) 
     {
-
         File fichier = new File(cheminDossiers);
 
         if (!fichier.exists())
@@ -84,7 +82,8 @@ public class PanneauProjets extends JPanel {
         {
             String ligne;
             String messageInvalide = "Attention le projet a un ou des fichiers non valides \n";
-            boolean vide = true;
+
+            boolean vide         = true;
             boolean formatValide = true;
 
             while ((ligne = reader.readLine()) != null) 
@@ -92,11 +91,11 @@ public class PanneauProjets extends JPanel {
                 ligne = ligne.trim();
 
                 String ligneChemin = ligne.substring(0, ligne.indexOf("\t") );
-                String intitule = ligne.substring(ligne.indexOf("\t") + 1).trim();
+                String intitule    = ligne.substring(ligne.indexOf("\t") + 1).trim();
 
                 if (!ligneChemin.isEmpty()) 
                 {
-                    File projet          = new File(ligneChemin);
+                    File projet = new File(ligneChemin);
 
                     if (projet.exists())
                     {
@@ -126,10 +125,11 @@ public class PanneauProjets extends JPanel {
             labelErreur.setForeground(Color.RED);
             panelProjets.add(labelErreur);
         }
-
+        repaint();
     }
 
-    private JButton creerBoutonProjet(File projet, String intitule) {
+    private JButton creerBoutonProjet(File projet, String intitule)
+    {
         JButton bouton = new JButton(intitule);
         bouton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         bouton.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -140,40 +140,41 @@ public class PanneauProjets extends JPanel {
         // Menu contextuel (clic droit)
         JPopupMenu menuContextuel = new JPopupMenu();
         
-        JMenuItem renommerItem = new JMenuItem("Renommer");
-        renommerItem.addActionListener(e -> renommerProjet(projet.getAbsolutePath()));
+        JMenuItem renommerItem  = new JMenuItem("Renommer");
+        renommerItem. addActionListener(e -> renommerProjet (projet.getAbsolutePath()));
         
         JMenuItem supprimerItem = new JMenuItem("Supprimer");
         supprimerItem.addActionListener(e -> supprimerProjet(projet.getAbsolutePath()));
         
-        menuContextuel.add(renommerItem);
+        menuContextuel.add(renommerItem );
         menuContextuel.add(supprimerItem);
         
         // Afficher le menu au clic droit
-        bouton.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mousePressed(java.awt.event.MouseEvent e) {
-                if (e.isPopupTrigger()) {
+        bouton.addMouseListener(new java.awt.event.MouseAdapter()
+        {
+            public void mousePressed(java.awt.event.MouseEvent e)
+            {
+                if (e.isPopupTrigger())
                     menuContextuel.show(e.getComponent(), e.getX(), e.getY());
-                }
             }
             
-            @Override
-            public void mouseReleased(java.awt.event.MouseEvent e) {
-                if (e.isPopupTrigger()) {
+            public void mouseReleased(java.awt.event.MouseEvent e)
+            {
+                if (e.isPopupTrigger())
                     menuContextuel.show(e.getComponent(), e.getX(), e.getY());
-                }
             }
         });
 
-        bouton.addActionListener(e -> {
+        bouton.addActionListener(e ->
+        {
             try 
             {
                 fenetrePrincipale.chargerProjet(projet.getAbsolutePath());
             }
             catch (Exception ex)
             {
-                JOptionPane.showMessageDialog(
+                JOptionPane.showMessageDialog
+                (
                     this,
                     "Impossible de charger le projet : " + projet.getName(),
                     "Erreur",
@@ -185,33 +186,43 @@ public class PanneauProjets extends JPanel {
         return bouton;
     }
 
-    private void renommerProjet(String cheminProjet) {
-        String nouvelIntitule = JOptionPane.showInputDialog(
+    private void renommerProjet(String cheminProjet)
+    {
+        String nouvelIntitule = JOptionPane.showInputDialog
+        (
             this,
             "Entrez le nouveau nom du projet :",
             "Renommer le projet",
             JOptionPane.PLAIN_MESSAGE
         );
         
-        if (nouvelIntitule != null && !nouvelIntitule.trim().isEmpty()) {
+        if (nouvelIntitule != null && !nouvelIntitule.trim().isEmpty())
+        {
             nouvelIntitule = nouvelIntitule.trim();
             
             // Vérifier si l'intitulé existe déjà
-            if (intituleExiste(nouvelIntitule, cheminProjet)) {
-                JOptionPane.showMessageDialog(
+            if (intituleExiste(nouvelIntitule, cheminProjet))
+            {
+                JOptionPane.showMessageDialog
+                (
                     this,
                     "Un projet avec ce nom existe déjà !\nVeuillez choisir un autre nom.",
                     "Erreur",
                     JOptionPane.ERROR_MESSAGE
                 );
+
                 return;
             }
             
-            try {
+            try
+            {
                 modifierProjetDansFichier(cheminProjet, nouvelIntitule, false);
                 actualiser();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(
+            }
+            catch (Exception e)
+            {
+                JOptionPane.showMessageDialog
+                (
                     this,
                     "Erreur lors du renommage : " + e.getMessage(),
                     "Erreur",
@@ -221,8 +232,10 @@ public class PanneauProjets extends JPanel {
         }
     }
 
-    private void supprimerProjet(String cheminProjet) {
-        int confirmation = JOptionPane.showConfirmDialog(
+    private void supprimerProjet(String cheminProjet)
+    {
+        int confirmation = JOptionPane.showConfirmDialog
+        (
             this,
             "Êtes-vous sûr de vouloir supprimer ce projet de la liste ?\n\nAttention : Cette action ne peut pas être annulée.\nSeules les données du graphe seront supprimées",
             "Confirmation de suppression",
@@ -230,18 +243,24 @@ public class PanneauProjets extends JPanel {
             JOptionPane.WARNING_MESSAGE
         );
         
-        if (confirmation == JOptionPane.YES_OPTION) {
-            try {
+        if (confirmation == JOptionPane.YES_OPTION)
+        {
+            try
+            {
                 modifierProjetDansFichier(cheminProjet, null, true);
-                JOptionPane.showMessageDialog(
+                JOptionPane.showMessageDialog
+                (
                     this,
                     "Projet supprimé",
                     "Succès",
                     JOptionPane.INFORMATION_MESSAGE
                 );
                 actualiser();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(
+            }
+            catch (Exception e)
+            {
+                JOptionPane.showMessageDialog
+                (
                     this,
                     "Erreur lors de la suppression : " + e.getMessage(),
                     "Erreur",
@@ -251,54 +270,67 @@ public class PanneauProjets extends JPanel {
         }
     }
 
-    private boolean intituleExiste(String intitule, String cheminProjetActuel) {
+    private boolean intituleExiste(String intitule, String cheminProjetActuel)
+    {
         File fichier = new File(cheminDossiers);
         
-        try (BufferedReader reader = new BufferedReader(new FileReader(fichier))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(fichier)))
+        {
             String ligne;
-            while ((ligne = reader.readLine()) != null) {
+
+            while ((ligne = reader.readLine()) != null)
+            {
                 String[] parts = ligne.split("\t");
-                if (parts.length >= 2) {
+                if (parts.length >= 2)
+                {
                     String intituleExistant = parts[1].trim();
                     // Vérifier que c'est pas le même projet
-                    if (intituleExistant.equals(intitule) && !parts[0].equals(cheminProjetActuel)) {
+                    if (intituleExistant.equals(intitule) && !parts[0].equals(cheminProjetActuel))
                         return true;
-                    }
                 }
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
         
         return false;
     }
 
-    private void modifierProjetDansFichier(String cheminProjet, String nouvelIntitule, boolean supprimer) throws Exception {
+    private void modifierProjetDansFichier(String cheminProjet, String nouvelIntitule, boolean supprimer) throws Exception
+    {
         File fichier = new File(cheminDossiers);
         java.util.ArrayList<String> lignes = new java.util.ArrayList<>();
         String fichierSauvegardeASupprimer = null;
         
         // Lire toutes les lignes
-        try (BufferedReader reader = new BufferedReader(new FileReader(fichier))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(fichier)))
+        {
             String ligne;
-            while ((ligne = reader.readLine()) != null) {
+            while ((ligne = reader.readLine()) != null)
+            {
                 String[] parts = ligne.split("\t");
-                if (parts.length >= 2 && parts[0].equals(cheminProjet)) {
-                    if (supprimer) {
+                if (parts.length >= 2 && parts[0].equals(cheminProjet))
+                {
+                    if (supprimer)
+                    {
                         // Marquer le fichier de sauvegarde pour suppression
                         fichierSauvegardeASupprimer = parts[1].trim();
                         continue; // Ne pas ajouter cette ligne
-                    } else {
+                    }
+                    else
+                    {
                         // Renommer
                         ligne = parts[0] + "\t" + nouvelIntitule;
                         
                         // Renommer aussi le fichier de sauvegarde .xml
                         String ancienNom = parts[1].trim();
-                        File ancienFichierSauvegarde = new File("data/sauvegardes/" + ancienNom + ".xml");
+                        File ancienFichierSauvegarde  = new File("data/sauvegardes/" + ancienNom      + ".xml");
                         File nouveauFichierSauvegarde = new File("data/sauvegardes/" + nouvelIntitule + ".xml");
-                        if (ancienFichierSauvegarde.exists()) {
+
+                        if (ancienFichierSauvegarde.exists()) 
                             ancienFichierSauvegarde.renameTo(nouveauFichierSauvegarde);
-                        }
                     }
                 }
                 lignes.add(ligne);
@@ -306,17 +338,22 @@ public class PanneauProjets extends JPanel {
         }
         
         // Réécrire le fichier
-        try (java.io.BufferedWriter writer = new java.io.BufferedWriter(new java.io.FileWriter(fichier))) {
-            for (String ligne : lignes) {
+        try (java.io.BufferedWriter writer = new java.io.BufferedWriter(new java.io.FileWriter(fichier)))
+        {
+            for (String ligne : lignes)
+            {
                 writer.write(ligne);
                 writer.newLine();
             }
         }
         
         // Supprimer le fichier de sauvegarde si nécessaire
-        if (fichierSauvegardeASupprimer != null) {
+        if (fichierSauvegardeASupprimer != null)
+        {
             File fichierSauvegarde = new File("data/sauvegardes/" + fichierSauvegardeASupprimer + ".xml");
-            if (fichierSauvegarde.exists()) {
+
+            if (fichierSauvegarde.exists())
+            {
                 fichierSauvegarde.delete();
             }
         }

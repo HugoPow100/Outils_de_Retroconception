@@ -14,18 +14,18 @@ public class BlocClasse
     //        ATTRIBUTS         //
     //--------------------------//
 
-    private String nom;
-    private boolean estInterface;
-    private boolean estSelectionne;
-    private List<String> attributs;
-    private List<String> methodes;
+    private String       nom           ;
+    private boolean      estInterface  ;
+    private boolean      estSelectionne;
+    private List<String> attributs     ;
+    private List<String> methodes      ;
 
-    private int x;
-    private int y;
+    private int x      ;
+    private int y      ;
     private int largeur;
     private int hauteur;
 
-    private int hauteurCalculee;
+    private int     hauteurCalculee    ;
     private boolean affichagePleinEcran;
 
     // Constantes 
@@ -47,13 +47,17 @@ public class BlocClasse
     public BlocClasse(String nom, int x, int y) 
     {
         this.nom = nom;
+
         this.x   = x;
         this.y   = y;
+    
         this.largeur = 200;
         this.hauteur = 150;
-        this.estInterface   = false;
-        this.estSelectionne = false;
+    
+        this.estInterface        = false;
+        this.estSelectionne      = false;
         this.affichagePleinEcran = false;
+
         this.attributs = new ArrayList<String>();
         this.methodes  = new ArrayList<String>();
     }
@@ -74,14 +78,15 @@ public class BlocClasse
         FontMetrics fm = g2d.getFontMetrics();
         
         // Si rentre sur une ligne, retourner tel quel
-        if (fm.stringWidth(methodeStr) <= maxWidth) {
+        if (fm.stringWidth(methodeStr) <= maxWidth)
             return methodeStr;
-        }
         
         // Si on est en mode plein écran, afficher tous les paramètres avec wrapping
-        if (affichagePleinEcran) {
+        if (affichagePleinEcran)
+        {
             int closeParen = methodeStr.indexOf(")");
-            if (closeParen > 0) {
+            if (closeParen > 0)
+            {
                 String firstPart = methodeStr.substring(0, closeParen + 1);
                 String secondPart = methodeStr.substring(closeParen + 1);
                 return firstPart + "\n" + secondPart;
@@ -91,7 +96,8 @@ public class BlocClasse
         
         // En mode condensé, limiter aussi les paramètres lors du wrapping
         int closeParen = methodeStr.indexOf(")");
-        if (closeParen <= 0) {
+        if (closeParen <= 0)
+        {
             return methodeStr;
         }
         
@@ -100,19 +106,26 @@ public class BlocClasse
         
         // Vérifier que les deux parties rentrent dans la largeur
         // Si la première partie est trop longue, on coupe aussi les paramètres
-        if (fm.stringWidth(firstPart) > maxWidth) {
+        if (fm.stringWidth(firstPart) > maxWidth)
+        {
             // Tronquer les paramètres
             int openParen = methodeStr.indexOf("(");
-            if (openParen > 0) {
+
+            if (openParen > 0)
+            {
                 String signature = methodeStr.substring(0, openParen + 1);
                 String params = methodeStr.substring(openParen + 1, closeParen);
                 String[] paramList = params.split(",");
                 
                 // Garder seulement les 2 premiers paramètres
-                if (paramList.length > 2) {
+                if (paramList.length > 2)
+                {
                     StringBuilder truncated = new StringBuilder(signature);
-                    for (int i = 0; i < 2; i++) {
+
+                    for (int i = 0; i < 2; i++)
+                    {
                         truncated.append(paramList[i].trim());
+
                         if (i < 1) truncated.append(", ");
                     }
                     truncated.append(", ...");

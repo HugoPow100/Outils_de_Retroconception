@@ -28,9 +28,9 @@ public class FenetrePrincipale extends JFrame
     //        ATTRIBUTS         //
     //--------------------------//
 
-    private PanneauProjets      panneauProjets;
+    private PanneauProjets      panneauProjets  ;
     private PanneauDiagramme    panneauDiagramme;
-    private Controleur         controleur;
+    private Controleur          controleur      ;
 
     //-------------------------//
     //      CONSTRUCTEUR       //
@@ -38,28 +38,29 @@ public class FenetrePrincipale extends JFrame
     
     public FenetrePrincipale() 
     {
-        setTitle("Générateur de diagramme UML");
+        setTitle("Générateur de diagrammes de classes UML");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1400, 800);
         setMinimumSize(new Dimension(700,400));
         setLocationRelativeTo(null);
         setResizable(true);
 
-        panneauProjets   = new PanneauProjets(this);
+        panneauProjets   = new PanneauProjets  (this);
         panneauDiagramme = new PanneauDiagramme(this);
-        this.controleur = new Controleur(this);
+        this.controleur  = new Controleur      (this);
 
         setLayout(new BorderLayout());
         
         // La ligne de division entre panel projet et panel diagramme
-        JSplitPane splitPane = new JSplitPane(
+        JSplitPane splitPane = new JSplitPane
+        (
             JSplitPane.HORIZONTAL_SPLIT,
             true,
             panneauProjets,
             panneauDiagramme
         );
 
-        splitPane.setDividerLocation(250);
+        splitPane.setDividerLocation   (250 );
         splitPane.setOneTouchExpandable(true);
 
         this.add(splitPane, BorderLayout.CENTER);
@@ -90,11 +91,10 @@ public class FenetrePrincipale extends JFrame
                 message += "Vérifiez que vous avez les permissions nécessaires.";
             }
             else
-            {
                 message += e.getMessage();
-            }
             
-            javax.swing.JOptionPane.showMessageDialog(
+            javax.swing.JOptionPane.showMessageDialog
+            (
                 this, 
                 message, 
                 "Erreur de chargement", 
@@ -124,21 +124,23 @@ public class FenetrePrincipale extends JFrame
             try 
             {
                 // Sauvegarder le zoom actuel et le réinitialiser pour l'export
-                double zoomSauvegarde = panneauDiagramme.getZoomLevel();
+                double zoomSauvegarde      = panneauDiagramme.getZoomLevel      ();
                 boolean textZoomSauvegarde = panneauDiagramme.isAfficherTextZoom();
                 
                 panneauDiagramme.setZoomLevel(1.0);
                 panneauDiagramme.setAfficherTextZoom(false);
                 
-                BufferedImage image = new BufferedImage(
-                panneauDiagramme.getWidth(), panneauDiagramme.getHeight(), BufferedImage.TYPE_INT_ARGB );
+                BufferedImage image = new BufferedImage
+                (
+                    panneauDiagramme.getWidth(), panneauDiagramme.getHeight(), BufferedImage.TYPE_INT_ARGB
+                );
 
                 panneauDiagramme.printAll(image.createGraphics());
                 ImageIO.write(image, "png", fichierSortie);
                 System.out.println("Diagramme sauvegardé dans"+fichierSortie);
                 
                 // Restaurer le zoom et l'affichage du texte
-                panneauDiagramme.setZoomLevel(zoomSauvegarde);
+                panneauDiagramme.setZoomLevel       (zoomSauvegarde    );
                 panneauDiagramme.setAfficherTextZoom(textZoomSauvegarde);
             } 
             catch (Exception e) 
@@ -154,7 +156,8 @@ public class FenetrePrincipale extends JFrame
         VerificationStructureProjet verification = new VerificationStructureProjet();
         verification.verifierStructure();
 
-        SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() ->
+        {
             FenetrePrincipale fenetre = new FenetrePrincipale();
             fenetre.setVisible(true);
         });

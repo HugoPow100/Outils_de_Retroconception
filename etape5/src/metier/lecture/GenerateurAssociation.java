@@ -10,8 +10,8 @@ import metier.objet.*;
  */
 public class GenerateurAssociation
 {
-	private HashMap<String, Classe> hashMapClasses ;
-	private ArrayList<Association>  lstAssociations;
+	private HashMap  <String, Classe> hashMapClasses ;
+	private ArrayList<Association   > lstAssociations;
 
 	public GenerateurAssociation(HashMap<String, Classe> hashMapClasses)
 	{
