@@ -206,7 +206,8 @@ public class Controleur
     * @param lstAssoc La list d'{@link Association}s sur laquelle baser les lstLiaisons
     * @param mapBlocsParNom {@link HashMap<String, BlocClasse>} de String, BlocClasse avec le nom de chaque bloc et chaque bloc
     */
-    private void creerLiaisonsDepuisAssoc(List<Association> lstAssoc, HashMap<String, BlocClasse> mapBlocsParNom) {
+    private void creerLiaisonsDepuisAssoc(List<Association> lstAssoc, HashMap<String, BlocClasse> mapBlocsParNom) 
+    {
         for (Association assoc : lstAssoc) 
         {
             String multOrig = (assoc.getMultOrig() != null) ? assoc.getMultOrig().toString() : "";

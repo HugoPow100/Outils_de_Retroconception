@@ -14,12 +14,16 @@ import vue.BlocClasse;
 public class LiaisonVue {
 
     // Attributs principaux
-    private String type;
+    private String type; //association, interface, heritage
+    private BlocClasse blocOrigine;
+    private BlocClasse blocDestination;
+
+    //POUR ASSOCIATION UNIQUEMENT
     private boolean unidirectionnel;
     private String multOrig;
     private String multDest;
-    private BlocClasse blocOrigine;
-    private BlocClasse blocDestination;
+
+
     private Point ancrageOrigine;
     private Point ancrageDestination;
     private double posRelOrigine;
@@ -42,6 +46,7 @@ public class LiaisonVue {
         this(blocOrigine, blocDestination, type, true, "", "");
     }
 
+    // constructeur pour les type "ASSOCIATION"
     public LiaisonVue(BlocClasse blocOrigine, BlocClasse blocDestination, String type, 
                       boolean unidirectionnel, String multOrig, String multDest) {
         this.blocOrigine = blocOrigine;
