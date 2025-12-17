@@ -98,7 +98,7 @@ public class Lecture
 				{
 					nomInterface = nomInterface.replace("{", "").trim();
 					Classe interfaceClasse = getClasse(nomInterface);
-					System.out.println("interface : " + interfaceClasse.getNom());
+					//System.out.println("interface : " + interfaceClasse.getNom());
 
 					if (interfaceClasse != null)
 					{

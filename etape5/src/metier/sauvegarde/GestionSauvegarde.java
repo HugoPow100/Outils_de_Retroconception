@@ -1,22 +1,18 @@
 package metier.sauvegarde;
 
-import metier.util.*;
-import metier.objet.Classe;
 import controleur.Controleur;
-import vue.BlocClasse;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.List;
+import metier.util.*;
+import vue.BlocClasse;
 
 public class GestionSauvegarde 
 {
@@ -52,6 +48,7 @@ public class GestionSauvegarde
         //Récupére depuis util le chemin pour sauvegarde/dossier
         String cheminDossier = Path.of(ConstantesChemins.SAUVEGARDES , dossierFichSelec).toString();
 
+        System.out.println("emplacement du fichier à charger : " + dossierFichSelec);
 
         Map<String, int[]> hashCoordonnees = new HashMap<String, int[]>();
 
@@ -99,7 +96,7 @@ public class GestionSauvegarde
     * @param dossierFichSelec L'intitulé du projet sur lequel baser les coordonées
     * @return Une {@link Map<String, int[]>} des noms des Classes et leurs coordonées (x et y)
     */
-    public void sauvegarderClasses(List<BlocClasse> listBlocClasses, String cheminProjet) 
+    public void sauvegarderClasses(List<BlocClasse> listBlocClasses, String cheminProjet)
     {
         /*String   basePath               = System.getProperty("user.dir");
         String   cheminPath             = basePath + "data/donnees/";
@@ -107,9 +104,7 @@ public class GestionSauvegarde
 
         String fichierLectureEcriture = Path.of(ConstantesChemins.DONNEES, "projets.xml").toString();
 
-
-        int      indiceslash            = Math.max(cheminProjet.lastIndexOf("/"), cheminProjet.lastIndexOf("\\"));
-        String   nomProjetASauv         = cheminProjet.substring(indiceslash + 1).trim();
+        String   nomProjetASauv         = getIntituleFromLien(cheminDossier);
 
         // Vérifier si le projet est déjà sauvegardé
         if (this.projetEstSauvegarde(cheminProjet)) 
@@ -174,8 +169,9 @@ public class GestionSauvegarde
         return file.exists();
     }
 
-    public HashMap<String, BlocClasse> chargerSauvegardeCoord(String nomFichier,  HashMap<String, BlocClasse> mapBlocClasse)
+    /*public HashMap<String, BlocClasse> chargerSauvegardeCoord(String nomFichier,  HashMap<String, BlocClasse> mapBlocClasse)
     {
+        System.out.println("nom du fichier à sauvegarder : " + nomFichier);
         HashMap<String, BlocClasse> mapNouvBlocClasse = new HashMap<>();
 
         /*String   basePath               = System.getProperty("user.dir");
@@ -185,7 +181,7 @@ public class GestionSauvegarde
 
         //System.out.println(cheminPath);
 
-        File file = new File(cheminPath + nomFichier + ".xml");*/
+        File file = new File(cheminPath + nomFichier + ".xml");
 
         Path cheminPath = Path.of(ConstantesChemins.SAUVEGARDES, nomFichier + ".xml");
         File file = new File(cheminPath.toString());
@@ -222,7 +218,7 @@ public class GestionSauvegarde
         }
 
         return mapNouvBlocClasse;
-    }
+    }*/
     
     public String getIntituleFromLien(String paraCheminDossier) {
 
@@ -255,6 +251,33 @@ public class GestionSauvegarde
         catch (Exception e) 
         {
             e.getMessage();
+        }
+
+        return "";
+    }
+
+    public String getLienFromIntitule(String intituleProjet) {
+
+        String fichierPath = Path.of(ConstantesChemins.DONNEES, "projets.xml").toString();
+
+        try(Scanner scan = new Scanner(new File(fichierPath))) 
+        {
+            while(scan.hasNextLine())
+            {
+                String ligne = scan.nextLine();
+                
+                String[] tabLigne = ligne.split("\t");
+
+                if(tabLigne.length >= 2 && tabLigne[1].trim().equals(intituleProjet.trim()))
+                {
+                    return tabLigne[0].trim();
+                }
+            }
+            
+        } 
+        catch (Exception e) 
+        {
+            e.printStackTrace();
         }
 
         return "";
@@ -313,6 +336,7 @@ public class GestionSauvegarde
                     parent.mkdirs();
                 }
                 
+                // TIENS HUGO CEST ICI
                 // Création du fichier s'il n'existe pas
                 if (!fichier.exists())
                 {
