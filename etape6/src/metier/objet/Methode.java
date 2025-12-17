@@ -48,9 +48,9 @@ public class Methode
 
 		switch (this.visibilite)
 		{
-			case "public" -> sRet = "+ ";
-			case "private" -> sRet = "- ";
-			case "package" -> sRet = "# ";
+			case "public"    -> sRet = "+ ";
+			case "private"   -> sRet = "- ";
+			case "package"   -> sRet = "# ";
 			case "protected" -> sRet = "~ ";
 		}
 
