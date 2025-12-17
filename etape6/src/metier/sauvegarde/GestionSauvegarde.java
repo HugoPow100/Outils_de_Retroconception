@@ -433,13 +433,26 @@ public class GestionSauvegarde
             //
             bw.write("---- Liaisons ----");
             bw.newLine();
-            bw.write("#id\tblocOrig\tcoteOrig\tposRelOrig\tblocDest\tcoteDest\tposRelDest\ttypeLiaison");
+            bw.write("#typeLiaison\tid\tblocOrig\tcoteOrig\tposRelOrig\tmultiOrig\tblocDest\tcoteDest\tposRelDest\tmultiDest");
             bw.newLine();
 
+
+            int id = 0;
             // Écrire les informations de toutes les liaisons
             for (LiaisonVue liaisonVue : listLiaison) 
             {
-                // À implémenter selon la structure de LiaisonVue
+                bw.write(liaisonVue.getType() + "\t" + 
+                         id + "\t" + 
+                         liaisonVue.getBlocOrigine().getNom() + "\t" + 
+                         id + "\t" + 
+                         id + "\t" + 
+                         liaisonVue.getMultOrig() + "\t" + 
+                         liaisonVue.getBlocDestination().getNom() + "\t" + 
+                         id + "\t" + 
+                         id + "\t" +
+                         liaisonVue.getMultDest() );
+                bw.newLine();
+                id++;
             }
         } 
         catch (Exception e) 
