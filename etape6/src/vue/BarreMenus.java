@@ -132,7 +132,10 @@ public class BarreMenus extends JMenuBar
     private void verifierFichiersProjet(String cheminFichier)
     {
         ArrayList<String> lstFichiersInvalides = this.getLstFichiersInvalides(cheminFichier);
-        String messageInvalide = "Attention fichiers non valides detectés :\n ( ";
+        String messageInvalide = "Attention fichiers non valides detectés :\n ( ";;
+
+        if (lstFichiersInvalides.size() == 1)
+            messageInvalide = "Attention fichier non valides detectés :\n ( ";
         
         if (lstFichiersInvalides.isEmpty())
         {
@@ -144,9 +147,11 @@ public class BarreMenus extends JMenuBar
             {
                 messageInvalide += fichierInvalides + ", ";
             }
+            // Retirer la derniere virgule
+            messageInvalide = messageInvalide.substring(0, messageInvalide.length() - 2);
             messageInvalide += " )";
 
-            JOptionPane.showMessageDialog(null, messageInvalide, "Erreur", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, messageInvalide, "Attention", JOptionPane.WARNING_MESSAGE);
         }
     }
 
