@@ -88,15 +88,17 @@ public class Controleur
         if (gestionSauvegarde.projetEstSauvegarde(cheminProjet) && 
             gestionSauvegarde.fichierDeSauvegardeExiste(intituleProjet)) 
         {
-            System.out.println("Le projet est sauvegardé. Chargement des coordonées depuis le .xml");
-            Map<String, int[]> coordonneesBlocs = gestionSauvegarde.lireCoordoneesXml(intituleProjet + ".xml");
+            System.out.println("Le projet est sauvegardé. Chargement complet depuis le .xml");
+            Map<String, BlocClasse> blocsCharges = gestionSauvegarde.chargerBlocsClasses(intituleProjet);
             
-            for (BlocClasse bloc : lstBlocs) {
-                int[] coordonnees = coordonneesBlocs.get(bloc.getNom());
-                if (coordonnees != null) {
-                    bloc.setX(coordonnees[0]);
-                    bloc.setY(coordonnees[1]);
-                }
+            // Utiliser les blocs chargés du XML
+            this.lstBlocs.clear();
+            this.lstBlocs.addAll(blocsCharges.values());
+            
+            // Mettre à jour la map avec les blocs chargés
+            mapBlocsParNom.clear();
+            for (BlocClasse bloc : blocsCharges.values()) {
+                mapBlocsParNom.put(bloc.getNom(), bloc);
             }
 
         } else {
@@ -107,7 +109,6 @@ public class Controleur
         creerLiaisonsDepuisAssoc        (lecture.getLstAssociation(), mapBlocsParNom);
 
         creerLiaisonsDepuisHerit        (lecture.getLstHeritage(), mapBlocsParNom);
-        creerLiaisonsDepuisInterface    (lecture.getLstInterface(), mapBlocsParNom);
 
         creerLiaisonsDepuisInterface    (lecture.getLstInterface(), mapBlocsParNom);
 
@@ -206,7 +207,8 @@ public class Controleur
     * @param lstAssoc La list d'{@link Association}s sur laquelle baser les lstLiaisons
     * @param mapBlocsParNom {@link HashMap<String, BlocClasse>} de String, BlocClasse avec le nom de chaque bloc et chaque bloc
     */
-    private void creerLiaisonsDepuisAssoc(List<Association> lstAssoc, HashMap<String, BlocClasse> mapBlocsParNom) {
+    private void creerLiaisonsDepuisAssoc(List<Association> lstAssoc, HashMap<String, BlocClasse> mapBlocsParNom) 
+    {
         for (Association assoc : lstAssoc) 
         {
             String multOrig = (assoc.getMultOrig() != null) ? assoc.getMultOrig().toString() : "";

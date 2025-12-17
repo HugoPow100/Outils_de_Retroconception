@@ -3,7 +3,7 @@ package vue;
 import metier.util.test_structure_projet.VerificationStructureProjet;
 import controleur.Controleur;
 import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.Dimension; 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;

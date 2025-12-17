@@ -461,9 +461,19 @@ public class BlocClasse
         this.attributs = attributs;
     }
 
+    public List<String> getAttributs() 
+    {
+        return attributs;
+    }
+
     public void setMethodesAffichage(List<String> methodes) 
     {
         this.methodes = methodes;
+    }
+
+    public List<String> getMethodes() 
+    {
+        return methodes;
     }
 
     public boolean isAffichagePleinEcran() 
