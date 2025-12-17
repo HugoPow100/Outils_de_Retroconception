@@ -330,6 +330,11 @@ public class GestionSauvegarde
 	*/
 	public void sauvegarderClasses(List<BlocClasse> listBlocClasses, List <LiaisonVue> listLiaison, String cheminProjet)
 	{
+		// Vérifier que cheminProjet n'est pas null
+		if (cheminProjet == null || cheminProjet.isEmpty()) {
+			System.out.println("Erreur: cheminProjet est null ou vide dans sauvegarderClasses");
+			return;
+		}
 
 		String fichierLectureEcriture = Path.of(ConstantesChemins.DONNEES, "projets.xml").toString();
 
@@ -368,6 +373,11 @@ public class GestionSauvegarde
 	*/
 	public void sauvegarderCoordProjet(List<BlocClasse> listBlocClasses, String nomProjet, String cheminProjet)
 	{
+		// Vérifier que les paramètres ne sont pas null
+		if (listBlocClasses == null || nomProjet == null || nomProjet.isEmpty() || cheminProjet == null || cheminProjet.isEmpty()) {
+			System.out.println("Erreur: paramètres invalides dans sauvegarderCoordProjet");
+			return;
+		}
 		
 		Path cheminPath = Path.of(ConstantesChemins.SAUVEGARDES, nomProjet + ".xml");
 		File file = new File(cheminPath.toString());
@@ -445,7 +455,7 @@ public class GestionSauvegarde
 
             int id = 0;
             // Écrire les informations de toutes les liaisons
-            for (LiaisonVue liaisonVue : listLiaison) 
+            /*for (LiaisonVue liaisonVue : listLiaison) 
             {
                 bw.write(liaisonVue.getType() + "\t" + 
                          id + "\t" + 
@@ -459,7 +469,7 @@ public class GestionSauvegarde
                          liaisonVue.getMultDest() );
                 bw.newLine();
                 id++;
-            }
+            }*/
         } 
         catch (Exception e) 
         {

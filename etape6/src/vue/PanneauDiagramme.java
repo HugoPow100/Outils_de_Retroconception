@@ -422,7 +422,6 @@ public class PanneauDiagramme extends JPanel
         }
 
         // Afficher le pourcentage de zoom
-            this.actionSauvegarder();
         afficherZoomPercentage(g2d);
     }
 
@@ -493,7 +492,10 @@ public class PanneauDiagramme extends JPanel
     }
 
     public void actionSauvegarder() {
-        this.fenetrePrincipale.sauvegarderClasses(this.blocsClasses, this.liaisons, cheminProjetCourant);
+        // Ne sauvegarder que si un projet a été chargé
+        if (cheminProjetCourant != null && !cheminProjetCourant.isEmpty()) {
+            this.fenetrePrincipale.sauvegarderClasses(this.blocsClasses, this.liaisons, cheminProjetCourant);
+        }
     }
 
     public void setSauvegardeAuto(boolean b) {
