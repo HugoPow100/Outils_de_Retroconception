@@ -129,6 +129,91 @@ public class GestionSauvegarde
         return hashCoordonnees;
     }
 
+	/**
+	 * Lit les liaisons à partir d'un fichier dans data/sauvegardes/ à partir d'une ligne donnée.
+	*
+	* La méthode parcourt le fichier ligne par ligne, ignore les lignes vides et les commentaires
+	* (commençant par '#'). Chaque ligne valide est découpée en colonnes selon les tabulation
+	* pour créer un objet {@link LiaisonVue}.
+	*
+	* @param dossierFichSelec le nom du fichier.xml contenant les liaisons, situé dans le dossier de sauvegarde
+	* @param ligneDepartLecture l'indice de la ligne à partir de laquelle commencer la lecture des liaisons
+	* @return une liste de {@link LiaisonVue} correspondant aux liaisons lues
+	*/
+	public List<LiaisonVue> lectureLiaison(String dossierFichSelec, int ligneDepartLecture)
+	{
+		List<LiaisonVue> lstLiaisons = new ArrayList<>();
+
+		String chemin = Path.of(ConstantesChemins.SAUVEGARDES , dossierFichSelec).toString();
+
+		try (BufferedReader br = new BufferedReader(new FileReader(chemin))) 
+		{
+			String ligne;
+			int index = 0;
+
+			//  On avance jusqu'à la ligne donnée par ligneDepartLecture
+			while (index < ligneDepartLecture && br.readLine() != null) 
+			{
+				index++;
+			}
+
+			// on commence a lire :D
+			while ((ligne = br.readLine()) != null) 
+			{
+
+				ligne = ligne.trim();
+				if (ligne.isEmpty()) continue;
+				if (ligne.startsWith("#")) continue;
+
+				String[] tabLigne = ligne.split("\\s+");
+				if (tabLigne.length < 10) continue;
+
+				String typeLiaison       = tabLigne[0].trim();
+				String blocOrig          = tabLigne[2].trim();
+				String blocDest          = tabLigne[5].trim();
+
+				String Bidirectionnalite = typeLiaison.substring(typeLiaison.indexOf("_") +1).trim();
+
+
+				if(typeLiaison.equals("association_uni") || 
+					typeLiaison.equals("association_bi"))
+				{
+					if(Bidirectionnalite.equals("uni"))
+					{
+							LiaisonVue liaisonVue = new LiaisonVue(blocOrig, blocDest, "association",
+																	true,
+																	tabLigne[8].trim(),
+																	tabLigne[9].trim()
+																	);
+					}
+					else
+					{
+						LiaisonVue liaisonVue = new LiaisonVue(blocOrig, blocDest, "association",
+																	false,
+																	tabLigne[8].trim(),
+																	tabLigne[9].trim()
+																	);
+					}
+
+					
+				}
+				else
+				{
+					LiaisonVue liaisonVue =  new LiaisonVue(blocOrig, blocDest, typeLiaison);
+				}
+
+				lstLiaisons.add(liaisonVue);
+			}
+
+		} 
+		catch (IOException | NumberFormatException e) 
+		{
+			e.printStackTrace();
+		}
+
+		return lstLiaisons;
+	}
+
     /**
     * Charge les blocs de classe depuis un fichier de sauvegarde au nouveau format
     * @param nomProjet Le nom du projet à charger
@@ -240,9 +325,6 @@ public class GestionSauvegarde
     */
     public void sauvegarderClasses(List<BlocClasse> listBlocClasses, String cheminProjet)
     {
-        /*String   basePath               = System.getProperty("user.dir");
-        String   cheminPath             = basePath + "data/donnees/";
-        String   fichierLectureEcriture = cheminPath + "projets.xml";*/
 
         String fichierLectureEcriture = Path.of(ConstantesChemins.DONNEES, "projets.xml").toString();
 
