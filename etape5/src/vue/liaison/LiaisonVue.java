@@ -471,4 +471,28 @@ public class LiaisonVue {
     public void setMultDest(String multDest) { this.multDest = multDest; }
     public boolean isUnidirectionnel() { return unidirectionnel; }
     public void setUnidirectionnel(boolean unidirectionnel) { this.unidirectionnel = unidirectionnel; }
+    
+    public String getSideOrig() {
+        switch(sideOrigine) {
+            case 0: return "TOP";
+            case 1: return "RIGHT";
+            case 2: return "BOTTOM";
+            case 3: return "LEFT";
+            default: return "UNKNOWN";
+        }
+    }
+    
+    public String getSideDest() {
+        switch(sideDestination) {
+            case 0: return "TOP";
+            case 1: return "RIGHT";
+            case 2: return "BOTTOM";
+            case 3: return "LEFT";
+            default: return "UNKNOWN";
+        }
+    }
+    
+    public double getNivOrig() { return posRelOrigine; }
+    
+    public double getNivDest() { return posRelDestination; }
 }

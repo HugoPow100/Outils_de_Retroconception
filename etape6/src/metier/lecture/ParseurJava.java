@@ -86,10 +86,10 @@ public class ParseurJava
 			    !ligne.equals("{") && !ligne.equals("}"))
 			{
 				String ligneTrimmed = ligne.trim();
-				if (!ligneTrimmed.startsWith("//") && !ligneTrimmed.startsWith("/*")             && 
-					!ligneTrimmed.startsWith("*") && !ligneTrimmed.startsWith("public")          &&
+				if (!ligneTrimmed.startsWith("//")      && !ligneTrimmed.startsWith("/*")        && 
+					!ligneTrimmed.startsWith("*")       && !ligneTrimmed.startsWith("public")    &&
 					!ligneTrimmed.startsWith("private") && !ligneTrimmed.startsWith("protected") &&
-					!ligneTrimmed.contains("(") && ligneTrimmed.matches("^[A-Z].*[,;]?$"))
+					!ligneTrimmed.contains("(")              && ligneTrimmed.matches("^[A-Z].*[,;]?$"))
 				{
 					String valeur = ligneTrimmed.replaceAll("[,;]\\s*$", "").trim();
 					if (!valeur.isEmpty())
@@ -105,15 +105,15 @@ public class ParseurJava
 			}
 
 			// Parser les membres (attributs et méthodes)
-			boolean ligneCommenceParModificateur = ligne.startsWith("private")   || 
-			                                       ligne.startsWith("protected") || 
-			                                        ligne.startsWith("public");
+			boolean ligneCommenceParModificateur =	ligne.startsWith("private")   || 
+			                                       	ligne.startsWith("protected") || 
+			                                    	ligne.startsWith("public");
 													
-			boolean estMethodeInterface = typeClasse.contains("interface")  && 
-										  			   ligne.contains("(")  && 
-			                              			   ligne.contains(")")  && 
-										               ligne.endsWith(";")  && 
-										               !ligne.contains("{");
+			boolean estMethodeInterface = typeClasse.contains("interface")       && 
+										  		ligne.contains("(")              && 
+			                              		ligne.contains(")")              && 
+										        ligne.endsWith(";")         && 
+										        !ligne.contains("{");
 
 			if (ligneCommenceParModificateur || estMethodeInterface)
 			{
@@ -128,9 +128,14 @@ public class ParseurJava
 				                          ligne.trim().startsWith("this(")   || 
 				                          ligne.trim().startsWith("return ");
 				
-				if (ligne.contains("(") && ligne.contains(")") && !estAppelMethode &&
-				   (!ligne.endsWith(";") || ligne.contains("abstract")             ||
-					estMethodeInterface || ligne.contains("{")))
+				if (ligne.contains("(")        &&
+					ligne.contains(")")        && 
+					!estAppelMethode              &&
+
+					(!ligne.endsWith(";") || 
+					ligne.contains("abstract") ||
+					estMethodeInterface           || 
+					ligne.contains("{")))
 				{
 					nomMethode = "";
 					nomConstructeur = "";
@@ -143,6 +148,7 @@ public class ParseurJava
 		}
 
 		typeClasse = typeClasse.trim().replace(" ", ",");
+
 		return new Classe(nomFichier, classeParente, typeClasse, isHeritage, 
 		                  interfaces, lstAttribut, this.lstMethode);
 	}
@@ -210,7 +216,7 @@ public class ParseurJava
 		{
 			if (motSuivant.equals("final"))  { isFinal  = true; }
 			if (motSuivant.equals("static")) { isStatic = true; }
-			if (scAttribut.hasNext()) { motSuivant = scAttribut.next(); } 
+			if (scAttribut.hasNext())                  { motSuivant = scAttribut.next(); } 
 			else 
 			{
 				break;
@@ -245,7 +251,7 @@ public class ParseurJava
 							   List<Parametre> lstParametres)
 	{
 		boolean isMethodeAbstract = ligne.contains("abstract") || estMethodeInterface;
-		boolean isClasseHeritage = ligne.contains("extends");
+		boolean isClasseHeritage  = ligne.contains("extends");
 
 		Scanner scMethode = new Scanner(ligne);
 		
@@ -282,7 +288,7 @@ public class ParseurJava
 			if (scMethode.hasNext()) 
 			{
 				String methodAvecParam = scMethode.next();
-				int indexParen = methodAvecParam.indexOf("(");
+				int    indexParen      = methodAvecParam.indexOf("(");
 				if (indexParen != -1) 
 				{
 					nomMethode = methodAvecParam.substring(0, indexParen);
@@ -306,7 +312,7 @@ public class ParseurJava
 				// Vérifier si c'est un constructeur
 				if (nomMethodeTemp.equals(nomFichier) && !ligne.contains("record")) 
 				{
-					typeRetour = "";
+					typeRetour      = "";
 					nomConstructeur = "Constructeur";
 				} 
 				else 
@@ -318,12 +324,12 @@ public class ParseurJava
 			else
 			{
 				// Cas normal : type de retour puis nom de méthode
-				typeRetour = motSuivant;
+				typeRetour            = motSuivant;
 				String nomMethodeTemp = "";
 				if (scMethode.hasNext()) 
 				{
 					String methodAvecParam = scMethode.next();
-					int indexParen = methodAvecParam.indexOf("(");
+					int    indexParen      = methodAvecParam.indexOf("(");
 					if (indexParen != -1) 
 					{
 						nomMethodeTemp = methodAvecParam.substring(0, indexParen);
@@ -337,7 +343,7 @@ public class ParseurJava
 				// Vérifier si c'est un constructeur
 				if (nomMethodeTemp.equals(nomFichier) && !ligne.contains("record")) 
 				{
-					typeRetour = "";
+					typeRetour      = "";
 					nomConstructeur = "Constructeur";
 				} 
 				else 
