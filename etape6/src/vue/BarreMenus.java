@@ -167,8 +167,7 @@ public class BarreMenus extends JMenuBar
 
     private void sauvegardeProjetXml(String cheminFichier) 
     {
-        // Déléguer au contrôleur via la fenêtre principale
-        fenetrePrincipale.chargerProjet(cheminFichier);
+        fenetrePrincipale.ouvrirProjet(cheminFichier);
     }
 
     private void actionAffichageAttributs() 

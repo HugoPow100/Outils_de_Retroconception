@@ -1,6 +1,5 @@
 package vue;
 
-import metier.util.test_structure_projet.VerificationStructureProjet;
 import controleur.Controleur;
 import java.awt.BorderLayout;
 import java.awt.Dimension; 
@@ -13,6 +12,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
+import metier.util.test_structure_projet.VerificationStructureProjet;
 import vue.liaison.LiaisonVue;
 
 /**
@@ -69,7 +69,7 @@ public class FenetrePrincipale extends JFrame
     //      METHODES        //
     //----------------------//
 
-    public void chargerProjet(String cheminProjet) 
+    public void ouvrirProjet(String cheminProjet) 
     {
         try
         {
@@ -195,9 +195,14 @@ public class FenetrePrincipale extends JFrame
     /**
     * Méthodes passerelle au controleur
     */
-    public List<BlocClasse> chargerProjetEnBlocsClasses(String cheminProjet) 
+    public void chargerProjet(String cheminProjet) 
     {
-        return controleur.chargerProjetEnBlocsClasses(cheminProjet);
+        controleur.chargerProjet(cheminProjet);
+    }
+
+    public List<BlocClasse> getBlocClasses()
+    {
+        return controleur.getBlocClasses();
     }
 
     public List<LiaisonVue> getLiaisons()

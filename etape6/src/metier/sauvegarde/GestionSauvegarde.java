@@ -185,7 +185,7 @@ public class GestionSauvegarde
 				BlocClasse blocOrig      = hashMapBlocClass.get(tabLigne[2].trim());
 				BlocClasse blocDest      = hashMapBlocClass.get(tabLigne[5].trim());
 
-				System.out.println("Ligne analysée : " + typeLiaison + ", orig : " + blocOrig.getNom() + ", dest : " + blocDest.getNom());
+				//System.out.println("Ligne analysée : " + typeLiaison + ", orig : " + blocOrig.getNom() + ", dest : " + blocDest.getNom());
 
 				LiaisonVue liaisonVue;
 
