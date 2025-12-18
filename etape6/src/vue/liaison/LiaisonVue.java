@@ -3,8 +3,10 @@ package vue.liaison;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import vue.BlocClasse;
+
 
 /**
  * Classe qui gère l'affichage visuel des liens entre 2 {@link BlocClasse}s
@@ -13,6 +15,9 @@ import vue.BlocClasse;
  */
 public class LiaisonVue 
 {
+
+    //Identifie la liaison vue de maniére unique
+    private final UUID id;
 
     // Attributs principaux
     private String type;
@@ -39,18 +44,23 @@ public class LiaisonVue
     private RenduLiaison renduLiaison;
 
     // Constructeurs
-    public LiaisonVue(BlocClasse blocOrigine, BlocClasse blocDestination, String type) {
+    public LiaisonVue(BlocClasse blocOrigine, BlocClasse blocDestination, String type) 
+    {
         this(blocOrigine, blocDestination, type, true, "", "");
+
     }
 
     public LiaisonVue(BlocClasse blocOrigine, BlocClasse blocDestination, String type, 
-                      boolean unidirectionnel, String multOrig, String multDest) {
+                      boolean unidirectionnel, String multOrig, String multDest) 
+    {
         this.blocOrigine = blocOrigine;
         this.blocDestination = blocDestination;
         this.type = type;
         this.unidirectionnel = unidirectionnel;
         this.multOrig = multOrig;
         this.multDest = multDest;
+
+        this.id = UUID.randomUUID();
         
         initializeHelpers();
         chooseBestSides();
@@ -460,6 +470,7 @@ public class LiaisonVue
     }
 
     // Getters/Setters
+    public UUID getId() {return id;}
     public BlocClasse getBlocOrigine() { return blocOrigine; }
     public void setBlocOrigine(BlocClasse blocOrigine) { this.blocOrigine = blocOrigine; initializeHelpers(); }
     public BlocClasse getBlocDestination() { return blocDestination; }
@@ -472,4 +483,33 @@ public class LiaisonVue
     public void setMultDest(String multDest) { this.multDest = multDest; }
     public boolean isUnidirectionnel() { return unidirectionnel; }
     public void setUnidirectionnel(boolean unidirectionnel) { this.unidirectionnel = unidirectionnel; }
+    
+    public String getSideOrig() {
+        switch(sideOrigine) {
+            case 0: return "TOP";
+            case 1: return "RIGHT";
+            case 2: return "BOTTOM";
+            case 3: return "LEFT";
+            default: return "UNKNOWN";
+        }
+    }
+    
+    public String getSideDest() {
+        switch(sideDestination) {
+            case 0: return "TOP";
+            case 1: return "RIGHT";
+            case 2: return "BOTTOM";
+            case 3: return "LEFT";
+            default: return "UNKNOWN";
+        }
+    }
+    
+    public double getNivOrig() { return posRelOrigine; }
+    
+    public double getNivDest() { return posRelDestination; }
+
+
+    public void setPosRelOrig(double posRel) { this.posRelOrigine = posRel; }
+    
+    public void setPosRelDest(double posRel) { this.posRelDestination = posRel; }
 }

@@ -15,7 +15,6 @@ import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import vue.liaison.LiaisonVue;
 
-
 /**
 * Fenêtre principale de l'IHM du générateur de diagramme UML.
 * Gère également la liasion avec le controleur.
@@ -23,14 +22,13 @@ import vue.liaison.LiaisonVue;
 */
 public class FenetrePrincipale extends JFrame 
 {
-
     //--------------------------//
     //        ATTRIBUTS         //
     //--------------------------//
 
-    private PanneauProjets      panneauProjets;
-    private PanneauDiagramme    panneauDiagramme;
-    private Controleur         controleur;
+    private PanneauProjets   panneauProjets  ;
+    private PanneauDiagramme panneauDiagramme;
+    private Controleur       controleur      ;
 
     //-------------------------//
     //      CONSTRUCTEUR       //
@@ -52,7 +50,8 @@ public class FenetrePrincipale extends JFrame
         setLayout(new BorderLayout());
         
         // La ligne de division entre panel projet et panel diagramme
-        JSplitPane splitPane = new JSplitPane(
+        JSplitPane splitPane = new JSplitPane
+        (
             JSplitPane.HORIZONTAL_SPLIT,
             true,
             panneauProjets,
@@ -62,8 +61,8 @@ public class FenetrePrincipale extends JFrame
         splitPane.setDividerLocation(250);
         splitPane.setOneTouchExpandable(true);
 
-        this.add(splitPane, BorderLayout.CENTER);
-        this.add(new BarreMenus(this), BorderLayout.NORTH);
+        this.add(splitPane           , BorderLayout.CENTER);
+        this.add(new BarreMenus(this), BorderLayout.NORTH );
     }
 
     //----------------------//
@@ -72,7 +71,7 @@ public class FenetrePrincipale extends JFrame
 
     public void chargerProjet(String cheminProjet) 
     {
-        try 
+        try
         {
             panneauDiagramme.chargerProjet(cheminProjet);
             // Enregistrer le projet au premier chargement
@@ -94,7 +93,8 @@ public class FenetrePrincipale extends JFrame
                 message += e.getMessage();
             }
             
-            javax.swing.JOptionPane.showMessageDialog(
+            javax.swing.JOptionPane.showMessageDialog
+            (
                 this, 
                 message, 
                 "Erreur de chargement", 
@@ -114,7 +114,6 @@ public class FenetrePrincipale extends JFrame
 
         if (retour == JFileChooser.APPROVE_OPTION) 
         {
-
             File fichierSortie = chooser.getSelectedFile();
             if (!fichierSortie.getName().toLowerCase().endsWith(".png")) 
             {
@@ -124,21 +123,23 @@ public class FenetrePrincipale extends JFrame
             try 
             {
                 // Sauvegarder le zoom actuel et le réinitialiser pour l'export
-                double zoomSauvegarde = panneauDiagramme.getZoomLevel();
+                double  zoomSauvegarde     = panneauDiagramme.getZoomLevel      ();
                 boolean textZoomSauvegarde = panneauDiagramme.isAfficherTextZoom();
                 
                 panneauDiagramme.setZoomLevel(1.0);
                 panneauDiagramme.setAfficherTextZoom(false);
                 
-                BufferedImage image = new BufferedImage(
-                panneauDiagramme.getWidth(), panneauDiagramme.getHeight(), BufferedImage.TYPE_INT_ARGB );
+                BufferedImage image = new BufferedImage
+                (
+                    panneauDiagramme.getWidth(), panneauDiagramme.getHeight(), BufferedImage.TYPE_INT_ARGB
+                );
 
                 panneauDiagramme.printAll(image.createGraphics());
                 ImageIO.write(image, "png", fichierSortie);
                 System.out.println("Diagramme sauvegardé dans"+fichierSortie);
                 
                 // Restaurer le zoom et l'affichage du texte
-                panneauDiagramme.setZoomLevel(zoomSauvegarde);
+                panneauDiagramme.setZoomLevel       (zoomSauvegarde    );
                 panneauDiagramme.setAfficherTextZoom(textZoomSauvegarde);
             } 
             catch (Exception e) 
@@ -154,7 +155,8 @@ public class FenetrePrincipale extends JFrame
         VerificationStructureProjet verification = new VerificationStructureProjet();
         verification.verifierStructure();
 
-        SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() ->
+        {
             FenetrePrincipale fenetre = new FenetrePrincipale();
             fenetre.setVisible(true);
         });
@@ -180,6 +182,11 @@ public class FenetrePrincipale extends JFrame
         panneauDiagramme.optimiserPositionsLiaisons();
     }
 
+    public void setSauvegardeAuto(boolean b)
+    {
+        panneauDiagramme.setSauvegardeAuto(b);
+    }
+
     public void actionSauvegarder()
     {
         panneauDiagramme.actionSauvegarder();
@@ -203,8 +210,8 @@ public class FenetrePrincipale extends JFrame
         return this.controleur.getLstFichiersInvalides(cheminProjet);
     }
 
-    public void sauvegarderClasses(List<BlocClasse> blocClasses, String cheminProjet)
+    public void sauvegarderClasses(List<BlocClasse> blocClasses, List<LiaisonVue> liaisonVues, String cheminProjet)
     {
-        controleur.sauvegarderClasses(blocClasses, cheminProjet);
+        controleur.sauvegarderClasses(blocClasses, liaisonVues, cheminProjet);
     }
 }

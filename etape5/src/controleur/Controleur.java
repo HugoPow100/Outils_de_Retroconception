@@ -262,7 +262,6 @@ public class Controleur
         this.gestionSauvegarde.sauvegardeProjetXml(cheminFichier);
     }
 
-
     public void sauvegarderClasses(List<BlocClasse> blocClasses, String cheminProjet) {
         gestionSauvegarde.sauvegarderClasses(blocClasses, cheminProjet);
     }

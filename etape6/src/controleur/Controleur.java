@@ -37,10 +37,10 @@ public class Controleur
     public Controleur(FenetrePrincipale fenetrePrincipale) 
     {
         this.fenetrePrincipale  = fenetrePrincipale;
-        this.lstLiaisons        = new ArrayList<>();
+        this.lstLiaisons        = new ArrayList<LiaisonVue>();
         this.gestionSauvegarde  = new GestionSauvegarde(this);
 
-        this.lstBlocs           = new ArrayList<>();
+        this.lstBlocs           = new ArrayList<BlocClasse>();
     }
 
     //----------------------//
@@ -57,63 +57,72 @@ public class Controleur
         lecture = new Lecture(cheminProjet);
         lstBlocs.   clear();
 
-
         // hasmap pour associer les noms de classes aux blocs
         HashMap<String, BlocClasse> mapBlocsParNom  = new HashMap<>();
-        HashMap<String, Classe>     hashMapclasses  = lecture.getHashMapClasses();
-
-        int posX    = 50;
-        int posY    = 50;
-
-        for (Classe classe : hashMapclasses.values()) 
-        {
-            if (classe != null) 
-            {
-                BlocClasse bloc = creerBlocAPartirDeClasse(classe, posX, posY);
-                this.lstBlocs.add(bloc);
-                mapBlocsParNom.put(classe.getNom(), bloc);
-
-                posX += 250;
-                if (posX > 1000) 
-                {
-                    posX    = 50;
-                    posY    += 200;
-                }
-            }
-        }
+        
 
         // Test si le projet est déjàa présent dans les sauvegardes .xml
         String intituleProjet = gestionSauvegarde.getIntituleFromLien(cheminProjet);
         if (gestionSauvegarde.projetEstSauvegarde(cheminProjet) && 
             gestionSauvegarde.fichierDeSauvegardeExiste(intituleProjet)) 
         {
-            System.out.println("Le projet est sauvegardé. Chargement des coordonées depuis le .xml");
-            Map<String, int[]> coordonneesBlocs = gestionSauvegarde.lireCoordoneesXml(intituleProjet + ".xml");
+            System.out.println("Le projet est sauvegardé. Chargement complet depuis le .xml");
+            Map<String, BlocClasse> blocsCharges = gestionSauvegarde.chargerBlocsClasses(intituleProjet);
             
-            for (BlocClasse bloc : lstBlocs) {
-                int[] coordonnees = coordonneesBlocs.get(bloc.getNom());
-                if (coordonnees != null) {
-                    bloc.setX(coordonnees[0]);
-                    bloc.setY(coordonnees[1]);
+            // Utiliser les blocs chargés du XML
+            this.lstBlocs.clear(); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            this.lstBlocs.addAll(blocsCharges.values());
+            
+            // Mettre à jour la map avec les blocs chargés
+            mapBlocsParNom.clear();
+            for (BlocClasse bloc : blocsCharges.values()) 
+            {
+                mapBlocsParNom.put(bloc.getNom(), bloc);
+            }
+            
+            //On charge les liaisons depuis le XML
+            this.lstLiaisons = gestionSauvegarde.lectureLiaison(cheminProjet, blocsCharges);
+        } 
+        else 
+        {
+            System.out.println("Le projet n'est pas sauvegardé. On garde les coordonées par défaut");
+
+            HashMap<String, Classe>     hashMapclasses  = lecture.getHashMapClasses();
+
+            int posX    = 50;
+            int posY    = 50;
+
+            for (Classe classe : hashMapclasses.values()) 
+            {
+                if (classe != null) 
+                {
+                    BlocClasse bloc = creerBlocAPartirDeClasse(classe, posX, posY);
+                    this.lstBlocs.add(bloc);
+                    mapBlocsParNom.put(classe.getNom(), bloc);
+
+                    posX += 250;
+                    if (posX > 1000) 
+                    {
+                        posX  = 50 ;
+                        posY += 200;
+                    }
                 }
             }
+                
+            // Créer les lstLiaisons depuis associations, heritages, et interfaces
+            this.lstLiaisons = creerLiaisonsDepuisAssoc        (lecture.getLstAssociation(), mapBlocsParNom, this.lstLiaisons);
 
-        } else {
-            System.out.println("Le projet n'est pas sauvegardé. On garde les coordonées par défaut");
+            this.lstLiaisons = creerLiaisonsDepuisHerit        (lecture.getLstHeritage(), mapBlocsParNom, this.lstLiaisons);
+
+            this.lstLiaisons = creerLiaisonsDepuisInterface    (lecture.getLstInterface(), mapBlocsParNom, this.lstLiaisons);
+
+            fenetrePrincipale.optimiserPositionsClasses();
+            fenetrePrincipale.optimiserPositionsLiaisons();
         }
             
-        // Créer les lstLiaisons depuis associations, heritages, et interfaces
-        creerLiaisonsDepuisAssoc        (lecture.getLstAssociation(), mapBlocsParNom);
-
-        creerLiaisonsDepuisHerit        (lecture.getLstHeritage(), mapBlocsParNom);
-        creerLiaisonsDepuisInterface    (lecture.getLstInterface(), mapBlocsParNom);
-
-        creerLiaisonsDepuisInterface    (lecture.getLstInterface(), mapBlocsParNom);
-
-        fenetrePrincipale.optimiserPositionsClasses();
-
         return this.lstBlocs;
     }
+
 
     /**
     * Crée un BlocClasse à partir d'une Classe
@@ -130,61 +139,65 @@ public class Controleur
         bloc.setInterface(classe.isInterface());
 
         // Traitement de la liste des attributs
-        List<String> attributsStr = new ArrayList<>();
-        for (Attribut att : classe.getLstAttribut()) {
+        List<String> attributsStr = new ArrayList<String>();
+        for (Attribut att : classe.getLstAttribut())
+        {
             String sRet;
 
             String visibilite = att.getVisibilite();
 
-            switch (visibilite) {
-                case "public" -> visibilite = "+";
-                case "private" -> visibilite = "-";
-                case "package" -> visibilite = "#";
+            switch (visibilite) 
+            {
+                case "public"    -> visibilite = "+";
+                case "private"   -> visibilite = "-";
+                case "package"   -> visibilite = "#";
                 case "protected" -> visibilite = "~";
             }
 
-            sRet = visibilite + " ";
+            sRet = visibilite    + " ";
             
             sRet += att.getNom() + " : ";
             
             sRet += att.getType();
 
-            if (att.isConstant()) {
+            if (att.isConstant()) 
                 sRet += " {frozen}";
-            }
 
-            if (att.getPortee().equals("classe")) {
-                // Pour souligner
+            // Pour souligner
+            if (att.getPortee().equals("classe")) 
                 sRet = "\u001B[4m" + sRet + "\u001B[0m";
-            }
 
             attributsStr.add(sRet);
         }
 
         // Traitement de la liste des méthodes
-        List<String> methodesStr = new ArrayList<>();
+        List<String> methodesStr = new ArrayList<String>();
         for (Methode met : classe.getLstMethode()) 
         {
             String visibilite = met.getVisibilite();
 
-            switch (visibilite) {
-                case "public" -> visibilite = "+";
-                case "private" -> visibilite = "-";
-                case "package" -> visibilite = "#";
+            switch (visibilite) 
+            {
+                case "public"    -> visibilite = "+";
+                case "private"   -> visibilite = "-";
+                case "package"   -> visibilite = "#";
                 case "protected" -> visibilite = "~";
             }
 
             String nomMet = met.getNomMethode();
-            String retour = met.getRetour();
+            String retour = met.getRetour    ();
             
-            // Construire les paramètres
+            // Construie les paramètres
             StringBuilder parametres = new StringBuilder("(");
             List<Parametre> lstParam = met.getLstParametre();
-            if (lstParam != null && !lstParam.isEmpty()) {
-                for (int i = 0; i < lstParam.size(); i++) {
+            if (lstParam != null && !lstParam.isEmpty()) 
+            {
+                for (int i = 0; i < lstParam.size(); i++) 
+                {
                     Parametre param = lstParam.get(i);
                     parametres.append(param.getNomPara()).append(": ").append(param.getTypePara());
-                    if (i < lstParam.size() - 1) {
+                    if (i < lstParam.size() - 1) 
+                    {
                         parametres.append(", ");
                     }
                 }
@@ -195,7 +208,7 @@ public class Controleur
         }
 
         bloc.setAttributsAffichage(attributsStr);
-        bloc.setMethodesAffichage(methodesStr);
+        bloc.setMethodesAffichage (methodesStr );
 
         return bloc;
     }
@@ -205,19 +218,23 @@ public class Controleur
     * @param lstAssoc La list d'{@link Association}s sur laquelle baser les lstLiaisons
     * @param mapBlocsParNom {@link HashMap<String, BlocClasse>} de String, BlocClasse avec le nom de chaque bloc et chaque bloc
     */
-    private void creerLiaisonsDepuisAssoc(List<Association> lstAssoc, HashMap<String, BlocClasse> mapBlocsParNom) {
+    private List<LiaisonVue> creerLiaisonsDepuisAssoc(List<Association> lstAssoc, HashMap<String, BlocClasse> mapBlocsParNom, List<LiaisonVue> lstLiaisons) 
+    {
         for (Association assoc : lstAssoc) 
         {
-            String multOrig = (assoc.getMultOrig() != null) ? assoc.getMultOrig().toString() : "";
-            String multDest = (assoc.getMultDest() != null) ? assoc.getMultDest().toString() : "";
-            BlocClasse blocOrigine = mapBlocsParNom.get(assoc.getClasseOrig().getNom());
+            String     multOrig        = (assoc.getMultOrig() != null) ? assoc.getMultOrig().toString() : "";
+            String     multDest        = (assoc.getMultDest() != null) ? assoc.getMultDest().toString() : "";
+
+            BlocClasse blocOrigine     = mapBlocsParNom.get(assoc.getClasseOrig().getNom());
             BlocClasse blocDestination = mapBlocsParNom.get(assoc.getClasseDest().getNom());
 
-            LiaisonVue liaison = new LiaisonVue(blocOrigine, blocDestination, "association", assoc.isUnidirectionnel(),
-                    multOrig, multDest);
+            LiaisonVue liaison = new LiaisonVue(blocOrigine, blocDestination, "association", 
+                                                assoc.isUnidirectionnel()   , multOrig, multDest );
 
             lstLiaisons.add(liaison);
         }
+
+        return lstLiaisons;
     }
 
     /**
@@ -225,17 +242,20 @@ public class Controleur
     * @param lstAssoc La list d'{@link Heritage}s sur laquelle baser les lstLiaisons
     * @param mapBlocsParNom {@link HashMap<String, BlocClasse>} de String, BlocClasse avec le nom de chaque bloc et chaque bloc
     */
-    private void creerLiaisonsDepuisHerit(List<Heritage> lstHerit, HashMap<String, BlocClasse> mapBlocsParNom) {
+    private List<LiaisonVue>  creerLiaisonsDepuisHerit(List<Heritage> lstHerit, HashMap<String, BlocClasse> mapBlocsParNom, List<LiaisonVue> lstLiaisons) 
+    {
 
         for (Heritage herit : lstHerit) 
         {
-            BlocClasse blocOrigine = mapBlocsParNom.get(herit.getClasseOrig().getNom());
+            BlocClasse blocOrigine     = mapBlocsParNom.get(herit.getClasseOrig().getNom());
             BlocClasse blocDestination = mapBlocsParNom.get(herit.getClasseDest().getNom());
 
             LiaisonVue liaison = new LiaisonVue(blocOrigine, blocDestination, "heritage");
 
             lstLiaisons.add(liaison);
         }
+
+        return lstLiaisons;
     }
 
     /**
@@ -243,27 +263,30 @@ public class Controleur
     * @param lstAssoc La list d'{@link Interface}s sur laquelle baser les lstLiaisons
     * @param mapBlocsParNom {@link HashMap<String, BlocClasse>} de String, BlocClasse avec le nom de chaque bloc et chaque bloc
     */
-    private void creerLiaisonsDepuisInterface(List<Interface> lstInter, HashMap<String, BlocClasse> mapBlocsParNom) {
+    private List<LiaisonVue>  creerLiaisonsDepuisInterface(List<Interface> lstInter, HashMap<String, BlocClasse> mapBlocsParNom, List<LiaisonVue> lstLiaisons) {
 
         for (Interface inter : lstInter) 
         {
-            BlocClasse blocOrigine = mapBlocsParNom.get(inter.getClasseOrig().getNom());
+            BlocClasse blocOrigine    = mapBlocsParNom.get(inter.getClasseOrig().getNom());
             BlocClasse blocDestination = mapBlocsParNom.get(inter.getClasseDest().getNom());
 
             LiaisonVue liaison = new LiaisonVue(blocOrigine, blocDestination, "interface");
 
             lstLiaisons.add(liaison);
         }
+
+        return lstLiaisons;
     }
 
 
-    public void sauvegardeProjetXml(String cheminFichier){
+    public void sauvegardeProjetXml(String cheminFichier)
+    {
         this.gestionSauvegarde.sauvegardeProjetXml(cheminFichier);
     }
 
-
-    public void sauvegarderClasses(List<BlocClasse> blocClasses, String cheminProjet) {
-        gestionSauvegarde.sauvegarderClasses(blocClasses, cheminProjet);
+    public void sauvegarderClasses(List<BlocClasse> listBlocClasses, List <LiaisonVue> listLiaison, String cheminProjet) 
+    {
+        gestionSauvegarde.sauvegarderClasses(listBlocClasses, listLiaison, cheminProjet);
     }
 
     public void ajouterBlockList(BlocClasse block)
@@ -271,14 +294,12 @@ public class Controleur
         this.lstBlocs.add(block);
     }
 
+    
     //-----------//
     //  GETTERS  //
     //-----------//
 
-    public List<LiaisonVue> getLiaisons() 
-    {
-        return lstLiaisons;
-    }
+    public List<LiaisonVue> getLiaisons() { return lstLiaisons; }
 
     public ArrayList<String> getLstFichiersInvalides(String cheminDossier)
     {

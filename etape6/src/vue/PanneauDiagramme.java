@@ -1,5 +1,6 @@
 package vue;
 
+import java.util.UUID;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -13,8 +14,8 @@ public class PanneauDiagramme extends JPanel
     //        ATTRIBUTS         //
     //--------------------------//
 
-    private List<BlocClasse>    blocsClasses;
-    private List<LiaisonVue>    liaisons;
+    private List<BlocClasse>    lstBlocsClasses;
+    private List<LiaisonVue>    lstLiaisons;
 
     private FenetrePrincipale   fenetrePrincipale;
 
@@ -24,6 +25,7 @@ public class PanneauDiagramme extends JPanel
 
     private boolean             afficherAttributs = true;
     private boolean             afficherMethodes = true;
+    private boolean             sauvegardeAuto = false;
 
     // Pour le drag des points d'ancrage de liaisons
     private LiaisonVue          liaisonEnDeplacement;
@@ -56,8 +58,8 @@ public class PanneauDiagramme extends JPanel
 
     public PanneauDiagramme(FenetrePrincipale fenetrePrincipale) 
     {
-        this.blocsClasses           = new ArrayList<>();
-        this.liaisons               = new ArrayList<>();
+        this.lstBlocsClasses           = new ArrayList<>();
+        this.lstLiaisons               = new ArrayList<>();
         this.cheminProjetCourant    = null;
         this.fenetrePrincipale      = fenetrePrincipale;
 
@@ -93,16 +95,16 @@ public class PanneauDiagramme extends JPanel
     public void chargerProjet(String cheminProjet) throws Exception
     {
         this.cheminProjetCourant = cheminProjet;
-        this.blocsClasses.clear();
-        this.liaisons.clear();
+        this.lstBlocsClasses.clear();
+        this.lstLiaisons.clear();
 
         List<BlocClasse> blocCharges = fenetrePrincipale.chargerProjetEnBlocsClasses(cheminProjet);
-        blocsClasses.addAll(blocCharges);
-        liaisons.addAll(fenetrePrincipale.getLiaisons());
+        lstBlocsClasses.addAll(blocCharges);
+        lstLiaisons.addAll(fenetrePrincipale.getLiaisons());
 
         // Passer la liste des blocs à toutes les liaisons pour le contournement
-        for (LiaisonVue liaison : liaisons) {
-            liaison.setTousLesBlocs(blocsClasses);
+        for (LiaisonVue liaison : lstLiaisons) {
+            liaison.setTousLesBlocs(lstBlocsClasses);
         }
 
         repaint();
@@ -138,9 +140,10 @@ public class PanneauDiagramme extends JPanel
                    // System.out.println("Le clic droit a été cliqué");
                     // Chercher si on clique sur un bloc
                     BlocClasse blocClique = null;
-                    for (BlocClasse bloc : blocsClasses) {
-                        if (bloc.contient((int) logicalX, (int) logicalY)) 
-                        {
+
+                    for (BlocClasse bloc : lstBlocsClasses) {
+                        if (bloc.contient((int) logicalX, (int) logicalY)) {
+
                             blocClique = bloc;
                             blocValide = true;
                             System.out.println("Bloc cliqué : " + bloc.getNom());
@@ -185,7 +188,7 @@ public class PanneauDiagramme extends JPanel
                 draggingDestinationAnchor = false;
 
                 // Vérifier si on clique sur un point d'ancrage de liaison
-                for (LiaisonVue liaison : liaisons) {
+                for (LiaisonVue liaison : lstLiaisons) {
                     if (liaison.isOnOriginAnchor(e.getPoint(), zoomLevel, panOffsetX, panOffsetY, getWidth(), getHeight())) {
                         liaisonEnDeplacement = liaison;
                         draggingOriginAnchor = true;
@@ -199,7 +202,7 @@ public class PanneauDiagramme extends JPanel
                 }
 
                 // Sinon, vérifier si on clique sur un bloc
-                for (BlocClasse bloc : blocsClasses) {
+                for (BlocClasse bloc : lstBlocsClasses) {
                     if (bloc.contient((int) logicalX, (int) logicalY)) {
                         blocEnDeplacement = bloc;
                         bloc.setSelectionne(true);
@@ -289,6 +292,8 @@ public class PanneauDiagramme extends JPanel
                     repaint();
                 }
             }
+
+            
         });
 
         // Listener pour la molette de souris (zoom)
@@ -309,7 +314,7 @@ public class PanneauDiagramme extends JPanel
     }
 
     public void optimiserPositionsClasses() {
-        if (blocsClasses.isEmpty()) {
+        if (lstBlocsClasses.isEmpty()) {
             return;
         }
 
@@ -323,17 +328,17 @@ public class PanneauDiagramme extends JPanel
     }
 
     public void optimiserPositionsLiaisons() {
-        if (liaisons.isEmpty()) {
+        if (lstLiaisons.isEmpty()) {
             return;
         }
 
         // D'abord, passer la liste de toutes les liaisons à chaque liaison
-        for (LiaisonVue liaison : liaisons) {
-            liaison.setToutesLesLiaisons(liaisons);
+        for (LiaisonVue liaison : lstLiaisons) {
+            liaison.setToutesLesLiaisons(lstLiaisons);
         }
         
         // Réinitialiser toutes les liaisons avec le nouvel algorithme
-        for (LiaisonVue liaison : liaisons) {
+        for (LiaisonVue liaison : lstLiaisons) {
             liaison.recalculerAncrages();
         }
 
@@ -345,21 +350,21 @@ public class PanneauDiagramme extends JPanel
      * Organise les blocs en une grille régulière avec espacement optimal
      */
     private void organiserEnGrille() {
-        int cols = (int) Math.ceil(Math.sqrt(blocsClasses.size()));
+        int cols = (int) Math.ceil(Math.sqrt(lstBlocsClasses.size()));
         int spacingX = 275; // Espacement entre les blocs
         int spacingY = 275;
         int startX = 50;
         int startY = 50;
 
-        for (BlocClasse bloc : blocsClasses) {
+        for (BlocClasse bloc : lstBlocsClasses) {
             if (spacingY < bloc.getHauteurCalculee()) {
                 spacingY = bloc.getHauteurCalculee();
             }
 
         }
 
-        for (int i = 0; i < blocsClasses.size(); i++) {
-            BlocClasse bloc = blocsClasses.get(i);
+        for (int i = 0; i < lstBlocsClasses.size(); i++) {
+            BlocClasse bloc = lstBlocsClasses.get(i);
             int col = i % cols;
             int row = i / cols;
 
@@ -372,7 +377,7 @@ public class PanneauDiagramme extends JPanel
     }
 
     private void reinitialiserAnchages() {
-        for (LiaisonVue liaison : liaisons) {
+        for (LiaisonVue liaison : lstLiaisons) {
             // Réinitialiser les côtés selon la position relative des blocs
             optimiserAncragesPourLiaison(liaison);
         }
@@ -448,15 +453,15 @@ public class PanneauDiagramme extends JPanel
         g2d.translate(-getWidth() / (2 * zoomLevel), -getHeight() / (2 * zoomLevel));
 
         // Mettre à jour la liste de toutes les liaisons pour détecter les intersections
-        for (LiaisonVue liaison : liaisons) {
-            liaison.setToutesLesLiaisons(liaisons);
+        for (LiaisonVue liaison : lstLiaisons) {
+            liaison.setToutesLesLiaisons(lstLiaisons);
         }
         
         // Dessiner les liaisons
         dessinerLiaisons(g2d);
 
         // Dessiner les blocs
-        for (BlocClasse bloc : blocsClasses) {
+        for (BlocClasse bloc : lstBlocsClasses) {
             bloc.dessiner(g2d, this.afficherAttributs, this.afficherMethodes);
         }
 
@@ -488,23 +493,39 @@ public class PanneauDiagramme extends JPanel
         g2d.drawString(zoomText, x, y);
     }
 
+
     private void dessinerLiaisons(Graphics2D g2d) 
     {
-        for (LiaisonVue liaison : liaisons) 
+        for (LiaisonVue liaison : this.lstLiaisons) 
         {
+
             liaison.dessiner(g2d);
 
-            System.out.println("liaison : " + liaison);
+            //System.out.println("liaison : " + liaison);
         }
     }
 
-    public void modifiMultiplicite(int min, int max)
-    {
+
+ 
                 
+
+    public void modifiMultiplicite(String multiModifie, boolean estOrigine, UUID idLiaison)
+    {
+        for (LiaisonVue liaisonVue : this.lstLiaisons) 
+        {
+            if(liaisonVue.getId().equals(idLiaison))
+            {
+                if(estOrigine)
+                    liaisonVue.setMultOrig(multiModifie);
+                else
+                    liaisonVue.setMultDest(multiModifie);
+            }
+        }
+
     }
 
     public List<BlocClasse> getBlocsClasses() {
-        return blocsClasses;
+        return lstBlocsClasses;
     }
 
     public String getCheminProjetCourant() {
@@ -540,7 +561,22 @@ public class PanneauDiagramme extends JPanel
     }
 
     public void actionSauvegarder() {
-        this.fenetrePrincipale.sauvegarderClasses(this.blocsClasses, cheminProjetCourant);
+        // Ne sauvegarder que si un projet a été chargé
+        if (cheminProjetCourant != null && !cheminProjetCourant.isEmpty()) {
+            this.fenetrePrincipale.sauvegarderClasses(this.lstBlocsClasses, this.lstLiaisons, cheminProjetCourant);
+        }
+    }
+
+    public void setSauvegardeAuto(boolean b) {
+        this.sauvegardeAuto = b;
+    }
+
+    public void actionEffectuee() {
+        System.out.println("Action effectuée.");
+        if (this.sauvegardeAuto) {
+            this.actionSauvegarder();
+            System.out.println("Sauvegarde auto effectuée !");
+        }
     }
 
 

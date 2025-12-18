@@ -20,10 +20,11 @@ public class BarreMenus extends JMenuBar
     //       ATTRIBUTS        //
     //------------------------//
 
-    private FenetrePrincipale fenetrePrincipale;
+    private FenetrePrincipale fenetrePrincipale    ;
 
     private JCheckBoxMenuItem afficherAttributsItem;
-    private JCheckBoxMenuItem afficherMethodesItem;
+    private JCheckBoxMenuItem afficherMethodesItem ;
+    private JCheckBoxMenuItem sauvegardeAutoItem   ;
     
     //-------------------------//
     //      CONSTRUCTEUR       //
@@ -55,6 +56,9 @@ public class BarreMenus extends JMenuBar
 
         JMenuItem sauvegarderItem = new JMenuItem("Sauvegarder");
         sauvegarderItem.addActionListener(e -> actionSauvegarder());
+        
+        sauvegardeAutoItem        = new JCheckBoxMenuItem("Sauvegarde automatique", false);
+        sauvegardeAutoItem.  addActionListener(e -> actionSauvegardeAuto());
 
         JMenuItem quitterItem     = new JMenuItem("Quitter");
         quitterItem.    addActionListener(e -> System.exit(0));
@@ -63,6 +67,7 @@ public class BarreMenus extends JMenuBar
         menu.addSeparator();
         menu.add(exporterItem);
         menu.add(sauvegarderItem);
+        menu.add(sauvegardeAutoItem);
         menu.addSeparator();
         menu.add(quitterItem);
 
@@ -78,10 +83,10 @@ public class BarreMenus extends JMenuBar
         JMenuItem optimiserItem         = new JMenuItem("Optimiser les positions");
         JMenuItem optimiserLiaisonsItem = new JMenuItem("Optimiser les liaisons uniquement");
 
-        afficherAttributsItem.  addActionListener(e -> actionAffichageAttributs());
-        afficherMethodesItem.   addActionListener(e -> actionAffichageMethodes());
-        optimiserItem.          addActionListener(e -> actionOptimiser());
-        optimiserLiaisonsItem.  addActionListener(e -> actionOptimiserLiaisons());
+        afficherAttributsItem. addActionListener(e -> actionAffichageAttributs());
+        afficherMethodesItem.  addActionListener(e -> actionAffichageMethodes ());
+        optimiserItem.         addActionListener(e -> actionOptimiser         ());
+        optimiserLiaisonsItem. addActionListener(e -> actionOptimiserLiaisons ());
 
         menu.add(afficherAttributsItem);
         menu.add(afficherMethodesItem);
@@ -174,6 +179,11 @@ public class BarreMenus extends JMenuBar
     private void actionAffichageMethodes() 
     {
         fenetrePrincipale.affichageMethodes(afficherMethodesItem.getState());
+    }
+
+    private void actionSauvegardeAuto() 
+    {
+        fenetrePrincipale.setSauvegardeAuto(sauvegardeAutoItem.getState());
     }
 
     private void actionAligner()
