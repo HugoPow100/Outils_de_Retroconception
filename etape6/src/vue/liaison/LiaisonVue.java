@@ -18,6 +18,10 @@ public class LiaisonVue {
     //Identifie la liaison vue de maniére unique
     private final UUID id;
 
+    // Rôles UML
+    private String roleOrig; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    private String roleDest;
+
     // Attributs principaux
     private String type;
     private boolean unidirectionnel;
@@ -52,14 +56,17 @@ public class LiaisonVue {
     public LiaisonVue(BlocClasse blocOrigine, BlocClasse blocDestination, String type, 
                       boolean unidirectionnel, String multOrig, String multDest) 
     {
-        this.blocOrigine = blocOrigine;
+        this.blocOrigine     = blocOrigine;
         this.blocDestination = blocDestination;
-        this.type = type;
+        this.type            = type;
         this.unidirectionnel = unidirectionnel;
-        this.multOrig = multOrig;
-        this.multDest = multDest;
+        this.multOrig        = multOrig;
+        this.multDest        = multDest;
 
-        this.id = UUID.randomUUID();
+        this.id       = UUID.randomUUID();
+        this.roleOrig = "Bonjour";//!!!!!!!!!!!!!!!!!!!!!!!!!!
+        this.roleDest = "orevoir";
+
         
         initializeHelpers();
         chooseBestSides();
@@ -370,6 +377,30 @@ public class LiaisonVue {
                 Point pos = GestionnaireAncrage.calculateMultiplicityPosition(ancrageDestination, sideDestination, fm.stringWidth(multDest), fm.getAscent());
                 g.drawString(multDest, pos.x, pos.y);
             }
+
+			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if (roleOrig != null && !roleOrig.isEmpty()) 
+			{
+				Point pos = GestionnaireAncrage.calculateRolePosition(
+					ancrageOrigine,
+					sideOrigine,
+					fm.stringWidth(roleOrig),
+					fm.getAscent()
+				);
+				g.drawString(roleOrig, pos.x, pos.y);
+			}
+
+			//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			if (roleDest != null && !roleDest.isEmpty()) 
+			{
+				Point pos = GestionnaireAncrage.calculateRolePosition(
+					ancrageDestination,
+					sideDestination,
+					fm.stringWidth(roleDest),
+					fm.getAscent()
+				);
+				g.drawString(roleDest, pos.x, pos.y);
+			}
         }
     }
     
@@ -511,4 +542,14 @@ public class LiaisonVue {
     public void setPosRelOrig(double posRel) { this.posRelOrigine = posRel; }
     
     public void setPosRelDest(double posRel) { this.posRelDestination = posRel; }
+
+	public String getRoleOrig() { return roleOrig; }
+	
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	public void setRoleOrig(String roleOrig) { this.roleOrig = roleOrig; }
+
+	public String getRoleDest() { return roleDest; }
+	public void setRoleDest(String roleDest) { this.roleDest = roleDest; }
+
+
 }

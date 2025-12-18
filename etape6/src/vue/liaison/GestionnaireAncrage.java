@@ -6,7 +6,8 @@ import java.awt.Point;
 /**
  * Gestion des points d'ancrage sur les blocs
  */
-public class GestionnaireAncrage {
+public class GestionnaireAncrage 
+{
     
     private static final int ANCHOR_RADIUS = 10;
     
@@ -111,4 +112,35 @@ public class GestionnaireAncrage {
         
         return 1000;
     }
+
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    public static Point calculateRolePosition(Point anchor, int side, int textWidth, int textHeight) 
+	{
+
+		int offset = 12; // un peu plus loin que la multiplicité
+		int x = anchor.x;
+		int y = anchor.y;
+
+		switch (side) 
+		{
+			case 0: // TOP
+				x -= textWidth / 2;
+				y -= offset;
+				break;
+			case 1: // RIGHT
+				x += offset;
+				y += textHeight / 2;
+				break;
+			case 2: // BOTTOM
+				x -= textWidth / 2;
+				y += offset + textHeight;
+				break;
+			case 3: // LEFT
+				x -= offset + textWidth;
+				y += textHeight / 2;
+				break;
+		}
+		return new Point(x, y);
+	}
+
 }

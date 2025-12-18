@@ -470,6 +470,21 @@ public class PanneauDiagramme extends JPanel
         }
     }
 
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	public void modifierRole(UUID id, String roleOrig, String roleDest) 
+	{
+		for (LiaisonVue lv : lstLiaisons) 
+		{
+			if (lv.getId().equals(id)) 
+			{
+				lv.setRoleOrig(roleOrig);
+				lv.setRoleDest(roleDest);
+				return;
+			}
+		}
+	}
+
+
     public List<BlocClasse> getBlocsClasses() {
         return lstBlocsClasses;
     }
