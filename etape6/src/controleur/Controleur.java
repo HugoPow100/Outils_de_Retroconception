@@ -23,8 +23,8 @@ public class Controleur
     private FenetrePrincipale   fenetrePrincipale;
     private GestionSauvegarde   gestionSauvegarde;
 
-    private List<LiaisonVue> lstLiaisons;
-    private List<BlocClasse> lstBlocs   ;
+    private List<LiaisonVue>    lstLiaisons;
+    private List<BlocClasse>    lstBlocs   ;
 
     //-------------------------//
     //      CONSTRUCTEUR       //
@@ -56,8 +56,7 @@ public class Controleur
     {
         lecture = new Lecture(cheminProjet);
         lstBlocs.   clear();
-        lstLiaisons.clear();
-        lstBlocs.   clear();
+
 
         // hasmap pour associer les noms de classes aux blocs
         HashMap<String, BlocClasse> mapBlocsParNom  = new HashMap<>();

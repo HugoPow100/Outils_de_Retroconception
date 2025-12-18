@@ -11,7 +11,8 @@ import vue.BlocClasse;
  * Refactorisée avec délégation aux classes helper
  * @author Jules
  */
-public class LiaisonVue {
+public class LiaisonVue 
+{
 
     // Attributs principaux
     private String type;

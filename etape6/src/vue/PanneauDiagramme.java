@@ -5,10 +5,9 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
-
 import vue.liaison.LiaisonVue;
 
-public class PanneauDiagramme extends JPanel
+public class PanneauDiagramme extends JPanel 
 {
     //--------------------------//
     //        ATTRIBUTS         //
@@ -45,6 +44,12 @@ public class PanneauDiagramme extends JPanel
     private BlocClasse          blocPleinEcranTemporaire = null;
 
 
+    private JPopupMenu          menuModif; 
+    private JMenuItem menuChangerMultiplicite;
+
+    ;
+
+
     //-------------------------//
     //      CONSTRUCTEUR       //
     //-------------------------//
@@ -56,6 +61,18 @@ public class PanneauDiagramme extends JPanel
         this.cheminProjetCourant    = null;
         this.fenetrePrincipale      = fenetrePrincipale;
 
+        this.menuModif                = new JPopupMenu();
+
+        this.menuChangerMultiplicite      = new JMenuItem("Changer la multiplicité");
+
+       
+
+        this.menuChangerMultiplicite.addActionListener(ActionEvent -> {
+            FenetreChangementMultiplicite fenetreChangementMultiplicite = new FenetreChangementMultiplicite();
+            fenetreChangementMultiplicite.setVisible(true);
+        });
+
+        this.menuModif.add(this.menuChangerMultiplicite);
         setLayout(null);
         setBackground(new Color(255, 255, 255));
         setBorder(BorderFactory.createTitledBorder("Diagramme UML"));
@@ -93,7 +110,10 @@ public class PanneauDiagramme extends JPanel
 
     private void ajouterListenersInteraction() {
         addMouseListener(new MouseAdapter() {
+
+            boolean blocValide = false;
             @Override
+            
             public void mousePressed(MouseEvent e) {
                 // Vérifier si on clique sur le texte de zoom pour le réinitialiser
                 // Zone cliquable : bas-gauche de la fenêtre
@@ -113,16 +133,36 @@ public class PanneauDiagramme extends JPanel
                 double logicalY = (e.getY() - panOffsetY - getHeight() / 2) / zoomLevel + getHeight() / (2 * zoomLevel);
 
                 // Clic-droit : affichage plein écran d'une classe ou pan
-                if (e.getButton() == MouseEvent.BUTTON3)
+                if (e.getButton() == MouseEvent.BUTTON3 )
                 {
+                   // System.out.println("Le clic droit a été cliqué");
                     // Chercher si on clique sur un bloc
                     BlocClasse blocClique = null;
                     for (BlocClasse bloc : blocsClasses) {
-                        if (bloc.contient((int) logicalX, (int) logicalY)) {
+                        if (bloc.contient((int) logicalX, (int) logicalY)) 
+                        {
                             blocClique = bloc;
+                            blocValide = true;
+                            System.out.println("Bloc cliqué : " + bloc.getNom());
                             break;
                         }
+
                     }
+
+
+                if(e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 2)
+                {
+                    if (blocValide)
+                    //System.out.println("Double clique droit effectué");
+                        PanneauDiagramme.this.menuModif.show(e.getComponent(), e.getX(), e.getY());
+                }
+
+                    
+
+                
+                
+
+
                     
                     // Si on clique sur un bloc, activer l'affichage plein écran temporairement
                     if (blocClique != null) {
@@ -448,10 +488,19 @@ public class PanneauDiagramme extends JPanel
         g2d.drawString(zoomText, x, y);
     }
 
-    private void dessinerLiaisons(Graphics2D g2d) {
-        for (LiaisonVue liaison : liaisons) {
+    private void dessinerLiaisons(Graphics2D g2d) 
+    {
+        for (LiaisonVue liaison : liaisons) 
+        {
             liaison.dessiner(g2d);
+
+            System.out.println("liaison : " + liaison);
         }
+    }
+
+    public void modifiMultiplicite(int min, int max)
+    {
+                
     }
 
     public List<BlocClasse> getBlocsClasses() {
@@ -493,4 +542,8 @@ public class PanneauDiagramme extends JPanel
     public void actionSauvegarder() {
         this.fenetrePrincipale.sauvegarderClasses(this.blocsClasses, cheminProjetCourant);
     }
+
+
+
+   
 }
