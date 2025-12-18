@@ -300,6 +300,7 @@ public class PanneauProjets extends JPanel
         return false;
     }
 
+    //Modification de projets.xml
     private void modifierProjetDansFichier(String cheminProjet, String nouvelIntitule, boolean supprimer) throws Exception
     {
         File                        fichier                     = new File(cheminDossiers)   ;
@@ -361,5 +362,7 @@ public class PanneauProjets extends JPanel
             if (fichierSauvegarde.exists())
                 fichierSauvegarde.delete();
         }
+
+        if (supprimer) fenetrePrincipale.viderDiagramme();
     }
 }

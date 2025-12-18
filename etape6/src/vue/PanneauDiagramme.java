@@ -77,7 +77,7 @@ public class PanneauDiagramme extends JPanel
         this.menuModif.add(this.menuChangerMultiplicite);
         setLayout(null);
         setBackground(new Color(255, 255, 255));
-        setBorder(BorderFactory.createTitledBorder("Diagramme UML"));
+        setBorder(BorderFactory.createTitledBorder("Diagramme de classe"));
         
         // Augmenter la taille de la police par défaut pour la bordure
         Font defaultFont = UIManager.getFont("TitledBorder.font");
@@ -575,5 +575,12 @@ public class PanneauDiagramme extends JPanel
             this.actionSauvegarder();
             System.out.println("Sauvegarde auto effectuée !");
         }
+    }
+
+    public void viderDiagramme() 
+    {
+        this.blocsClasses.clear();
+        this.liaisons.clear();
+        this.repaint();
     }
 }

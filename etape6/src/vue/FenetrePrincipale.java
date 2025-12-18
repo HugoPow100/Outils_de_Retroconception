@@ -219,4 +219,9 @@ public class FenetrePrincipale extends JFrame
     {
         controleur.sauvegarderClasses(blocClasses, liaisonVues, cheminProjet);
     }
+
+    public void viderDiagramme()
+    {
+        panneauDiagramme.viderDiagramme();
+    }
 }
