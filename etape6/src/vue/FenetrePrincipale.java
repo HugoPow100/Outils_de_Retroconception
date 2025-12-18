@@ -43,9 +43,9 @@ public class FenetrePrincipale extends JFrame
         setLocationRelativeTo(null);
         setResizable(true);
 
-        panneauProjets   = new PanneauProjets(this);
+        panneauProjets   = new PanneauProjets  (this);
         panneauDiagramme = new PanneauDiagramme(this);
-        this.controleur = new Controleur(this);
+        this.controleur  = new Controleur      (this);
 
         setLayout(new BorderLayout());
         
@@ -218,5 +218,10 @@ public class FenetrePrincipale extends JFrame
     public void sauvegarderClasses(List<BlocClasse> blocClasses, List<LiaisonVue> liaisonVues, String cheminProjet)
     {
         controleur.sauvegarderClasses(blocClasses, liaisonVues, cheminProjet);
+    }
+
+    public void viderDiagramme()
+    {
+        panneauDiagramme.viderDiagramme();
     }
 }

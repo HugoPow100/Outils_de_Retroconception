@@ -10,12 +10,12 @@ package metier.objet;
  */
 public class Parametre
 {
-	private String nomPara;
+	private String nomPara ;
 	private String typePara;
 
 	public Parametre(String nomPara, String typePara)
 	{
-		this.nomPara  = nomPara;
+		this.nomPara  = nomPara ;
 		this.typePara = typePara;
 	}
 

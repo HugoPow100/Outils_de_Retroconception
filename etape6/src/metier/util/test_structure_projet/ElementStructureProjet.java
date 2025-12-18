@@ -14,89 +14,89 @@ import java.nio.file.Path;
 public enum ElementStructureProjet
 {
 
-    //DOSSIER extérieur à la RACINE projet (etape5)
-    TEST_LIB(     "../test-lib"      , TypeElement.DOSSIER),
+	//DOSSIER extérieur à la RACINE projet (etape5)
+	TEST_LIB(     "../test-lib"      , TypeElement.DOSSIER),
 
-    // DOSSIERS RACINE
-    BIN(          "bin"           , TypeElement.DOSSIER),
-    DATA(         "data"          , TypeElement.DOSSIER),
-    SRC(          "src"           , TypeElement.DOSSIER),
-    TEST_UNITAIRE("testUnitaire"  , TypeElement.DOSSIER),
-
-
-
-    
-    // SOUS-DOSSIERS DATA
-    DONNEES(             "data/donnees"             , TypeElement.DOSSIER),
-    SAUVEGARDES(         "data/sauvegardes"         , TypeElement.DOSSIER),
-    SAUVEGARDES_DOSSIERS("data/sauvegardes/dossiers", TypeElement.DOSSIER),
+	// DOSSIERS RACINE
+	BIN(          "bin"           , TypeElement.DOSSIER),
+	DATA(         "data"          , TypeElement.DOSSIER),
+	SRC(          "src"           , TypeElement.DOSSIER),
+	TEST_UNITAIRE("testUnitaire"  , TypeElement.DOSSIER),
 
 
-    // DOSSIERS SRC
-    CONTROLEUR(       "src/controleur"       , TypeElement.DOSSIER),
-    METIER(           "src/metier"           , TypeElement.DOSSIER),
-    METIER_LECTURE(   "src/metier/lecture"   , TypeElement.DOSSIER),
-    METIER_OBJET(     "src/metier/objet"     , TypeElement.DOSSIER),
-    METIER_SAUVEGARDE("src/metier/sauvegarde", TypeElement.DOSSIER),
-    METIER_UTIL(      "src/metier/util"      , TypeElement.DOSSIER),
-    VUE(              "src/vue"              , TypeElement.DOSSIER),
-    VUE_LIAISON(      "src/vue/liaison"      , TypeElement.DOSSIER),
+
+	
+	// SOUS-DOSSIERS DATA
+	DONNEES(             "data/donnees"             , TypeElement.DOSSIER),
+	SAUVEGARDES(         "data/sauvegardes"         , TypeElement.DOSSIER),
+	SAUVEGARDES_DOSSIERS("data/sauvegardes/dossiers", TypeElement.DOSSIER),
 
 
-    //FICHIER OBLIGATOIRES extérieur à la RACINE projet (etape5)
-    GITIGNORE(   "../.gitignore"             , TypeElement.FICHIER),
-
-    // FICHIERS OBLIGATOIRES
-    PROJETS_XML( "data/donnees/projets.xml"   , TypeElement.FICHIER),
-    COMPILE_LIST("compile.list"               , TypeElement.FICHIER);
-
-    /* ------------------------------*/
-    /* -----------ATTRIBUTS----------*/
-    /* ------------------------------*/
-    private final String chemin;
-    private final TypeElement type;
+	// DOSSIERS SRC
+	CONTROLEUR(       "src/controleur"       , TypeElement.DOSSIER),
+	METIER(           "src/metier"           , TypeElement.DOSSIER),
+	METIER_LECTURE(   "src/metier/lecture"   , TypeElement.DOSSIER),
+	METIER_OBJET(     "src/metier/objet"     , TypeElement.DOSSIER),
+	METIER_SAUVEGARDE("src/metier/sauvegarde", TypeElement.DOSSIER),
+	METIER_UTIL(      "src/metier/util"      , TypeElement.DOSSIER),
+	VUE(              "src/vue"              , TypeElement.DOSSIER),
+	VUE_LIAISON(      "src/vue/liaison"      , TypeElement.DOSSIER),
 
 
-    /**
-     * Crée un élément de structure du projet.
-     *
-     * @param chemin chemin relatif de l'élément dans le projet
-     * @param type   type de l'élément (dossier ou fichier)
-     */
-    ElementStructureProjet(String chemin, TypeElement type)
-    {
-        this.chemin = chemin;
-        this.type   = type;
-    }
+	//FICHIER OBLIGATOIRES extérieur à la RACINE projet (etape5)
+	GITIGNORE(   "../.gitignore"             , TypeElement.FICHIER),
+
+	// FICHIERS OBLIGATOIRES
+	PROJETS_XML( "data/donnees/projets.xml"   , TypeElement.FICHIER),
+	COMPILE_LIST("compile.list"               , TypeElement.FICHIER);
+
+	/* ------------------------------*/
+	/* -----------ATTRIBUTS----------*/
+	/* ------------------------------*/
+	private final String chemin;
+	private final TypeElement type;
 
 
-    /**
-     * Vérifie l'existence de l'élément sur le système de fichiers.
-     *
-     * @return true si l'élément existe et correspond à son type, false sinon
-     */
-    public boolean existe()
-    {
-        Path path = Path.of(this.chemin);
-
-        if (this.type == TypeElement.DOSSIER)
-        {
-            return Files.isDirectory(path);
-        }
-        else
-        {
-            return Files.isRegularFile(path);
-        }
-    }
+	/**
+	 * Crée un élément de structure du projet.
+	 *
+	 * @param chemin chemin relatif de l'élément dans le projet
+	 * @param type   type de l'élément (dossier ou fichier)
+	 */
+	ElementStructureProjet(String chemin, TypeElement type)
+	{
+		this.chemin = chemin;
+		this.type   = type;
+	}
 
 
-    /**
-     * Retourne le message d'erreur associé à l'élément lorsque celui-ci est absent.
-     *
-     * @return message d'erreur décrivant l'élément manquant
-     */
-    public String getMessageErreur()
-    {
+	/**
+	 * Vérifie l'existence de l'élément sur le système de fichiers.
+	 *
+	 * @return true si l'élément existe et correspond à son type, false sinon
+	 */
+	public boolean existe()
+	{
+		Path path = Path.of(this.chemin);
+
+		if (this.type == TypeElement.DOSSIER)
+		{
+			return Files.isDirectory(path);
+		}
+		else
+		{
+			return Files.isRegularFile(path);
+		}
+	}
+
+
+	/**
+	 * Retourne le message d'erreur associé à l'élément lorsque celui-ci est absent.
+	 *
+	 * @return message d'erreur décrivant l'élément manquant
+	 */
+	public String getMessageErreur()
+	{
 		if (this.type == TypeElement.DOSSIER)
 		{
 			return String.format("%-22s %s", "Dossier manquant :", this.chemin);
@@ -106,17 +106,8 @@ public enum ElementStructureProjet
 			return String.format("%-22s %s", "Fichier manquant :", this.chemin);
 		}
 
-    }
-
-
-	public String getChemin()
-	{
-		return this.chemin;
 	}
 
-	public TypeElement getType()
-	{
-		return this.type;
-	}
+	public String      getChemin() { return this.chemin; }
+	public TypeElement getType  () { return this.type  ; }
 }
-

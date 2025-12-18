@@ -19,14 +19,6 @@ public class Liaison
 		this.classeOrig = classeOrig;
 	}
 
-	public Classe getClasseOrig() 
-	{
-		return classeOrig;
-	}
-
-	public Classe getClasseDest() 
-	{
-		return classeDest;
-	}
-
+	public Classe getClasseOrig() { return classeOrig ; }
+	public Classe getClasseDest() { return classeDest ; }
 }

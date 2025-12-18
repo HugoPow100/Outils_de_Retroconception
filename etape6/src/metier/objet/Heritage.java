@@ -8,7 +8,6 @@ package metier.objet;
  */
 public class Heritage extends Liaison 
 {
-
 	/**
 	 * Construit une relation d'héritage entre une classe d'origine et une classe
 	 * destination.
@@ -21,10 +20,8 @@ public class Heritage extends Liaison
 		super(classeDest, classeOrig);
 	}
 
-	@Override
 	public String toString() 
 	{
 		return classeOrig.getNom() + " hérite de " + classeDest.getNom();
 	}
-
 }

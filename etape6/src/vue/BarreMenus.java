@@ -67,7 +67,7 @@ public class BarreMenus extends JMenuBar
         menu.addSeparator();
         menu.add(exporterItem);
         menu.add(sauvegarderItem);
-        menu.add(sauvegardeAutoItem);
+        //menu.add(sauvegardeAutoItem);
         menu.addSeparator();
         menu.add(quitterItem);
 

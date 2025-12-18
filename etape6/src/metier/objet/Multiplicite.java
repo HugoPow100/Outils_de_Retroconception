@@ -12,7 +12,7 @@ public class Multiplicite
 {
 	// Integer.MAX_VALUE = * en affichage
 	private int debut;
-	private int fin;
+	private int fin  ;
 
 	public Multiplicite(int debut, int fin) 
 	{

@@ -26,8 +26,8 @@ public class Lecture
 
 		analyserFichier (cheminFichier);
 
-		afficherHeritage ();
-		creerLstInterface();
+		construireHeritage();
+		creerLstInterface ();
 	}
 
 	/**
@@ -48,21 +48,19 @@ public class Lecture
 	/**
 	 * Affiche les relations d'héritage entre les classes.
 	 */
-	public void afficherHeritage()
+	public void construireHeritage()
 	{
-		String nomParent = "";
 		for (Classe classe : hashMapClasses.values())
 		{
-			nomParent = classe.getClasseParente();
+			String nomParent = classe.getClasseParente();
 
 			if (nomParent != null && !nomParent.isEmpty())
 			{
-				Classe classParent = getClasse(nomParent);
+				Classe classeParent = getClasse(nomParent);
 
-				if (classParent != null)
+				if (classeParent != null)
 				{
-					Heritage heritage = new Heritage(classParent, classe);
-					lstHeritage.add(heritage);
+					lstHeritage.add(new Heritage(classeParent, classe));
 				}
 			}
 		}
@@ -106,7 +104,7 @@ public class Lecture
 					}
 					else
 					{
-						System.out.println(" Interface introuvable : " + nomInterface);
+						System.err.println(" Interface introuvable : " + nomInterface);
 					}
 				}
 			}

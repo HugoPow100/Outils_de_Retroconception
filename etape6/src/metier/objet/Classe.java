@@ -54,12 +54,8 @@ public class Classe
 	public ArrayList<Attribut> getLstAttribut  () { return this.lstAttribut  ; }
 	public ArrayList<Methode > getLstMethode   () { return this.lstMethode   ; }
 
-	public boolean isEnum() {return this.typeClasse.contains("enum");}
-
-	public boolean isAbstract() {return this.typeClasse.contains("abstract");}
-
-
-	public boolean isInterface() {return this.typeClasse.contains("interface");}
-
-	public boolean isRecord() {return this.typeClasse.contains("record");}
+	public boolean isEnum     () { return this.typeClasse.contains("enum"     ); }
+	public boolean isAbstract () { return this.typeClasse.contains("abstract" ); }
+	public boolean isInterface() { return this.typeClasse.contains("interface"); }
+	public boolean isRecord   () { return this.typeClasse.contains("record"   ); }
 }

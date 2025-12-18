@@ -23,7 +23,6 @@ public class Association extends Liaison
 	private Multiplicite multDest               ;
 	private int          num                    ;
 
-
 	/**
 	 * Construit une nouvelle association entre deux classes, avec leurs multiplicités
 	 * respectives et la direction éventuelle de l’association.
@@ -54,8 +53,6 @@ public class Association extends Liaison
 	public void setMultOrig       (Multiplicite multOrig)   { this.multOrig        = multOrig       ; }
 	public void setUnidirectionnel(boolean unidirectionnel) { this.unidirectionnel = unidirectionnel; }
 
-
-	
 	/**
 	 * Retourne une représentation textuelle complète de l’association,
 	 * incluant le sens, les classes concernées et leurs multiplicités.
