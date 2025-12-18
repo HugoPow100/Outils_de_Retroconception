@@ -135,12 +135,19 @@ public class PanelModif extends JPanel implements ListSelectionListener, ActionL
         return false;
     }
 
-
     public boolean estValide()
     {
+        if ((caractereValideMultMin() && txtMultipliciteMax.getText().equals("*")) || (caractereValideMultMin() && caractereValideMultMax()))
+        {
+            return true;
+        }
 
-        if 
+        return false;
+
     }
+
+
+    
 
 
     public void actionPerformed(ActionEvent e)
@@ -148,10 +155,10 @@ public class PanelModif extends JPanel implements ListSelectionListener, ActionL
         if(e.getSource() == btnValider)
         {
 
-            if (estNombre())
+            if (estValide())
             {
                 int min = Integer.parseInt(txtMultipliciteMin.getText());
-                int max = Integer.parseInt(txtMultipliciteMax.getText());
+                String max = txtMultipliciteMax.getText();
                 System.out.println("Vous avez valider les Multiplicités : " + min + " et " + max);
             }
             else
