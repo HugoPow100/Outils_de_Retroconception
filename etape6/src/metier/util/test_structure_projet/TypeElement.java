@@ -6,7 +6,6 @@ package metier.util.test_structure_projet;
  */
 public enum TypeElement
 {
-    DOSSIER,
-    FICHIER
+	DOSSIER,
+	FICHIER
 }
-

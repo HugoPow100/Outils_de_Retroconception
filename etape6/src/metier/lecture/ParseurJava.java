@@ -130,7 +130,7 @@ public class ParseurJava
 				
 				if (ligne.contains("(")        &&
 					ligne.contains(")")        && 
-					!estAppelMethode              &&
+					!estAppelMethode             &&
 
 					(!ligne.endsWith(";") || 
 					ligne.contains("abstract") ||

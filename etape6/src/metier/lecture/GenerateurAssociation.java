@@ -35,7 +35,7 @@ public class GenerateurAssociation
 			Map<String, Integer> compteur = new HashMap<>();
 			
 			// Liste pour savoir si ce type était multi-instance
-			ArrayList<String> listeMultiInstance = new ArrayList<>();
+			ArrayList<String> listeMultiInstance = new ArrayList<String>();
 
 			for (Attribut attr : classeOrig.getLstAttribut())
 			{
@@ -141,10 +141,9 @@ public class GenerateurAssociation
 		for (Attribut attrDest : classeDest.getLstAttribut())
 		{
 			String typeAttrDest = UtilitaireType.nettoyerType(attrDest.getType().trim());
+
 			if (typeAttrDest.equals(classeOrig.getNom()))
-			{
 				return true;
-			}
 		}
 
 		// Vérifier dans les paramètres des méthodes
@@ -195,8 +194,5 @@ public class GenerateurAssociation
 		lstAssociations = new ArrayList<Association>(uniques.values());
 	}
 
-	public ArrayList<Association> getLstAssociations()
-	{
-		return this.lstAssociations;
-	}
+	public ArrayList<Association> getLstAssociations() { return this.lstAssociations; }
 }

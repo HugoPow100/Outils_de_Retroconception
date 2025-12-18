@@ -68,11 +68,7 @@ public class VerificationStructureProjet
 								RESET);
 
 			for (String erreur : erreurs)
-			{
 				System.err.println(ROUGE + "[X] " + JAUNE + erreur + RESET);
-			}
-
-			
 		}
 		else
 		{
@@ -91,9 +87,7 @@ public class VerificationStructureProjet
 		try
 		{
 			if (element.getType() == TypeElement.DOSSIER)
-			{
 				Files.createDirectories(path);
-			}
 			else
 			{
 				Files.createDirectories(path.getParent());
@@ -101,8 +95,6 @@ public class VerificationStructureProjet
 			}
 
 			erreurs.add(String.format("%s%-22s %s%s", VERT, "Créé automatiquement :", element.getChemin(), RESET));
-
-
 		}
 		catch (Exception e)
 		{
