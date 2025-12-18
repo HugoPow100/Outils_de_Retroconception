@@ -82,8 +82,8 @@ public class PanneauDiagramme extends JPanel
         this.lstLiaisons.clear();
 
         fenetrePrincipale.chargerProjet(cheminProjet);
-        blocsClasses.addAll(fenetrePrincipale.getBlocClasses());
-        liaisons.addAll(fenetrePrincipale.getLiaisons());
+        lstBlocsClasses.addAll(fenetrePrincipale.getBlocClasses());
+        lstLiaisons.addAll(fenetrePrincipale.getLiaisons());
 
         // Passer la liste des blocs à toutes les liaisons pour le contournement
         for (LiaisonVue liaison : lstLiaisons) {
