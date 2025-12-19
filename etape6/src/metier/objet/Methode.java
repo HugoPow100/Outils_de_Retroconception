@@ -1,6 +1,5 @@
 package metier.objet;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,29 +11,29 @@ import java.util.List;
  */
 public class Methode
 {
-	private String          nomMethode  ;
+	private String          nom  		;
 	private String          retour      ;
 	private String          visibilite  ;
 	private boolean         isAbstract  ;
 	private List<Parametre> lstParametre;
 
-	public Methode(String nomMethode, String retour, String visibilite, 
+	public Methode(String nom, String retour, String visibilite, 
 	               boolean isAbstract, List<Parametre> lstParametre)
 	{
-		this.nomMethode   = nomMethode  ;
+		this.nom   		  = nom  		;
 		this.visibilite   = visibilite  ;
 		this.retour       = retour      ;
 		this.isAbstract   = isAbstract  ;
 		this.lstParametre = lstParametre;
 	}
 
-	public String          getNomMethode  () { return nomMethode  ; }
+	public String          getNomMethode  () { return nom  		  ; }
 	public String          getVisibilite  () { return visibilite  ; }
 	public String          getRetour      () { return retour      ; }
 	public boolean         isAbstract     () { return isAbstract  ; }
 	public List<Parametre> getLstParametre() { return lstParametre; }
 
-	public void setNomMethode  (String nomMethode           ) { this.nomMethode   = nomMethode  ; }
+	public void setNomMethode  (String nom          		) { this.nom   = nom  				; }
 	public void setVisibilite  (String visibilite           ) { this.visibilite   = visibilite  ; }
 	public void setRetour      (String retour               ) { this.retour       = retour      ; }
 	public void setAbstract    (boolean isAbstract          ) { this.isAbstract   = isAbstract  ; }
@@ -54,7 +53,7 @@ public class Methode
 			case "protected" -> sRet = "~ ";
 		}
 
-		sRet += this.nomMethode + " (";
+		sRet += this.nom + " (";
 
 		for (int i = 0; i < this.lstParametre.size(); i++)
 		{

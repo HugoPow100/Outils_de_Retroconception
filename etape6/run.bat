@@ -18,4 +18,4 @@ echo.
 echo √ Compilation reussie
 
 REM Executer le programme
-java -cp class vue.FenetrePrincipale %*
+java -cp class controleur.Controleur %*

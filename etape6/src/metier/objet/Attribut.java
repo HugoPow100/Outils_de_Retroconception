@@ -22,7 +22,7 @@ package metier.objet;
  */
 public class Attribut
 {
-	private String  nomAttribut;
+	private String  nom		   ;
 	private String  type       ;
 	private String  visibilite ;
 	private String  portee     ;
@@ -31,26 +31,26 @@ public class Attribut
 	/**
 	 * Constructeur d'un attribut.
 	 *
-	 * @param nomAttribut nom de l'attribut
+	 * @param nom nom de l'attribut
 	 * @param type        type de l'attribut
 	 * @param visibilite  visibilité UML
 	 * @param portee      portée de l'attribut (instance ou classe)
 	 * @param isConstant  true si l'attribut est une constante
 	 */
-	public Attribut(String nomAttribut, String type, String visibilite, String portee, boolean isConstant)
+	public Attribut(String nom, String type, String visibilite, String portee, boolean isConstant)
 	{
-		this.nomAttribut = nomAttribut;
+		this.nom = nom;
 		this.type        = type       ;
 		this.visibilite  = visibilite ;
 		this.portee      = portee     ;
 		this.isConstant  = isConstant ;
 	}
 
-	public String  getNom			() { return this.nomAttribut; }
-	public String  getType			() { return this.type       ; }
-	public String  getVisibilite  	() { return this.visibilite ; }
-	public String  getPortee     	() { return this.portee     ; }
-	public boolean isConstant     	() { return this.isConstant ; }
+	public String  getNom       () { return this.nom		; }
+	public String  getType      () { return this.type       ; }
+	public String  getVisibilite() { return this.visibilite ; }
+	public String  getPortee    () { return this.portee     ; }
+	public boolean isConstant   () { return this.isConstant ; }
 
 	public String  toString()
 	{
@@ -66,7 +66,7 @@ public class Attribut
 			case "protected" -> sRet = "# ";
 		}
 		
-		sRet += this.nomAttribut + "\t: ";
+		sRet += this.nom + "\t: ";
 
 		sRet += this.type;
 
