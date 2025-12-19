@@ -1,8 +1,8 @@
 src/controleur/Controleur.java
 
-src/metier/lecture/Lecture.java
 src/metier/lecture/AnalyseurFichier.java
 src/metier/lecture/GenerateurAssociation.java
+src/metier/lecture/Lecture.java
 src/metier/lecture/ParseurJava.java
 src/metier/lecture/UtilitaireType.java
 
@@ -19,10 +19,24 @@ src/metier/objet/Parametre.java
 src/metier/sauvegarde/GestionSauvegarde.java
 
 src/metier/util/ConstantesChemins.java
+src/metier/util/test_structure_projet/ElementStructureProjet.java
+src/metier/util/test_structure_projet/TypeElement.java
+src/metier/util/test_structure_projet/VerificationStructureProjet.java
 
 src/vue/BarreMenus.java
 src/vue/BlocClasse.java
 src/vue/FenetrePrincipale.java
-src/vue/LiaisonVue.java
 src/vue/PanneauDiagramme.java
 src/vue/PanneauProjets.java
+
+src/vue/liaison/CalculateurChemin.java
+src/vue/liaison/DetecteurObstacles.java
+src/vue/liaison/GestionnaireAncrage.java
+src/vue/liaison/GestionnaireIntersections.java
+src/vue/liaison/LiaisonVue.java
+src/vue/liaison/RenduLiaison.java
+
+src/vue/role_classe/FenetreChangementMultiplicite.java
+src/vue/role_classe/FenetreModifRole.java
+src/vue/role_classe/PanelModif.java
+src/vue/role_classe/PanelModifRole.java
