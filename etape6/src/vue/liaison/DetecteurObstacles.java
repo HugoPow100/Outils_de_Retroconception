@@ -1,9 +1,8 @@
 package vue.liaison;
 
-import vue.BlocClasse;
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
+import vue.BlocClasse;
 
 /**
  * Détection d'obstacles pour le routage des liaisons
@@ -84,7 +83,7 @@ public class DetecteurObstacles
 		List<BlocClasse> obstacles = new ArrayList<>();
 		int minX = Math.min(x1, x2);
 		int maxX = Math.max(x1, x2);
-		int margin = 10;
+		int margin = 20;
 		
 		for (BlocClasse bloc : tousLesBlocs)
 		{
@@ -112,7 +111,7 @@ public class DetecteurObstacles
 		List<BlocClasse> obstacles = new ArrayList<>();
 		int minY = Math.min(y1, y2);
 		int maxY = Math.max(y1, y2);
-		int margin = 10;
+		int margin = 20;
 		
 		for (BlocClasse bloc : tousLesBlocs)
 		{

@@ -89,12 +89,75 @@ public class LiaisonVue
      * Choisit les meilleurs côtés et positions pour minimiser le nombre de segments
      * Algorithme simplifié: teste toutes les combinaisons et choisit le meilleur chemin
      */
+    /**
+     * Choisit les meilleurs côtés et positions pour minimiser le nombre de segments
+     * Algorithme: calcule les chemins optimaux de toutes les liaisons avec même origine/destination,
+     * puis choisit le meilleur chemin parmi tous et l'applique à toutes ces liaisons
+     */
     private void chooseBestSides() {
-        // NOTE: On ne réutilise PLUS automatiquement les côtés des liaisons partageant origine/destination
-        // Chaque liaison calcule son propre chemin optimal
-        // Le partage de chemin se fait uniquement via l'offset visuel dans calculatePathOffset()
+        // Trouver toutes les liaisons ayant la même origine et destination (ou inversées)
+        List<LiaisonVue> liaisonsGroupees = new ArrayList<>();
+        liaisonsGroupees.add(this);
         
-        // Algorithme optimisé: priorité absolue à la distance la plus courte
+        for (LiaisonVue autre : toutesLesLiaisons) {
+            if (autre == this) continue;
+            
+            boolean memeDirection = (autre.blocOrigine == this.blocOrigine && autre.blocDestination == this.blocDestination);
+            boolean directionInversee = (autre.blocOrigine == this.blocDestination && autre.blocDestination == this.blocOrigine);
+            
+            if (memeDirection || directionInversee) {
+                liaisonsGroupees.add(autre);
+            }
+        }
+        
+        // Si plusieurs liaisons partagent la même origine/destination
+        if (liaisonsGroupees.size() > 1) {
+            // Calculer le meilleur chemin pour chaque liaison du groupe
+            CheminCandidat meilleurChemin = null;
+            
+            for (LiaisonVue liaison : liaisonsGroupees) {
+                CheminCandidat cheminLiaison = calculerMeilleurChemin(liaison.blocOrigine, liaison.blocDestination);
+                
+                if (cheminLiaison != null) {
+                    if (meilleurChemin == null || estMeilleur(cheminLiaison, meilleurChemin)) {
+                        meilleurChemin = cheminLiaison;
+                    }
+                }
+            }
+            
+            // Appliquer le meilleur chemin à toutes les liaisons du groupe avec décalage pour éviter superposition
+            if (meilleurChemin != null) {
+                int index = 0;
+                double offsetStep = 0.15; // Décalage de 15% par liaison
+                
+                for (LiaisonVue liaison : liaisonsGroupees) {
+                    boolean inversee = (liaison.blocOrigine == this.blocDestination && liaison.blocDestination == this.blocOrigine);
+                    
+                    // Calculer le décalage pour éviter superposition
+                    double origOffset = (index - liaisonsGroupees.size() / 2.0) * offsetStep;
+                    double destOffset = (index - liaisonsGroupees.size() / 2.0) * offsetStep;
+                    
+                    if (inversee) {
+                        liaison.sideOrigine = meilleurChemin.sideDestination;
+                        liaison.sideDestination = meilleurChemin.sideOrigine;
+                        liaison.posRelOrigine = Math.max(0.1, Math.min(0.9, meilleurChemin.posRelDestination + origOffset));
+                        liaison.posRelDestination = Math.max(0.1, Math.min(0.9, meilleurChemin.posRelOrigine + destOffset));
+                    } else {
+                        liaison.sideOrigine = meilleurChemin.sideOrigine;
+                        liaison.sideDestination = meilleurChemin.sideDestination;
+                        liaison.posRelOrigine = Math.max(0.1, Math.min(0.9, meilleurChemin.posRelOrigine + origOffset));
+                        liaison.posRelDestination = Math.max(0.1, Math.min(0.9, meilleurChemin.posRelDestination + destOffset));
+                    }
+                    
+                    liaison.ancrageOrigine = GestionnaireAncrage.getPointOnSide(liaison.blocOrigine, liaison.sideOrigine, liaison.posRelOrigine);
+                    liaison.ancrageDestination = GestionnaireAncrage.getPointOnSide(liaison.blocDestination, liaison.sideDestination, liaison.posRelDestination);
+                    index++;
+                }
+                return;
+            }
+        }
+        
+        // Sinon, calculer le chemin optimal pour cette liaison seule
         int bestOrigSide = 0, bestDestSide = 0;
         double bestOrigPos = 0.5, bestDestPos = 0.5;
         int minBends = Integer.MAX_VALUE;
@@ -246,6 +309,49 @@ public class LiaisonVue
                 }
             }
         }
+        
+        // Détection supplémentaire: chemin qui fait un détour inutile
+        // UNIQUEMENT pour chemins très longs (5+ segments)
+        if (path.size() >= 6) {
+            Point start = path.get(0);
+            Point end = path.get(path.size() - 1);
+            
+            // Si début et fin sont alignés (même X ou même Y) mais qu'on a 5+ segments
+            if ((start.x == end.x || start.y == end.y) && path.size() > 3) {
+                return true;
+            }
+        }
+        
+        // Détection TRÈS stricte: si on a 4+ segments, vérifier qu'on n'a pas de segments
+        // qui partent dans une direction puis reviennent partiellement
+        if (path.size() >= 4) {
+            for (int i = 0; i < path.size() - 2; i++) {
+                Point p1 = path.get(i);
+                Point p2 = path.get(i + 1);
+                Point p3 = path.get(i + 2);
+                
+                // Segment horizontal qui change de direction
+                if (p1.y == p2.y && p2.y == p3.y) {
+                    int dir1 = Integer.compare(p2.x - p1.x, 0);
+                    int dir2 = Integer.compare(p3.x - p2.x, 0);
+                    if (dir1 != 0 && dir2 != 0 && dir1 != dir2) {
+                        // Change de direction sur la même ligne horizontale
+                        return true;
+                    }
+                }
+                
+                // Segment vertical qui change de direction
+                if (p1.x == p2.x && p2.x == p3.x) {
+                    int dir1 = Integer.compare(p2.y - p1.y, 0);
+                    int dir2 = Integer.compare(p3.y - p2.y, 0);
+                    if (dir1 != 0 && dir2 != 0 && dir1 != dir2) {
+                        // Change de direction sur la même ligne verticale
+                        return true;
+                    }
+                }
+            }
+        }
+        
         return false;
     }
     
@@ -254,10 +360,23 @@ public class LiaisonVue
      * Système de côtés: 0=HAUT, 1=DROITE, 2=BAS, 3=GAUCHE
      */
     private boolean isNaturalSidePair(int oSide, int dSide, boolean right, boolean left, boolean below, boolean above) {
-        return (oSide == 1 && dSide == 3 && right) ||  // Origine DROITE -> Dest GAUCHE (dest à droite)
-               (oSide == 3 && dSide == 1 && left) ||   // Origine GAUCHE -> Dest DROITE (dest à gauche)
-               (oSide == 2 && dSide == 0 && below) ||  // Origine BAS -> Dest HAUT (dest en dessous)
-               (oSide == 0 && dSide == 2 && above);    // Origine HAUT -> Dest BAS (dest au dessus)
+        // Paires perpendiculaires
+        if (oSide == 1 && dSide == 0 && right && above) return true;  // DROITE -> HAUT
+        if (oSide == 1 && dSide == 2 && right && below) return true;  // DROITE -> BAS
+        if (oSide == 3 && dSide == 0 && left && above) return true;   // GAUCHE -> HAUT
+        if (oSide == 3 && dSide == 2 && left && below) return true;   // GAUCHE -> BAS
+        if (oSide == 0 && dSide == 1 && above && right) return true;  // HAUT -> DROITE
+        if (oSide == 0 && dSide == 3 && above && left) return true;   // HAUT -> GAUCHE
+        if (oSide == 2 && dSide == 1 && below && right) return true;  // BAS -> DROITE
+        if (oSide == 2 && dSide == 3 && below && left) return true;   // BAS -> GAUCHE
+        
+        // Paires opposées sont aussi naturelles si elles correspondent à la direction
+        if (oSide == 1 && dSide == 3 && right) return true;  // DROITE -> GAUCHE
+        if (oSide == 3 && dSide == 1 && left) return true;   // GAUCHE -> DROITE  
+        if (oSide == 2 && dSide == 0 && below) return true;  // BAS -> HAUT
+        if (oSide == 0 && dSide == 2 && above) return true;  // HAUT -> BAS
+        
+        return false;
     }
 
 	private DirectPathResult checkDirectPath(Point start, Point end, double pos, boolean isNatural)
@@ -465,11 +584,16 @@ public class LiaisonVue
 				renduLiaison.drawLineWithBridges(g, p1, p2, segmentIntersections, normalStroke);
 		}
 
-		if (type.equals("association") && unidirectionnel)
-			renduLiaison.dessinerFlecheAssociation(g, ancrageDestination, sideDestination);
 
-		if (type.equals("heritage") || type.equals("interface"))
-			renduLiaison.dessinerFlecheVide(g, ancrageDestination, sideDestination);
+        // Dessiner les flèches au dernier point réel du chemin (après offset)
+        Point pointFleche = path.get(path.size() - 1);
+        
+        if (type.equals("association") && unidirectionnel) {
+            renduLiaison.dessinerFlecheAssociation(g, pointFleche, sideDestination);
+        }
+        if (type.equals("heritage") || type.equals("interface")) {
+            renduLiaison.dessinerFlecheVide(g, pointFleche, sideDestination);
+        }
 
 		drawMultiplicityAndRoles(g);
 	}
@@ -652,5 +776,189 @@ public class LiaisonVue
 			default: return "UNKNOWN";
 		}
 	}
+
+	 /**
+     * Classe pour stocker un chemin candidat avec son score
+     */
+    private static class CheminCandidat {
+        int sideOrigine;
+        int sideDestination;
+        double posRelOrigine;
+        double posRelDestination;
+        int nbSegments;
+        double distance;
+        boolean hasAccordion;
+        boolean isNaturalPair;
+        
+        CheminCandidat(int sideOrig, int sideDest, double posOrig, double posDest, 
+                       int segments, double dist, boolean accordion, boolean natural) {
+            this.sideOrigine = sideOrig;
+            this.sideDestination = sideDest;
+            this.posRelOrigine = posOrig;
+            this.posRelDestination = posDest;
+            this.nbSegments = segments;
+            this.distance = dist;
+            this.hasAccordion = accordion;
+            this.isNaturalPair = natural;
+        }
+    }
+    
+    /**
+     * Calcule le meilleur chemin possible pour une liaison entre deux blocs
+     * OPTIMISATION: privilégie positions centrées et paires naturelles en premier
+     */
+    private CheminCandidat calculerMeilleurChemin(BlocClasse origine, BlocClasse destination) {
+        CheminCandidat meilleurChemin = null;
+        
+        final int ox = origine.getX() + (origine.getLargeur() >> 1);
+        final int oy = origine.getY() + (origine.getHauteurCalculee() >> 1);
+        final int dx = destination.getX() + (destination.getLargeur() >> 1);
+        final int dy = destination.getY() + (destination.getHauteurCalculee() >> 1);
+        
+        final boolean destIsRight = dx > ox, destIsLeft = dx < ox;
+        final boolean destIsBelow = dy > oy, destIsAbove = dy < oy;
+        
+        // Positions triées par priorité: centre d'abord, puis quarts, puis tiers
+        // Éviter les coins exacts (0.0 et 1.0) -> utiliser 0.1 et 0.9 à la place
+        double[] positions = {0.5, 0.25, 0.75, 0.33, 0.67, 0.1, 0.9};
+        
+        // D'abord essayer les paires naturelles avec position centrale
+        for (int origSide = 0; origSide < 4; origSide++) {
+            for (int destSide = 0; destSide < 4; destSide++) {
+                boolean isNaturalPair = isNaturalSidePair(origSide, destSide, destIsRight, destIsLeft, destIsBelow, destIsAbove);
+                
+                if (isNaturalPair) {
+                    Point start = GestionnaireAncrage.getPointOnSide(origine, origSide, 0.5);
+                    Point end = GestionnaireAncrage.getPointOnSide(destination, destSide, 0.5);
+                    
+                    List<Point> testPath = calculateurChemin.createOrthogonalPath(start, end, origSide, destSide);
+                    
+                    if (!calculateurChemin.pathHasCollisions(testPath) && !hasAccordion(testPath)) {
+                        int actualSegments = testPath.size() - 1;
+                        double distance = calculateurChemin.calculatePathLength(testPath);
+                        
+                        CheminCandidat candidat = new CheminCandidat(
+                            origSide, destSide, 0.5, 0.5,
+                            actualSegments, distance, false, true
+                        );
+                        
+                        if (meilleurChemin == null || estMeilleur(candidat, meilleurChemin)) {
+                            meilleurChemin = candidat;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Si on a déjà un excellent chemin (1-2 segments sans accordéon), on peut s'arrêter
+        if (meilleurChemin != null && meilleurChemin.nbSegments <= 2) {
+            return meilleurChemin;
+        }
+        
+        // Sinon, tester toutes les combinaisons
+        for (int origSide = 0; origSide < 4; origSide++) {
+            for (int destSide = 0; destSide < 4; destSide++) {
+                boolean isNaturalPair = isNaturalSidePair(origSide, destSide, destIsRight, destIsLeft, destIsBelow, destIsAbove);
+                
+                for (double origPos : positions) {
+                    for (double destPos : positions) {
+                        Point start = GestionnaireAncrage.getPointOnSide(origine, origSide, origPos);
+                        Point end = GestionnaireAncrage.getPointOnSide(destination, destSide, destPos);
+                        
+                        List<Point> testPath = calculateurChemin.createOrthogonalPath(start, end, origSide, destSide);
+                        
+                        if (!calculateurChemin.pathHasCollisions(testPath)) {
+                            int actualSegments = testPath.size() - 1;
+                            double distance = calculateurChemin.calculatePathLength(testPath);
+                            boolean hasAccordion = hasAccordion(testPath);
+                            
+                            // Pénalité légère pour positions exactement sur les coins
+                            boolean isOnCorner = (origPos == 0.0 || origPos == 1.0 || destPos == 0.0 || destPos == 1.0);
+                            double adjustedDistance = isOnCorner ? distance * 1.05 : distance;
+                            
+                            // BONUS FORT pour chemins à 2 segments (optimal)
+                            // Pénalité pour 3+ segments pour vraiment favoriser la simplicité
+                            if (actualSegments == 1) {
+                                adjustedDistance *= 0.5; // Bonus énorme pour ligne droite
+                            } else if (actualSegments == 2) {
+                                adjustedDistance *= 0.7; // Bonus fort pour 2 segments
+                            } else if (actualSegments >= 3) {
+                                adjustedDistance *= 1.3; // Pénalité pour 3+ segments
+                            }
+                            
+                            CheminCandidat candidat = new CheminCandidat(
+                                origSide, destSide, origPos, destPos,
+                                actualSegments, adjustedDistance, hasAccordion, isNaturalPair
+                            );
+                            
+                            if (meilleurChemin == null || estMeilleur(candidat, meilleurChemin)) {
+                                meilleurChemin = candidat;
+                            }
+                            
+                            // Si on a un chemin parfait (1 segment), on peut arrêter
+                            if (meilleurChemin != null && meilleurChemin.nbSegments == 1 && !meilleurChemin.hasAccordion) {
+                                return meilleurChemin;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return meilleurChemin;
+    }
+    
+    /**
+     * Compare deux chemins candidats et détermine si le premier est meilleur
+     * STRICTE: priorité absolue aux chemins sans accordéon et avec moins de segments
+     * Prend en compte le coût des ponts (intersections avec d'autres liaisons)
+     */
+    private boolean estMeilleur(CheminCandidat candidat, CheminCandidat actuel) {
+        // Priorité ABSOLUE: JAMAIS accepter un accordéon si on a un chemin sans accordéon
+        if (candidat.hasAccordion && !actuel.hasAccordion) {
+            return false;
+        }
+        if (!candidat.hasAccordion && actuel.hasAccordion) {
+            return true;
+        }
+        
+        // Si les deux ont un accordéon, prendre celui avec moins de segments
+        if (candidat.hasAccordion && actuel.hasAccordion) {
+            return candidat.nbSegments < actuel.nbSegments;
+        }
+        
+        // Priorité 1: Moins de segments (ABSOLU - pas de tolérance)
+        if (candidat.nbSegments < actuel.nbSegments) {
+            return true;
+        }
+        if (candidat.nbSegments > actuel.nbSegments) {
+            return false;
+        }
+        
+        // Priorité 2: Même nombre de segments -> paire naturelle d'abord
+        if (candidat.isNaturalPair && !actuel.isNaturalPair) {
+            return true;
+        }
+        if (!candidat.isNaturalPair && actuel.isNaturalPair) {
+            return false;
+        }
+        
+        // Priorité 3: Plus court (seulement avec différence significative >20%)
+        // Note: Les ponts ajoutent un coût implicite car ils nécessitent des détours
+        if (candidat.distance < actuel.distance * 0.80) {
+            return true;
+        }
+        
+        // Priorité 4: Positions plus centrées (favorise 0.5)
+        double candidatCentrality = Math.abs(candidat.posRelOrigine - 0.5) + Math.abs(candidat.posRelDestination - 0.5);
+        double actuelCentrality = Math.abs(actuel.posRelOrigine - 0.5) + Math.abs(actuel.posRelDestination - 0.5);
+        if (candidatCentrality < actuelCentrality * 0.9) {
+            return true;
+        }
+        
+        return false;
+    }
+
+
 
 }
