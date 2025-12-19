@@ -52,7 +52,7 @@ public class BarreMenus extends JMenuBar
         ouvrirItem.     addActionListener(e -> actionOuvrirProjet());
 
         JMenuItem exporterItem    = new JMenuItem("Exporter en image");
-        exporterItem.   addActionListener(e -> fenetrePrincipale.sauvegarderDiagramme());
+        exporterItem.   addActionListener(e -> fenetrePrincipale.exporterImageDiagramme());
 
         JMenuItem sauvegarderItem = new JMenuItem("Sauvegarder");
         sauvegarderItem.addActionListener(e -> actionSauvegarder());

@@ -104,7 +104,7 @@ public class FenetrePrincipale extends JFrame
         }
     }
 
-    public void sauvegarderDiagramme() 
+    public void exporterImageDiagramme()
     {
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY); // choisir un fichier
@@ -126,7 +126,7 @@ public class FenetrePrincipale extends JFrame
                 double  zoomSauvegarde     = panneauDiagramme.getZoomLevel      ();
                 boolean textZoomSauvegarde = panneauDiagramme.isAfficherTextZoom();
                 
-                panneauDiagramme.setZoomLevel(1.0);
+                //panneauDiagramme.setZoomLevel(1.0);
                 panneauDiagramme.setAfficherTextZoom(false);
                 
                 BufferedImage image = new BufferedImage
