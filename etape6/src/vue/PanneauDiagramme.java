@@ -384,16 +384,17 @@ public class PanneauDiagramme extends JPanel
         if (lstLiaisons.isEmpty())
             return;
 
-        // D'abord, passer la liste de toutes les lstLiaisons à chaque liaison
+        // D'abord, passer la liste de toutes les liaisons à chaque liaison
         for (LiaisonVue liaison : lstLiaisons)
             liaison.setToutesLesLiaisons(lstLiaisons);
         
-        // Réinitialiser toutes les lstLiaisons avec le nouvel algorithme
+        // Réinitialiser toutes les liaisons avec le nouvel algorithme
         for (LiaisonVue liaison : lstLiaisons)
             liaison.recalculerAncrages();
 
+
         // Redessiner
-        rafraichirDiagramme();
+        repaint();
     }
 
     /**
