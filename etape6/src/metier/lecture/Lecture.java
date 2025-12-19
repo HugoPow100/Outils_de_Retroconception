@@ -118,7 +118,12 @@ public class Lecture
 	 */
 	private Classe getClasse(String nomFichier)
 	{
-		return this.hashMapClasses.get(nomFichier);
+		for (Classe classe : hashMapClasses.values())
+		{
+			if (classe.getNom().equals(nomFichier))
+				return classe;
+		}
+		return null;
 	}
 
 	// ========== Getters ==========
