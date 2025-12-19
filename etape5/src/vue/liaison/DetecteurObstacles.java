@@ -79,7 +79,7 @@ public class DetecteurObstacles {
         List<BlocClasse> obstacles = new ArrayList<>();
         int minX = Math.min(x1, x2);
         int maxX = Math.max(x1, x2);
-        int margin = 10;
+        int margin = 20; // Augmenté pour meilleure détection
         
         for (BlocClasse bloc : tousLesBlocs) {
             if (bloc == blocOrigine || bloc == blocDestination) continue;
@@ -106,7 +106,7 @@ public class DetecteurObstacles {
         List<BlocClasse> obstacles = new ArrayList<>();
         int minY = Math.min(y1, y2);
         int maxY = Math.max(y1, y2);
-        int margin = 10;
+        int margin = 20; // Augmenté pour meilleure détection
         
         for (BlocClasse bloc : tousLesBlocs) {
             if (bloc == blocOrigine || bloc == blocDestination) continue;
