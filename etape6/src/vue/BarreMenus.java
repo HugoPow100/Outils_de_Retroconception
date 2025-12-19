@@ -161,7 +161,7 @@ public class BarreMenus extends JMenuBar
         } 
         else 
         {
-            System.out.println("Aucun fichier choisi");
+            System.err.println("Aucun fichier choisi");
         }    
     }
 

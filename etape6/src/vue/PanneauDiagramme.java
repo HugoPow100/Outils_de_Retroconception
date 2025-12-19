@@ -1,13 +1,13 @@
 package vue;
 
-import vue.role_classe.*;
-import java.util.UUID;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.swing.*;
 import vue.liaison.LiaisonVue;
+import vue.role_classe.*;
 
 
 
@@ -208,7 +208,7 @@ public class PanneauDiagramme extends JPanel
 				{
 					if (bloc.contient((int) logicalX, (int) logicalY)) 
 					{
-                        System.out.println("OOOOOOOOOOOOOOOOOOOOOOOO Bloc cliqué mis à jour : " + bloc.getNom());
+                        //System.out.println("OOOOOOOOOOOOOOOOOOOOOOOO Bloc cliqué mis à jour : " + bloc.getNom());
 						PanneauDiagramme.this.blocClique = bloc;
 						break;
 					}
@@ -451,7 +451,7 @@ public class PanneauDiagramme extends JPanel
 
         for (BlocClasse bloc : lstBlocsClasses)
         {
-                System.out.println(bloc.getNom() + " X=" + bloc.getX() + " Y=" + bloc.getY());
+            //System.out.println(bloc.getNom() + " X=" + bloc.getX() + " Y=" + bloc.getY());
             if (spacingY < bloc.getHauteurCalculee())
                 spacingY = bloc.getHauteurCalculee();
         }
@@ -698,14 +698,15 @@ public class PanneauDiagramme extends JPanel
 
     public void setSauvegardeAuto(boolean b) { this.sauvegardeAuto = b; }
 
+    // Non utilisé
     public void actionEffectuee()
     {
-        System.out.println("Action effectuée.");
+        //System.out.println("Action effectuée.");
 
         if (this.sauvegardeAuto)
         {
             this.actionSauvegarder();
-            System.out.println("Sauvegarde auto effectuée !");
+            //System.out.println("Sauvegarde auto effectuée !");
         }
     }
 

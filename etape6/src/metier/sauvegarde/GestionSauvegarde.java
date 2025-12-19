@@ -6,7 +6,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +16,6 @@ import java.util.Scanner;
 import metier.util.*;
 import vue.BlocClasse;
 import vue.liaison.LiaisonVue;
-import java.util.ArrayList;
-import java.io.IOException;
 
 public class GestionSauvegarde 
 {
@@ -299,7 +299,7 @@ public class GestionSauvegarde
 		// Vérifier que cheminProjet n'est pas null
 		if (cheminProjet == null || cheminProjet.isEmpty()) 
 		{
-			System.out.println("Erreur: cheminProjet est null ou vide dans sauvegarderClasses");
+			System.err.println("Erreur: cheminProjet est null ou vide dans sauvegarderClasses");
 			return;
 		}
 
@@ -343,7 +343,7 @@ public class GestionSauvegarde
 	{
 		// Vérifier que les paramètres ne sont pas null
 		if (listBlocClasses == null || nomProjet == null || nomProjet.isEmpty() || cheminProjet == null || cheminProjet.isEmpty()) {
-			System.out.println("Erreur: paramètres invalides dans sauvegarderCoordProjet");
+			System.err.println("Erreur: paramètres invalides dans sauvegarderCoordProjet");
 			return;
 		}
 		

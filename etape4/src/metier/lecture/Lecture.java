@@ -91,10 +91,6 @@ public class Lecture
 
 						System.out.println(inter);
 					}
-					else
-					{
-						System.out.println("⚠ Interface introuvable : " + nomInterface);
-					}
 				}
 			}
 		}

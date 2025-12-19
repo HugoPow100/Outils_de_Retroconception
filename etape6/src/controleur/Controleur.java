@@ -72,12 +72,12 @@ public class Controleur
         if (gestionSauvegarde.projetEstSauvegarde(cheminProjet) && 
             gestionSauvegarde.fichierDeSauvegardeExiste(intituleProjet)) 
         {
-            System.out.println("--- Le projet est sauvegardé. Chargement complet depuis " + intituleProjet + ".xml ---");
+            System.out.println("--- Le projet est sauvegardé. Chargement complet depuis " + intituleProjet + ".xml ---"); // à laisser :)
             chargerProjetDepuisXml(intituleProjet);
         } 
         else
         {
-            System.out.println("--- Le projet n'est pas sauvegardé. On charge depuis ce chemin : " + cheminProjet + " ---");
+            System.out.println("--- Le projet n'est pas sauvegardé. On charge depuis ce chemin : " + cheminProjet + " ---"); // à laisser aussi
             chargerProjetDepuisJava(cheminProjet);
 
         }

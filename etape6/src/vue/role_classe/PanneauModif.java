@@ -126,7 +126,7 @@ public class PanneauModif extends JPanel implements ListSelectionListener, Actio
 	}
 	public void valueChanged(ListSelectionEvent e)
 	{
-		System.out.println("Liaison sélectionnée : " + listeLiaisonsIHM.getSelectedValue());
+		//System.out.println("Liaison sélectionnée : " + listeLiaisonsIHM.getSelectedValue());
 		lblTitre.setText("Modification : " + this.blocSelectionne.getNom() + " à " + listeLiaisonsIHM.getSelectedValue());
 		nomSelectionListe = listeLiaisonsIHM.getSelectedValue();
 	}
@@ -140,7 +140,7 @@ public class PanneauModif extends JPanel implements ListSelectionListener, Actio
 		}
 		catch (NumberFormatException e)
 		{
-			System.out.println("Erreur : Multiplicité min non valide");
+			System.err.println("Erreur : Multiplicité min non valide");
 		}
 
 		return false;
@@ -157,7 +157,7 @@ public class PanneauModif extends JPanel implements ListSelectionListener, Actio
 		}
 		catch (NumberFormatException e)
 		{
-			System.out.println("Erreur : Multiplicité Max non valide");
+			System.err.println("Erreur : Multiplicité Max non valide");
 		}
 
 		return false;
@@ -174,7 +174,7 @@ public class PanneauModif extends JPanel implements ListSelectionListener, Actio
 				int maxFormat = Integer.parseInt(max);
 				if (minFormat > maxFormat)
 				{
-					System.out.println("Changement impossible : Le minimum est superieur au maximum");
+					System.err.println("Changement impossible : Le minimum est superieur au maximum");
 					return false;
 				}
 			}
@@ -219,7 +219,6 @@ public class PanneauModif extends JPanel implements ListSelectionListener, Actio
 		if(e.getSource() == btnAnnuler)
 		{
 			SwingUtilities.getWindowAncestor(this).dispose();
-			System.out.println("Annuler clicked");
 		}
 
 			
@@ -231,9 +230,6 @@ public class PanneauModif extends JPanel implements ListSelectionListener, Actio
 
 		String min = txtMultipliciteMin.getText();
 		String max = txtMultipliciteMax.getText();
-
-		System.out.println("minimum : " + min);
-		System.out.println("maximum : " + max);
 		
 		if (!getBlocClasseSelectionne().equals(null) && estMultipliciteValide(min, max))
 		{
@@ -257,13 +253,13 @@ public class PanneauModif extends JPanel implements ListSelectionListener, Actio
 				}
 			}
 
-			System.out.println("Nouvelle Multiplicité : " + nouvelleMultiplicite);
+			//System.out.println("Nouvelle Multiplicité : " + nouvelleMultiplicite);
 			//System.out.println("Les multiplicités de " + this.blocSelectionne.getNom() + " vers " + listeLiaisonsIHM.getSelectedValue() + " sont modifiés");
 			this.panDiag.rafraichirDiagramme();
 		}
 		else
 		{
-			System.out.println("Erreur : Multiplicité non valide");
+			System.err.println("Erreur : Multiplicité non valide");
 			return;
 		}
 	}

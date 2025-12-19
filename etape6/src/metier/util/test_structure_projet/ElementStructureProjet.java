@@ -21,7 +21,6 @@ public enum ElementStructureProjet
 	BIN(          "bin"           , TypeElement.DOSSIER),
 	DATA(         "data"          , TypeElement.DOSSIER),
 	SRC(          "src"           , TypeElement.DOSSIER),
-	TEST_UNITAIRE("testUnitaire"  , TypeElement.DOSSIER),
 
 
 
@@ -29,7 +28,6 @@ public enum ElementStructureProjet
 	// SOUS-DOSSIERS DATA
 	DONNEES(             "data/donnees"             , TypeElement.DOSSIER),
 	SAUVEGARDES(         "data/sauvegardes"         , TypeElement.DOSSIER),
-	SAUVEGARDES_DOSSIERS("data/sauvegardes/dossiers", TypeElement.DOSSIER),
 
 
 	// DOSSIERS SRC
