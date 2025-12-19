@@ -34,8 +34,18 @@ public class CalculateurChemin {
         boolean exitHorizontal = (startSide == 1 || startSide == 3);
         boolean entryHorizontal = (endSide == 1 || endSide == 3);
         
-        if (exitHorizontal && entryHorizontal) {
-            // Les deux sorties sont horizontales, il faut un coude vertical
+        // Vérifier si c'est une paire de côtés opposés
+        boolean oppositeVertical = (startSide == 2 && endSide == 0) || (startSide == 0 && endSide == 2);
+        boolean oppositeHorizontal = (startSide == 1 && endSide == 3) || (startSide == 3 && endSide == 1);
+        
+        if (oppositeVertical) {
+            // BAS↔HAUT: un seul point intermédiaire (2 segments)
+            path.add(new Point(exitPoint.x, entryPoint.y));
+        } else if (oppositeHorizontal) {
+            // DROITE↔GAUCHE: un seul point intermédiaire (2 segments)
+            path.add(new Point(entryPoint.x, exitPoint.y));
+        } else if (exitHorizontal && entryHorizontal) {
+            // Les deux sorties sont horizontales (même côté)
             if (exitPoint.x != entryPoint.x) {
                 int cornerY;
                 if (startSide == 3 && endSide == 3) {
@@ -49,7 +59,7 @@ public class CalculateurChemin {
                 path.add(new Point(entryPoint.x, cornerY));
             }
         } else if (!exitHorizontal && !entryHorizontal) {
-            // Les deux sorties sont verticales, il faut un coude horizontal
+            // Les deux sorties sont verticales (même côté)
             if (exitPoint.y != entryPoint.y) {
                 int cornerX;
                 if (startSide == 0 && endSide == 0) {

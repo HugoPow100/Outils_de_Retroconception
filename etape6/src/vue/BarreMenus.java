@@ -190,12 +190,38 @@ public class BarreMenus extends JMenuBar
         this.fenetrePrincipale.actionSauvegarder();
     }
 
-    private void actionAPropos() 
-    {
-        String messageDeb = "Modélisation UML - Générateur de Diagrammes\n";
-        String messageRes = "par Romain BARUCHELLO,\nJules BOUQUET,\nPierre COIGNARD,\nPaul NOEL,\n";
-        String messageFin = messageDeb + messageRes + "Thibault PADOIS,\nHugo VARAO GOMES DA SILVA";
+private void actionAPropos()
+{
+    String htmlMessage =
+        "<html>"
+      + "<body style='font-family:Arial; font-size:12pt;'>"
 
-        JOptionPane.showMessageDialog(null, messageFin, "À propos", JOptionPane.INFORMATION_MESSAGE);
-    }
+      + "<div style='text-align:center; font-weight:bold; font-size:14pt;'>"
+      + "Modélisation UML – Générateur de Diagrammes"
+      + "</div>"
+
+      + "<hr><br>"
+
+      + "<div style='color:#DC143C;'><u>AUTEURS</u> :</div><br>"
+
+      + "<pre style='color:#228B22;'>Hugo     VARAO GOMES DA SILVA</pre>"
+      + "<pre style='color:#FF1493;'>Romain   BARUCHELLO</pre>"
+      + "<pre style='color:#FF8C00;'>Jules    BOUQUET</pre>"
+      + "<pre style='color:#0000FF;'>Pierre   COIGNARD</pre>"
+      + "<pre style='color:#800080;'>Paul     NOEL</pre>"
+      + "<pre style='color:#DC143C;'>Thibaul  PADOIS</pre>"
+
+      + "<br><hr>"
+
+      + "<div style='text-align:center;'>Projet académique – IUT du Havre</div>"
+      + "<div style='text-align:center;'>SAE 3.01 – Outil de rétroconception Java-UML</div>"
+
+      + "</body></html>";
+
+    JOptionPane.showMessageDialog(null,htmlMessage,"À propos",
+                                JOptionPane.INFORMATION_MESSAGE);
+}
+
+
+
 }
