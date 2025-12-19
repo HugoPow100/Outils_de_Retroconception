@@ -76,8 +76,16 @@ public class FenetrePrincipale extends JFrame
             panneauDiagramme.chargerProjet(cheminProjet);
             // Enregistrer le projet au premier chargement
             controleur.sauvegardeProjetXml(cheminProjet);
-            // Actualiser la liste des projets
-            panneauProjets.actualiser();
+
+            // Forcer le recalcul des liaisons après le layout Swing
+            // pour eviter un mauvais placement des fléches
+            SwingUtilities.invokeLater(() ->
+            {
+                    optimiserPositionsLiaisons();
+                    revalidate();
+                    repaint();
+            });
+
         }
         catch (Exception e)
         {

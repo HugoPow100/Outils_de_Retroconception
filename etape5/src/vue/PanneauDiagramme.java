@@ -330,6 +330,11 @@ public class PanneauDiagramme extends JPanel
         for (LiaisonVue liaison : liaisons)
             liaison.recalculerAncrages();
 
+        // Optimiser les chemins partagés pour les liaisons ayant la même origine et destination
+        for (LiaisonVue liaison : liaisons) {
+            liaison.recalculerCheminPartage();
+        }
+
         // Redessiner
         repaint();
     }

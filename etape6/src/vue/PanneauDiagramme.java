@@ -15,8 +15,8 @@ public class PanneauDiagramme extends JPanel
     //        ATTRIBUTS         //
     //--------------------------//
 
-    private List<BlocClasse>    lstBlocsClasses                   ;
-    private List<LiaisonVue>    lstLiaisons                       ; 
+    private List<BlocClasse>    lstBlocsClasses                ;
+    private List<LiaisonVue>    lstLiaisons                    ; 
 
     private FenetrePrincipale   fenetrePrincipale              ;
 

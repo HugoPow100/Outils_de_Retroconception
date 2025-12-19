@@ -77,14 +77,18 @@ public class LiaisonVue {
 
     /**
      * Choisit les meilleurs côtés et positions pour minimiser le nombre de segments
+     * Algorithme simplifié: teste toutes les combinaisons et choisit le meilleur chemin
      */
     private void chooseBestSides() {
+        // NOTE: On ne réutilise PLUS automatiquement les côtés des liaisons partageant origine/destination
+        // Chaque liaison calcule son propre chemin optimal
+        // Le partage de chemin se fait uniquement via l'offset visuel dans calculatePathOffset()
+        
+        // Algorithme optimisé: priorité absolue à la distance la plus courte
         int bestOrigSide = 0, bestDestSide = 0;
         double bestOrigPos = 0.5, bestDestPos = 0.5;
-        int minSegments = Integer.MAX_VALUE;
+        int minBends = Integer.MAX_VALUE;
         double minDistance = Double.MAX_VALUE;
-        int bestCenterPriority = Integer.MAX_VALUE;
-        boolean foundDirect = false;
         
         final int ox = blocOrigine.getX() + (blocOrigine.getLargeur() >> 1);
         final int oy = blocOrigine.getY() + (blocOrigine.getHauteurCalculee() >> 1);
@@ -94,89 +98,70 @@ public class LiaisonVue {
         final boolean destIsRight = dx > ox, destIsLeft = dx < ox;
         final boolean destIsBelow = dy > oy, destIsAbove = dy < oy;
         
-        // PHASE 1 : Chemins directs
+        // Positions à tester (privilégier centre et coins)
+        double[] positions = {0.5, 0.0, 1.0, 0.25, 0.75, 0.33, 0.67};
+        
+        // Tester TOUTES les combinaisons de côtés et positions
         for (int origSide = 0; origSide < 4; origSide++) {
             for (int destSide = 0; destSide < 4; destSide++) {
-                boolean isNaturalPair = isNaturalSidePair(origSide, destSide, destIsRight, destIsLeft, destIsBelow, destIsAbove);
-                boolean samePosPair = (origSide + destSide == 2) || (origSide + destSide == 4);
-                
-                if (samePosPair) {
-                    for (double pos = 0.0; pos <= 1.0; pos += 0.02) {
-                        if (isAnchorOccupied(blocOrigine, origSide, pos) || 
-                            isAnchorOccupied(blocDestination, destSide, pos)) continue;
-                        
-                        Point start = GestionnaireAncrage.getPointOnSide(blocOrigine, origSide, pos);
-                        Point end = GestionnaireAncrage.getPointOnSide(blocDestination, destSide, pos);
-                        
-                        DirectPathResult result = checkDirectPath(start, end, pos, isNaturalPair);
-                        if (result.canDirect && updateBestIfBetter(result, 1, bestCenterPriority, minDistance, foundDirect)) {
-                            bestOrigSide = origSide; bestDestSide = destSide;
-                            bestOrigPos = pos; bestDestPos = pos;
-                            minSegments = 1; minDistance = result.distance;
-                            bestCenterPriority = result.priority;
-                            foundDirect = true;
-                        }
-                    }
-                } else {
-                    for (double origPos = 0.0; origPos <= 1.0; origPos += 0.1) {
-                        for (double destPos = 0.0; destPos <= 1.0; destPos += 0.1) {
-                            if (isAnchorOccupied(blocOrigine, origSide, origPos) || 
-                                isAnchorOccupied(blocDestination, destSide, destPos)) continue;
-                            
-                            Point start = GestionnaireAncrage.getPointOnSide(blocOrigine, origSide, origPos);
-                            Point end = GestionnaireAncrage.getPointOnSide(blocDestination, destSide, destPos);
-                            
-                            if (start.x != end.x && start.y != end.y) continue;
-                            
-                            DirectPathResult result = checkDirectPath(start, end, (origPos + destPos) / 2, isNaturalPair);
-                            if (result.canDirect && updateBestIfBetter(result, 1, bestCenterPriority, minDistance, foundDirect)) {
-                                bestOrigSide = origSide; bestDestSide = destSide;
-                                bestOrigPos = origPos; bestDestPos = destPos;
-                                minSegments = 1; minDistance = result.distance;
-                                bestCenterPriority = result.priority;
-                                foundDirect = true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        if (foundDirect) {
-            this.sideOrigine = bestOrigSide;
-            this.sideDestination = bestDestSide;
-            this.posRelOrigine = bestOrigPos;
-            this.posRelDestination = bestDestPos;
-            return;
-        }
-        
-        // PHASE 2 : Chemins multi-segments
-        for (int origSide = 0; origSide < 4; origSide++) {
-            for (int destSide = 0; destSide < 4; destSide++) {
+                // Vérifier si c'est une paire naturelle
                 boolean isNaturalPair = isNaturalSidePair(origSide, destSide, destIsRight, destIsLeft, destIsBelow, destIsAbove);
                 
-                for (double origPos = 0.1; origPos <= 0.9; origPos += 0.1) {
-                    for (double destPos = 0.1; destPos <= 0.9; destPos += 0.1) {
+                for (double origPos : positions) {
+                    for (double destPos : positions) {
+                        // Vérifier si les ancrages sont déjà occupés
                         if (isAnchorOccupied(blocOrigine, origSide, origPos) || 
                             isAnchorOccupied(blocDestination, destSide, destPos)) continue;
                         
                         Point start = GestionnaireAncrage.getPointOnSide(blocOrigine, origSide, origPos);
                         Point end = GestionnaireAncrage.getPointOnSide(blocDestination, destSide, destPos);
                         
+                        // Calculer le chemin orthogonal
                         List<Point> testPath = calculateurChemin.createOrthogonalPath(start, end, origSide, destSide);
                         
+                        // Vérifier les collisions
                         if (!calculateurChemin.pathHasCollisions(testPath)) {
-                            int numSegments = testPath.size() - 1;
+                            // Compter le nombre RÉEL de segments dans le chemin calculé
+                            int actualSegments = testPath.size() - 1;
                             double distance = calculateurChemin.calculatePathLength(testPath);
-                            int naturalBonus = isNaturalPair ? -1000 : 0;
                             
-                            if (numSegments < minSegments || 
-                                (numSegments == minSegments && shouldUpdateMultiSegment(isNaturalPair, bestCenterPriority, distance, minDistance))) {
-                                minSegments = numSegments;
+                            // Pénalité massive pour les accordéons
+                            boolean hasAccordion = hasAccordion(testPath);
+                            
+                            // CRITÈRE PRINCIPAL: Moins de segments réels
+                            // CRITÈRE SECONDAIRE: Pas d'accordéon
+                            // CRITÈRE TERTIAIRE: Distance plus courte
+                            boolean isBetter = false;
+                            
+                            if (hasAccordion) {
+                                // Ne JAMAIS accepter un chemin avec accordéon sauf si c'est le seul
+                                if (minBends == Integer.MAX_VALUE) {
+                                    isBetter = true;
+                                }
+                            } else if (minBends == Integer.MAX_VALUE) {
+                                // Premier chemin valide sans accordéon
+                                isBetter = true;
+                            } else if (actualSegments < minBends) {
+                                // Moins de segments = TOUJOURS mieux
+                                isBetter = true;
+                            } else if (actualSegments == minBends) {
+                                // Même nombre de segments: choisir le plus court
+                                if (distance < minDistance * 0.95) {
+                                    // Au moins 5% plus court pour éviter les changements mineurs
+                                    isBetter = true;
+                                } else if (Math.abs(distance - minDistance) < 20 && isNaturalPair) {
+                                    // Distance similaire: préférer paire naturelle
+                                    isBetter = true;
+                                }
+                            }
+                            
+                            if (isBetter) {
+                                minBends = actualSegments;
                                 minDistance = distance;
-                                bestCenterPriority = naturalBonus;
-                                bestOrigSide = origSide; bestDestSide = destSide;
-                                bestOrigPos = origPos; bestDestPos = destPos;
+                                bestOrigSide = origSide;
+                                bestDestSide = destSide;
+                                bestOrigPos = origPos;
+                                bestDestPos = destPos;
                             }
                         }
                     }
@@ -190,9 +175,79 @@ public class LiaisonVue {
         this.posRelDestination = bestDestPos;
     }
     
+    /**
+     * Calcule le nombre MINIMUM théorique de segments pour une paire de côtés
+     * Système de côtés: 0=HAUT, 1=DROITE, 2=BAS, 3=GAUCHE
+     */
+    private int getMinimumSegments(int origSide, int destSide, Point start, Point end) {
+        // Sortie horizontale = DROITE(1) ou GAUCHE(3)
+        boolean origHorizontal = (origSide == 1 || origSide == 3);
+        boolean destHorizontal = (destSide == 1 || destSide == 3);
+        
+        // Cas 1: Les deux côtés ont la même orientation (horizontal-horizontal ou vertical-vertical)
+        if (origHorizontal == destHorizontal) {
+            // Il faut toujours 3 segments minimum: sortir, traverser perpendiculairement, entrer
+            return 3;
+        }
+        
+        // Cas 2: Orientations perpendiculaires (horizontal-vertical ou vertical-horizontal)
+        // Vérifier si on peut faire un chemin direct en 1 segment (alignement parfait)
+        if (origHorizontal) {
+            // Origine horizontale, destination verticale
+            if (start.y == end.y) {
+                // Alignés horizontalement: 1 segment possible
+                return 1;
+            }
+        } else {
+            // Origine verticale, destination horizontale
+            if (start.x == end.x) {
+                // Alignés verticalement: 1 segment possible
+                return 1;
+            }
+        }
+        
+        // Sinon, il faut 2 segments: sortir puis tourner pour entrer
+        return 2;
+    }
+    
+    /**
+     * Détecte si un chemin fait des allers-retours inutiles (accordéon)
+     */
+    private boolean hasAccordion(List<Point> path) {
+        if (path.size() < 4) return false;
+        
+        for (int i = 0; i < path.size() - 3; i++) {
+            Point p1 = path.get(i);
+            Point p2 = path.get(i + 1);
+            Point p3 = path.get(i + 2);
+            Point p4 = path.get(i + 3);
+            
+            // Détecter un accordéon horizontal: p1-p2 à droite, p2-p3 vertical, p3-p4 à gauche (ou inverse)
+            if (p1.y == p2.y && p2.x == p3.x && p3.y == p4.y) {
+                if ((p2.x > p1.x && p4.x < p3.x) || (p2.x < p1.x && p4.x > p3.x)) {
+                    return true;
+                }
+            }
+            
+            // Détecter un accordéon vertical: p1-p2 vertical, p2-p3 horizontal, p3-p4 vertical
+            if (p1.x == p2.x && p2.y == p3.y && p3.x == p4.x) {
+                if ((p2.y > p1.y && p4.y < p3.y) || (p2.y < p1.y && p4.y > p3.y)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Vérifie si une paire de côtés est naturelle (orientation logique)
+     * Système de côtés: 0=HAUT, 1=DROITE, 2=BAS, 3=GAUCHE
+     */
     private boolean isNaturalSidePair(int oSide, int dSide, boolean right, boolean left, boolean below, boolean above) {
-        return (oSide == 0 && dSide == 2 && right) || (oSide == 2 && dSide == 0 && left) ||
-               (oSide == 1 && dSide == 3 && below) || (oSide == 3 && dSide == 1 && above);
+        return (oSide == 1 && dSide == 3 && right) ||  // Origine DROITE -> Dest GAUCHE (dest à droite)
+               (oSide == 3 && dSide == 1 && left) ||   // Origine GAUCHE -> Dest DROITE (dest à gauche)
+               (oSide == 2 && dSide == 0 && below) ||  // Origine BAS -> Dest HAUT (dest en dessous)
+               (oSide == 0 && dSide == 2 && above);    // Origine HAUT -> Dest BAS (dest au dessus)
     }
     
     private DirectPathResult checkDirectPath(Point start, Point end, double pos, boolean isNatural) {
@@ -247,9 +302,40 @@ public class LiaisonVue {
     private int calculatePathOffset(List<Point> myPath) {
         if (toutesLesLiaisons == null || toutesLesLiaisons.size() <= 1 || myPath.size() < 2) return 0;
         
-        final int OFFSET_DISTANCE = 4;
-        List<LiaisonVue> overlapping = new ArrayList<>();
+        final int OFFSET_DISTANCE = 8;
+        int myIndex = toutesLesLiaisons.indexOf(this);
         
+        // Compter les liaisons ayant exactement la même origine et destination
+        List<LiaisonVue> samePath = new ArrayList<>();
+        for (LiaisonVue autre : toutesLesLiaisons) {
+            if (autre == this) continue;
+            
+            // Vérifier si les deux liaisons ont la même origine et destination
+            boolean sameOriginDest = (autre.blocOrigine == this.blocOrigine && autre.blocDestination == this.blocDestination);
+            boolean sameDestOrigin = (autre.blocOrigine == this.blocDestination && autre.blocDestination == this.blocOrigine);
+            
+            if (sameOriginDest || sameDestOrigin) {
+                samePath.add(autre);
+            }
+        }
+        
+        // Si des liaisons partagent le même chemin, appliquer un décalage centré
+        if (!samePath.isEmpty()) {
+            int myPositionInGroup = 0;
+            for (LiaisonVue autre : samePath) {
+                if (toutesLesLiaisons.indexOf(autre) < myIndex) {
+                    myPositionInGroup++;
+                }
+            }
+            
+            // Décalage centré : -offset, 0, +offset, -2*offset, +2*offset, etc.
+            int totalInGroup = samePath.size() + 1;
+            int centerOffset = -(totalInGroup / 2) * OFFSET_DISTANCE;
+            return centerOffset + (myPositionInGroup * OFFSET_DISTANCE);
+        }
+        
+        // Sinon, utiliser l'ancien système basé sur les segments partagés
+        List<LiaisonVue> overlapping = new ArrayList<>();
         for (LiaisonVue autre : toutesLesLiaisons) {
             if (autre == this) continue;
             Point autreOrig = GestionnaireAncrage.getPointOnSide(autre.blocOrigine, autre.sideOrigine, autre.posRelOrigine);
@@ -263,7 +349,6 @@ public class LiaisonVue {
         
         if (overlapping.isEmpty()) return 0;
         
-        int myIndex = toutesLesLiaisons.indexOf(this);
         int offsetIdx = 0;
         for (LiaisonVue autre : overlapping) {
             if (toutesLesLiaisons.indexOf(autre) < myIndex) offsetIdx++;
@@ -495,4 +580,40 @@ public class LiaisonVue {
     public double getNivOrig() { return posRelOrigine; }
     
     public double getNivDest() { return posRelDestination; }
+    
+    /**
+     * Recalcule les chemins des liaisons ayant la même origine et destination
+     * et applique un décalage visuel pour les distinguer.
+     */
+    public void recalculerCheminPartage() {
+        // Regrouper les liaisons ayant la même origine et destination
+        List<LiaisonVue> liaisonsPartagees = new ArrayList<>();
+        for (LiaisonVue liaison : toutesLesLiaisons) {
+            if (liaison.blocOrigine == this.blocOrigine && liaison.blocDestination == this.blocDestination) {
+                liaisonsPartagees.add(liaison);
+            }
+        }
+
+        // Calculer un chemin commun
+        Point ancrageOrigineCommun = GestionnaireAncrage.getPointOnSide(blocOrigine, sideOrigine, posRelOrigine);
+        Point ancrageDestinationCommun = GestionnaireAncrage.getPointOnSide(blocDestination, sideDestination, posRelDestination);
+        List<Point> cheminCommun = calculateurChemin.createOrthogonalPath(ancrageOrigineCommun, ancrageDestinationCommun, sideOrigine, sideDestination);
+
+        // Appliquer un décalage visuel pour chaque liaison
+        int offset = -10 * (liaisonsPartagees.size() / 2); // Centrer les décalages
+        for (LiaisonVue liaison : liaisonsPartagees) {
+            List<Point> cheminAvecOffset = calculateurChemin.applyOffsetToPath(cheminCommun, offset);
+            liaison.setChemin(cheminAvecOffset); // Met à jour le chemin de la liaison
+            offset += 10; // Décalage visuel entre les liaisons
+        }
+    }
+
+    /**
+     * Met à jour le chemin de la liaison.
+     * @param chemin Le nouveau chemin à appliquer.
+     */
+    public void setChemin(List<Point> chemin) {
+        // Implémentation pour mettre à jour le chemin
+        this.calculateurChemin.setPath(chemin);
+    }
 }
