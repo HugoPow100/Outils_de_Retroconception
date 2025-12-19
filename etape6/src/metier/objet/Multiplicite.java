@@ -8,7 +8,7 @@ package metier.objet;
  * instance de classe reliée à une autre instance de classe.
  * Par exemple, "0..1", "1..*", "2..5".
  */
-public class Multiplicite 
+public class Multiplicite
 {
 	// Integer.MAX_VALUE = * en affichage
 	private int debut;

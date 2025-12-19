@@ -18,91 +18,78 @@ public class CalculateurChemin
 	}
 	
 	/**
-	 * Crée une liste de points qui représente un chemin orthogonal
-	 */
-	public List<Point> createOrthogonalPath(Point start, Point end, int startSide, int endSide)
-	{
-		List<Point> path = new ArrayList<Point>();
-		path.add(start);
-		
-		int padding = 15;
-		Point exitPoint  = calculateOffsetPoint(start, startSide, padding);
-		Point entryPoint = calculateOffsetPoint(end  , endSide  , padding);
-		
-		path.add(exitPoint);
-		
-		boolean exitHorizontal  = (startSide == 0 || startSide == 2);
-		boolean entryHorizontal = (endSide   == 0 || endSide   == 2);
-		
-		if (exitHorizontal && entryHorizontal)
-		{
-			if (exitPoint.y != entryPoint.y)
-			{
-				int cornerX;
-
-				if (startSide == 2 && endSide == 2)
-				{
-					cornerX = Math.min(exitPoint.x, entryPoint.x);
-				}
-				else if (startSide == 0 && endSide == 0)
-				{
-					cornerX = Math.max(exitPoint.x, entryPoint.x);
-				}
-				else
-				{
-					cornerX = (exitPoint.x + entryPoint.x) / 2;
-				}
-
-				path.add(new Point(cornerX, exitPoint .y));
-				path.add(new Point(cornerX, entryPoint.y));
-			}
-		}
-		else if (!exitHorizontal && !entryHorizontal)
-		{
-			if (exitPoint.x != entryPoint.x)
-			{
-				int cornerY;
-
-				if (startSide == 3 && endSide == 3)
-				{
-					cornerY = Math.min(exitPoint.y, entryPoint.y);
-				}
-				else if (startSide == 1 && endSide == 1)
-				{
-					cornerY = Math.max(exitPoint.y, entryPoint.y);
-				}
-				else
-				{
-					cornerY = (exitPoint.y + entryPoint.y) / 2;
-				}
-
-				path.add(new Point(exitPoint.x, cornerY));
-				path.add(new Point(entryPoint.x, cornerY));
-			}
-		}
-		else if (exitHorizontal && !entryHorizontal)
-		{
-			path.add(new Point(entryPoint.x, exitPoint.y));
-		}
-		else
-		{
-			path.add(new Point(exitPoint.x, entryPoint.y));
-		}
-
-		path.add(entryPoint);
-		path.add(end);
-		
-		return cleanRedundantPoints(path);
-	}
-	
-	/**
-	 * Calcule le point décalé selon le côté
-	 */
-	private Point calculateOffsetPoint(Point pt, int side, int padding)
-	{
-		return new Point(pt.x + (side == 0 ? padding : side == 2 ? -padding : 0),
-						pt.y + (side == 1 ? padding : side == 3 ? -padding : 0));
-	}
+     * Crée une liste de points qui représente un chemin orthogonal
+     * Système de côtés: 0=HAUT, 1=DROITE, 2=BAS, 3=GAUCHE
+     */
+    public List<Point> createOrthogonalPath(Point start, Point end, int startSide, int endSide) {
+        List<Point> path = new ArrayList<>();
+        path.add(start);
+        
+        int padding = 15;
+        Point exitPoint = calculateOffsetPoint(start, startSide, padding);
+        Point entryPoint = calculateOffsetPoint(end, endSide, padding);
+        
+        path.add(exitPoint);
+        
+        // HAUT(0) et BAS(2) = sortie verticale, DROITE(1) et GAUCHE(3) = sortie horizontale
+        boolean exitHorizontal = (startSide == 1 || startSide == 3);
+        boolean entryHorizontal = (endSide == 1 || endSide == 3);
+        
+        if (exitHorizontal && entryHorizontal) {
+            // Les deux sorties sont horizontales, il faut un coude vertical
+            if (exitPoint.x != entryPoint.x) {
+                int cornerY;
+                if (startSide == 3 && endSide == 3) {
+                    cornerY = Math.min(exitPoint.y, entryPoint.y);
+                } else if (startSide == 1 && endSide == 1) {
+                    cornerY = Math.max(exitPoint.y, entryPoint.y);
+                } else {
+                    cornerY = (exitPoint.y + entryPoint.y) / 2;
+                }
+                path.add(new Point(exitPoint.x, cornerY));
+                path.add(new Point(entryPoint.x, cornerY));
+            }
+        } else if (!exitHorizontal && !entryHorizontal) {
+            // Les deux sorties sont verticales, il faut un coude horizontal
+            if (exitPoint.y != entryPoint.y) {
+                int cornerX;
+                if (startSide == 0 && endSide == 0) {
+                    cornerX = Math.min(exitPoint.x, entryPoint.x);
+                } else if (startSide == 2 && endSide == 2) {
+                    cornerX = Math.max(exitPoint.x, entryPoint.x);
+                } else {
+                    cornerX = (exitPoint.x + entryPoint.x) / 2;
+                }
+                path.add(new Point(cornerX, exitPoint.y));
+                path.add(new Point(cornerX, entryPoint.y));
+            }
+        } else if (exitHorizontal && !entryHorizontal) {
+            // Sortie horizontale, entrée verticale
+            path.add(new Point(exitPoint.x, entryPoint.y));
+        } else {
+            // Sortie verticale, entrée horizontale
+            path.add(new Point(entryPoint.x, exitPoint.y));
+        }
+        
+        path.add(entryPoint);
+        path.add(end);
+        
+        return cleanRedundantPoints(path);
+    }
+    
+    /**
+     * Calcule le point décalé selon le côté
+     * side 0=HAUT, 1=DROITE, 2=BAS, 3=GAUCHE
+     */
+    private Point calculateOffsetPoint(Point pt, int side, int padding) {
+        switch(side) {
+            case 0: return new Point(pt.x, pt.y - padding); // HAUT
+            case 1: return new Point(pt.x + padding, pt.y); // DROITE
+            case 2: return new Point(pt.x, pt.y + padding); // BAS
+            case 3: return new Point(pt.x - padding, pt.y); // GAUCHE
+            default: return pt;
+        }
+    }
 	
 	/**
 	 * Nettoie les points redondants (3 points alignés → 2 points)
@@ -241,4 +228,5 @@ public class CalculateurChemin
 		
 		return offsetPath;
 	}
+
 }

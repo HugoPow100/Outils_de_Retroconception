@@ -17,4 +17,4 @@ echo
 echo "✓ Compilation réussie"
 
 # Exécuter le programme
-java -cp class vue.FenetrePrincipale "$@"
+java -cp class controleur.Controleur "$@"

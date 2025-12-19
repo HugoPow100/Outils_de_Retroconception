@@ -52,7 +52,7 @@ public class BarreMenus extends JMenuBar
         ouvrirItem.     addActionListener(e -> actionOuvrirProjet());
 
         JMenuItem exporterItem    = new JMenuItem("Exporter en image");
-        exporterItem.   addActionListener(e -> fenetrePrincipale.sauvegarderDiagramme());
+        exporterItem.   addActionListener(e -> fenetrePrincipale.exporterImageDiagramme());
 
         JMenuItem sauvegarderItem = new JMenuItem("Sauvegarder");
         sauvegarderItem.addActionListener(e -> actionSauvegarder());
@@ -136,33 +136,22 @@ public class BarreMenus extends JMenuBar
 
     private void verifierFichiersProjet(String cheminFichier)
     {
-        ArrayList<String> lstFichiersInvalides = this.getLstFichiersInvalides(cheminFichier);
-        String messageInvalide = "Attention fichiers non valides detectés :\n ( ";;
+        ArrayList<String> lstFichiersInvalides = fenetrePrincipale.getLstFichiersInvalides(cheminFichier);
+        String messageInvalide = lstFichiersInvalides.size() == 1
+               ? "Attention, fichier non valide detectés :\n ( "
+               : "Attention, fichiers non valides detectés :\n ( ";
 
-        if (lstFichiersInvalides.size() == 1)
-            messageInvalide = "Attention fichier non valides detectés :\n ( ";
-        
-        if (lstFichiersInvalides.isEmpty())
+        if (lstFichiersInvalides.isEmpty()) return;
+
+        for(String fichierInvalide : lstFichiersInvalides)
         {
-            return;
+            messageInvalide += fichierInvalide + ", ";
         }
-        else
-        {
-            for(String fichierInvalides : this.getLstFichiersInvalides(cheminFichier))
-            {
-                messageInvalide += fichierInvalides + ", ";
-            }
-            // Retirer la derniere virgule
-            messageInvalide = messageInvalide.substring(0, messageInvalide.length() - 2);
-            messageInvalide += " )";
+        // Retirer la derniere virgule
+        messageInvalide = messageInvalide.substring(0, messageInvalide.length() - 2);
+        messageInvalide += " )";
 
-            JOptionPane.showMessageDialog(null, messageInvalide, "Attention", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    private ArrayList<String> getLstFichiersInvalides(String cheminProjet)
-    {
-        return fenetrePrincipale.getLstFichiersInvalides(cheminProjet);
+        JOptionPane.showMessageDialog(null, messageInvalide, "Attention", JOptionPane.WARNING_MESSAGE);
     }
 
     private void sauvegardeProjetXml(String cheminFichier) 
@@ -183,11 +172,6 @@ public class BarreMenus extends JMenuBar
     private void actionSauvegardeAuto() 
     {
         fenetrePrincipale.setSauvegardeAuto(sauvegardeAutoItem.getState());
-    }
-
-    private void actionAligner()
-    {
-        JOptionPane.showMessageDialog(null, "Pas fini");
     }
 
     private void actionOptimiser() 

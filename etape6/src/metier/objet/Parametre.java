@@ -10,23 +10,23 @@ package metier.objet;
  */
 public class Parametre
 {
-	private String nomPara ;
-	private String typePara;
+	private String nom ;
+	private String type;
 
-	public Parametre(String nomPara, String typePara)
+	public Parametre(String nom, String type)
 	{
-		this.nomPara  = nomPara ;
-		this.typePara = typePara;
+		this.nom  = nom ;
+		this.type = type;
 	}
 
-	public String getNomPara () { return this.nomPara ; }
-	public String getTypePara() { return this.typePara; }
+	public String getNomPara () { return this.nom ; }
+	public String getTypePara() { return this.type; }
 
-	public void setNomPara (String nomPara ) { this.nomPara  = nomPara ; }
-	public void setTypePara(String typePara) { this.typePara = typePara; }
+	public void setNomPara (String nom ) { this.nom  = nom ; }
+	public void setTypePara(String type) { this.type = type; }
 
 	public String getContenue()
 	{
-		return "nom : " + this.nomPara + " type : " + this.typePara;
+		return "nom : " + this.nom + " type : " + this.type;
 	}
 }

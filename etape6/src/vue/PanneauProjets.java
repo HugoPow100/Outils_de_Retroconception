@@ -12,6 +12,7 @@ public class PanneauProjets extends JPanel
     //--------------------------//
     //        ATTRIBUTS         //
     //--------------------------//
+    private static final String CHEMIN_SAUVEGARDES = "data/sauvegardes/";
 
     private FenetrePrincipale fenetrePrincipale;
     private String            cheminDossiers   ;
@@ -26,7 +27,6 @@ public class PanneauProjets extends JPanel
         this.fenetrePrincipale = fenetrePrincipale;
         
         this.cheminDossiers = "data/donnees/projets.xml";
-        //this.cheminDossiers = "sauvegardes/dossiers";
 
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
@@ -100,7 +100,6 @@ public class PanneauProjets extends JPanel
 
                     if (projet.exists())
                     {
-                        //System.out.println("Le projet existe : " + ligne);
                         if (projet.isDirectory() || projet.getName().endsWith(".java"))
                         {
                             JButton boutonProjet = creerBoutonProjet(projet, intitule);
@@ -200,8 +199,7 @@ public class PanneauProjets extends JPanel
         if (nouvelIntitule != null && !nouvelIntitule.trim().isEmpty())
         {
             nouvelIntitule = nouvelIntitule.trim();
-            
-            String erreur = "Erreur";
+
             // Vérifier si l'intitulé existe déjà
             if (intituleExiste(nouvelIntitule, cheminProjet))
             {
@@ -209,7 +207,7 @@ public class PanneauProjets extends JPanel
                 (
                     this,
                     "Un projet avec ce nom existe déjà !\nVeuillez choisir un autre nom.",
-                    erreur,
+                    "Erreur",
                     JOptionPane.ERROR_MESSAGE
                 );
                 return;
@@ -226,7 +224,7 @@ public class PanneauProjets extends JPanel
                 (
                     this,
                     "Erreur lors du renommage : " + e.getMessage(),
-                    erreur,
+                    "Erreur",
                     JOptionPane.ERROR_MESSAGE
                 );
             }
@@ -332,8 +330,8 @@ public class PanneauProjets extends JPanel
                         // Renommer aussi le fichier de sauvegarde .xml
                         String ancienNom              = parts[1].trim();
 
-                        File ancienFichierSauvegarde  = new File("data/sauvegardes/" + ancienNom      + ".xml");
-                        File nouveauFichierSauvegarde = new File("data/sauvegardes/" + nouvelIntitule + ".xml");
+                        File ancienFichierSauvegarde  = new File(CHEMIN_SAUVEGARDES + ancienNom      + ".xml");
+                        File nouveauFichierSauvegarde = new File(CHEMIN_SAUVEGARDES + nouvelIntitule + ".xml");
 
                         if (ancienFichierSauvegarde.exists())
                         {
@@ -358,7 +356,7 @@ public class PanneauProjets extends JPanel
         // Supprimer le fichier de sauvegarde si nécessaire
         if (fichierSauvegardeASupprimer != null)
         {
-            File fichierSauvegarde = new File("data/sauvegardes/" + fichierSauvegardeASupprimer + ".xml");
+            File fichierSauvegarde = new File(CHEMIN_SAUVEGARDES + fichierSauvegardeASupprimer + ".xml");
             if (fichierSauvegarde.exists())
                 fichierSauvegarde.delete();
         }

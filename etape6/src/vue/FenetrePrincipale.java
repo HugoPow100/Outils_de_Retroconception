@@ -10,9 +10,9 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
-import metier.util.test_structure_projet.VerificationStructureProjet;
 import vue.liaison.LiaisonVue;
 
 /**
@@ -34,7 +34,7 @@ public class FenetrePrincipale extends JFrame
     //      CONSTRUCTEUR       //
     //-------------------------//
     
-    public FenetrePrincipale() 
+    public FenetrePrincipale(Controleur controleur) 
     {
         setTitle("Générateur de diagramme UML");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -45,7 +45,7 @@ public class FenetrePrincipale extends JFrame
 
         panneauProjets   = new PanneauProjets  (this);
         panneauDiagramme = new PanneauDiagramme(this);
-        this.controleur  = new Controleur      (this);
+        this.controleur  = controleur;
 
         setLayout(new BorderLayout());
         
@@ -63,6 +63,7 @@ public class FenetrePrincipale extends JFrame
 
         this.add(splitPane           , BorderLayout.CENTER);
         this.add(new BarreMenus(this), BorderLayout.NORTH );
+
     }
 
     //----------------------//
@@ -76,8 +77,16 @@ public class FenetrePrincipale extends JFrame
             panneauDiagramme.chargerProjet(cheminProjet);
             // Enregistrer le projet au premier chargement
             controleur.sauvegardeProjetXml(cheminProjet);
-            // Actualiser la liste des projets
-            panneauProjets.actualiser();
+
+            // Forcer le recalcul des liaisons après le layout Swing
+            // pour eviter un mauvais placement des fléches
+            SwingUtilities.invokeLater(() ->
+            {
+                    optimiserPositionsLiaisons();
+                    revalidate();
+                    repaint();
+            });
+
         }
         catch (Exception e)
         {
@@ -104,31 +113,30 @@ public class FenetrePrincipale extends JFrame
         }
     }
 
-    public void sauvegarderDiagramme() 
+    public void exporterImageDiagramme()
     {
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY); // choisir un fichier
         chooser.setSelectedFile(new File("diagramme.png")); // nom par défaut
 
-        int retour = chooser.showSaveDialog(panneauDiagramme);
+        int resultat = chooser.showSaveDialog(panneauDiagramme);
 
-        if (retour == JFileChooser.APPROVE_OPTION) 
+        if (resultat == JFileChooser.APPROVE_OPTION) 
         {
             File fichierSortie = chooser.getSelectedFile();
             if (!fichierSortie.getName().toLowerCase().endsWith(".png")) 
             {
                 fichierSortie = new File(fichierSortie.getParentFile(), fichierSortie.getName() + ".png");
             }
-            
+
             try 
             {
                 // Sauvegarder le zoom actuel et le réinitialiser pour l'export
                 double  zoomSauvegarde     = panneauDiagramme.getZoomLevel      ();
                 boolean textZoomSauvegarde = panneauDiagramme.isAfficherTextZoom();
-                
-                panneauDiagramme.setZoomLevel(1.0);
+
                 panneauDiagramme.setAfficherTextZoom(false);
-                
+
                 BufferedImage image = new BufferedImage
                 (
                     panneauDiagramme.getWidth(), panneauDiagramme.getHeight(), BufferedImage.TYPE_INT_ARGB
@@ -136,8 +144,10 @@ public class FenetrePrincipale extends JFrame
 
                 panneauDiagramme.printAll(image.createGraphics());
                 ImageIO.write(image, "png", fichierSortie);
-                System.out.println("Diagramme sauvegardé dans"+fichierSortie);
-                
+
+                String diagrammeSave = "Diagramme sauvegardé dans " + fichierSortie.getPath();
+                JOptionPane.showMessageDialog(this, diagrammeSave, "Save Diagramme", JOptionPane.INFORMATION_MESSAGE);
+
                 // Restaurer le zoom et l'affichage du texte
                 panneauDiagramme.setZoomLevel       (zoomSauvegarde    );
                 panneauDiagramme.setAfficherTextZoom(textZoomSauvegarde);
@@ -149,18 +159,6 @@ public class FenetrePrincipale extends JFrame
         }
     }
 
-    public static void main(String[] args) 
-    {
-         // Vérification de la structure du projet
-        VerificationStructureProjet verification = new VerificationStructureProjet();
-        verification.verifierStructure();
-
-        SwingUtilities.invokeLater(() ->
-        {
-            FenetrePrincipale fenetre = new FenetrePrincipale();
-            fenetre.setVisible(true);
-        });
-    }
 
     public void affichageAttributs(boolean b)
     {

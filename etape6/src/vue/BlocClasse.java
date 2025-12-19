@@ -1,5 +1,6 @@
 package vue;
 
+import java.util.UUID;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,19 +15,20 @@ public class BlocClasse
 	//        ATTRIBUTS         //
 	//--------------------------//
 
-	private String       nom           ;
-	private boolean      estInterface  ;
-	private boolean      estSelectionne;
-	private List<String> attributs     ;
-	private List<String> methodes      ;
+	private final UUID 	id					;
 
-	private int x      ;
-	private int y      ;
-	private int largeur;
-	private int hauteur;
+	private String       nom                ;
+	private boolean      estInterface       ;
+	private boolean      estSelectionne     ;
+	private List<String> attributs          ;
+	private List<String> methodes           ;
 
-	private int     hauteurCalculee    ;
-	private boolean affichagePleinEcran;
+	private int          x                  ;
+	private int          y                  ;
+	private int          largeur            ;
+	private int          hauteur            ;
+	private int          hauteurCalculee    ;
+	private boolean      affichagePleinEcran;
 
 	// Constantes 
 	private static final int PADDING           = 10;
@@ -45,14 +47,17 @@ public class BlocClasse
 	
 	public BlocClasse(String nom, int x, int y) 
 	{
-		this.nom = nom;
-		this.x   = x;
-		this.y   = y;
-		this.largeur = 200;
-		this.hauteur = 150;
+		this.id					 = UUID.randomUUID();
+
+		this.nom                 = nom  ;
+		this.x                   = x    ;
+		this.y                   = y    ;
+		this.largeur             = 200  ;
+		this.hauteur             = 150  ;
 		this.estInterface        = false;
 		this.estSelectionne      = false;
 		this.affichagePleinEcran = false;
+
 		this.attributs = new ArrayList<String>();
 		this.methodes  = new ArrayList<String>();
 	}
@@ -408,6 +413,7 @@ public class BlocClasse
 	}
 
 	// Getters et Setters
+	public UUID         getId             () {return this.id;}
 	public int          getX              () { return x              ; }
 	public int          getY              () { return y              ; }
 	public int          getLargeur        () { return largeur        ; }
