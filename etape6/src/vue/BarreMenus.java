@@ -45,15 +45,18 @@ public class BarreMenus extends JMenuBar
 
 		// Style des menus principaux
 		JMenu[] menus = {menuFichier, menuAffichage, menuAide};
-		for(JMenu menu : menus) {
-			menu.setOpaque(true);
+		for(JMenu menu : menus) 
+		{
+			menu.setOpaque    (true);
 			menu.setBackground(new java.awt.Color(40, 40, 120)); // bleu plus clair pour le menu
 			menu.setForeground(java.awt.Color.WHITE);
 
-			// Style des items visibles sur la barre (mais pas déroulants)
-			menu.setUI(new javax.swing.plaf.basic.BasicMenuUI() {
+			// Style des items visibles sur la barre
+			menu.setUI(new javax.swing.plaf.basic.BasicMenuUI() 
+			{
 				@Override
-				public void installDefaults() {
+				public void installDefaults() 
+				{
 					super.installDefaults();
 					menuItem.setBackground(new java.awt.Color(60, 100, 200)); // bleu doux
 					menuItem.setForeground(java.awt.Color.WHITE);
