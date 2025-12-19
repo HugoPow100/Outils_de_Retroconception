@@ -2,7 +2,7 @@
 
 - Ce projet est un Outil de rétroconception, il permet de génerer un Diagramme de classes   UML à partir d'un répertoire de classes Java.
 
-- Les packages ne sont pas pris en compte, toutes les classes doivent être à la racine du répertoire selectionné.
+- Attention : Lors du chargement d'un projet, les packages ne sont pas pris en compte, toutes les classes doivent être placées à la racine du répertoire selectionné.
 
 # Utilisation
 
@@ -37,12 +37,12 @@ La liste des projets sauvegardés et leur position est sauvegardée dans le fich
 Les diagrammes sont sauvegardés dans data/sauvegarde/ avec toutes les informations relatives aux classes et leurs liaisons.
 Les données des diagrammes peuvent être changées directement sur les fichiers .xml dans data, via un éditeur de texte.
 
-### Fonctionnalités de la barre de projets
+### Fonctionnalités de la section de projets
 - Choisir le projet a afficher dans le panneau diagramme (clique gauche sur le projet voulu)
 - Renommer un projet (clique droit sur le projet voulu -> Renommer projet)
 - Supprimer un projet (clique droit sur le projet voulu -> Supprimer projet)
 
-Un projet présent dans projets.xml mais inexistant l'ordinateur n'est pas pris en compte dans la liste des projet lors du lancement.
+Un projet présent dans `projets.xml` mais inexistant sur l'ordinateur est ignoré dans la liste des projet lors du lancement.
 
 # Code
 
@@ -79,6 +79,10 @@ Une fois toute la lecture terminée, les informations sont transférées via le 
 
 Ces instances de classes sont ensuite envoyées à la vue par le controleur, et sont affichées sur le Diagramme de classe par la vue.
 
+\
+\
+*Projet académique – IUT du Havre*
 
-Projet académique – IUT du Havre
 SAE 3.01 – Outil de rétroconception Java-UML
+
+Romain BARUCHELLO, Jules BOUQUET, Pierre COIGNARD, Paul NOEL, Thibault PADOIS, Hugo VARAO GOMES DA SILVA
