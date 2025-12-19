@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class Classe 
 {
 	private String  nom          ;
-	private String  typeClasse   ;
+	private String  type		 ;
 	private String  classeParente;
 	private boolean isHeritage   ;
 	private String  nomInterface ;
@@ -23,7 +23,7 @@ public class Classe
 	 *
 	 * @param nom           nom de la classe
 	 * @param classeParente nom de la classe héritée (si applicable)
-	 * @param typeClasse    type de classe (class, abstract, ect)
+	 * @param type    type de classe (class, abstract, ect)
 	 * @param isHeritage    true si la classe hérite d'une autre
 	 * @param nomInterface  nom de l'interface implémentée
 	 * @param lstAttribut   liste d'attributs trouvés dans la classe
@@ -31,7 +31,7 @@ public class Classe
 	 */
 	public Classe(String              nom          ,
 	              String              classeParente,
-	              String              typeClasse   ,
+	              String              type   	   ,
 	              boolean             isHeritage   ,
 	              String              nomInterface ,
 	              ArrayList<Attribut> lstAttribut  ,
@@ -39,7 +39,7 @@ public class Classe
 	{
 		this.nom           = nom          ;
 		this.classeParente = classeParente;
-		this.typeClasse    = typeClasse   ;
+		this.type    = type   			  ;
 		this.isHeritage    = isHeritage   ;
 		this.nomInterface  = nomInterface ;
 		this.lstAttribut   = lstAttribut  ;
@@ -49,13 +49,13 @@ public class Classe
 	public String              getNom          () { return this.nom          ; }
 	public String              getClasseParente() { return this.classeParente; }
 	public boolean             getIsHeritage   () { return this.isHeritage   ; }
-	public String              getTypeClasse   () { return this.typeClasse   ; }
+	public String              getTypeClasse   () { return this.type   		 ; }
 	public String              getNomInterface () { return this.nomInterface ; }
 	public ArrayList<Attribut> getLstAttribut  () { return this.lstAttribut  ; }
 	public ArrayList<Methode > getLstMethode   () { return this.lstMethode   ; }
 
-	public boolean isEnum     () { return this.typeClasse.contains("enum"     ); }
-	public boolean isAbstract () { return this.typeClasse.contains("abstract" ); }
-	public boolean isInterface() { return this.typeClasse.contains("interface"); }
-	public boolean isRecord   () { return this.typeClasse.contains("record"   ); }
+	public boolean isEnum     () { return this.type.contains("enum"     ); }
+	public boolean isAbstract () { return this.type.contains("abstract" ); }
+	public boolean isInterface() { return this.type.contains("interface"); }
+	public boolean isRecord   () { return this.type.contains("record"   ); }
 }
