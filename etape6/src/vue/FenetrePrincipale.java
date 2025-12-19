@@ -15,7 +15,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import vue.liaison.LiaisonVue;
-import java.awt.Image;
 
 /**
 * Fenêtre principale de l'IHM du générateur de diagramme UML.
@@ -45,17 +44,10 @@ public class FenetrePrincipale extends JFrame
         setLocationRelativeTo(null);
         setResizable(true);
 
-        // Charger et définir l'icône de la fenêtre
-        try {
-            Image icon = ImageIO.read(new File("src/res/uml_icon.png"));
-            setIconImage(icon);
-        } catch (Exception e) {
-            System.err.println("Impossible de charger l'icône: " + e.getMessage());
-        }
-
         panneauProjets   = new PanneauProjets  (this);
         panneauDiagramme = new PanneauDiagramme(this);
-        panneauProjets.setBackground( new java.awt.Color(15, 15, 70)); 
+        panneauProjets.setBackground(new java.awt.Color(230, 230, 250)); // lavande clair);
+        panneauDiagramme.setBackground(new java.awt.Color(230, 230, 250));
         
         this.controleur  = controleur;
 
