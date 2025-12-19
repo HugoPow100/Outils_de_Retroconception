@@ -8,7 +8,7 @@ import vue.BlocClasse;
  * Détection d'obstacles pour le routage des liaisons
  */
 public class DetecteurObstacles
-{    
+{
 	private final BlocClasse       blocOrigine    ;
 	private final BlocClasse       blocDestination;
 	private final List<BlocClasse> tousLesBlocs   ;
@@ -186,7 +186,7 @@ public class DetecteurObstacles
 		int maxY = Math.max(y1, y2);
 		int millieuY = (minY + maxY) / 2;
 		
-		if (getObstaclesSurLigneHorizontale(Integer.MIN_VALUE, Integer.MAX_VALUE, millieuY).isEmpty())
+		if(getObstaclesSurLigneHorizontale(Integer.MIN_VALUE,Integer.MAX_VALUE,millieuY).isEmpty())
 			return millieuY;
 		
 		for (BlocClasse bloc : tousLesBlocs)
@@ -211,7 +211,7 @@ public class DetecteurObstacles
 		int maxX = Math.max(x1, x2);
 		int millieuX = (minX + maxX) / 2;
 		
-		if (getObstaclesSurLigneVerticale(millieuX, Integer.MIN_VALUE, Integer.MAX_VALUE).isEmpty())
+		if(getObstaclesSurLigneVerticale(millieuX, Integer.MIN_VALUE, Integer.MAX_VALUE).isEmpty())
 			return millieuX;
 		
 		for (BlocClasse bloc : tousLesBlocs)
