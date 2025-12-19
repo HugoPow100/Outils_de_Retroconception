@@ -41,7 +41,7 @@ public class PanneauProjets extends JPanel
         // Panel scrollable
         this.panelProjets = new JPanel();
         panelProjets.setLayout(new BoxLayout(panelProjets, BoxLayout.Y_AXIS));
-        panelProjets.setBackground(new Color(245, 245, 245));
+        panelProjets.setBackground(new Color(30, 30, 120, 180));
 
         chargerProjets(panelProjets);
 
@@ -133,7 +133,7 @@ public class PanneauProjets extends JPanel
         JButton bouton = new JButton(intitule);
         bouton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         bouton.setFont(new Font("Arial", Font.PLAIN, 12));
-        bouton.setBackground(new Color(100, 150, 200));
+        bouton.setBackground(new Color(15, 15, 70, 100));
         bouton.setForeground(Color.WHITE);
         bouton.setFocusPainted(false);
 
