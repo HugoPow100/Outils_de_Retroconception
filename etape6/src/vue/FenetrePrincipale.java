@@ -125,8 +125,7 @@ public class FenetrePrincipale extends JFrame
                 // Sauvegarder le zoom actuel et le réinitialiser pour l'export
                 double  zoomSauvegarde     = panneauDiagramme.getZoomLevel      ();
                 boolean textZoomSauvegarde = panneauDiagramme.isAfficherTextZoom();
-                
-                //panneauDiagramme.setZoomLevel(1.0);
+
                 panneauDiagramme.setAfficherTextZoom(false);
                 
                 BufferedImage image = new BufferedImage

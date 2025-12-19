@@ -46,11 +46,11 @@ public class Attribut
 		this.isConstant  = isConstant ;
 	}
 
-	public String  getNom			() { return this.nomAttribut; }
-	public String  getType			() { return this.type       ; }
-	public String  getVisibilite  	() { return this.visibilite ; }
-	public String  getPortee     	() { return this.portee     ; }
-	public boolean isConstant     	() { return this.isConstant ; }
+	public String  getNom       () { return this.nomAttribut; }
+	public String  getType      () { return this.type       ; }
+	public String  getVisibilite() { return this.visibilite ; }
+	public String  getPortee    () { return this.portee     ; }
+	public boolean isConstant   () { return this.isConstant ; }
 
 	public String  toString()
 	{
