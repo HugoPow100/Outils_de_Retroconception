@@ -24,7 +24,7 @@ public class CalculateurChemin {
         List<Point> path = new ArrayList<>();
         path.add(start);
         
-        int padding = 15;
+        int padding = 30; // Augmenté pour éviter que les lignes passent dans les blocs
         Point exitPoint = calculateOffsetPoint(start, startSide, padding);
         Point entryPoint = calculateOffsetPoint(end, endSide, padding);
         
@@ -38,12 +38,27 @@ public class CalculateurChemin {
         boolean oppositeVertical = (startSide == 2 && endSide == 0) || (startSide == 0 && endSide == 2);
         boolean oppositeHorizontal = (startSide == 1 && endSide == 3) || (startSide == 3 && endSide == 1);
         
-        if (oppositeVertical) {
-            // BAS↔HAUT: un seul point intermédiaire (2 segments)
-            path.add(new Point(exitPoint.x, entryPoint.y));
+        // Détecter si les côtés opposés sont parfaitement alignés pour une ligne droite
+        if (oppositeVertical && start.x == end.x) {
+            // Alignés verticalement: ligne droite directe
+            path.clear();
+            path.add(start);
+            path.add(end);
+            return path;
+        } else if (oppositeHorizontal && start.y == end.y) {
+            // Alignés horizontalement: ligne droite directe
+            path.clear();
+            path.add(start);
+            path.add(end);
+            return path;
+        } else if (oppositeVertical) {
+            // BAS↔HAUT non alignés: un seul point intermédiaire (2 segments)
+            Point intermediate = avoidCorner(exitPoint.x, entryPoint.y, exitPoint.y, true);
+            path.add(intermediate);
         } else if (oppositeHorizontal) {
-            // DROITE↔GAUCHE: un seul point intermédiaire (2 segments)
-            path.add(new Point(entryPoint.x, exitPoint.y));
+            // DROITE↔GAUCHE non alignés: un seul point intermédiaire (2 segments)
+            Point intermediate = avoidCorner(exitPoint.y, entryPoint.x, exitPoint.x, false);
+            path.add(intermediate);
         } else if (exitHorizontal && entryHorizontal) {
             // Les deux sorties sont horizontales (même côté)
             if (exitPoint.x != entryPoint.x) {
@@ -135,6 +150,26 @@ public class CalculateurChemin {
         }
         
         return cleaned;
+    }
+    
+    /**
+     * Évite les coins parfaits en ajustant la position si trop proche d'une transition
+     */
+    private Point avoidCorner(int pos, int fixedCoord, int compareCoord, boolean isVertical) {
+        int distance = Math.abs(fixedCoord - compareCoord);
+        if (distance < 25) {
+            int adjustment = (fixedCoord < compareCoord) ? -20 : 20;
+            if (isVertical) {
+                return new Point(pos + adjustment, fixedCoord);
+            } else {
+                return new Point(fixedCoord, pos + adjustment);
+            }
+        }
+        if (isVertical) {
+            return new Point(pos, fixedCoord);
+        } else {
+            return new Point(fixedCoord, pos);
+        }
     }
     
     /**
