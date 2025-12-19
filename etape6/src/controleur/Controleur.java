@@ -7,6 +7,7 @@ import metier.sauvegarde.*;
 import vue.BlocClasse;
 import vue.FenetrePrincipale;
 import vue.liaison.LiaisonVue;
+import metier.util.test_structure_projet.*;
 
 /**
 * Contrôleur qui met en relation le métier et la vue IHM.
@@ -34,17 +35,27 @@ public class Controleur
     * Constructeur du controleur
     * @param classe La classe sur laquelle se base le BlocClasse 
     */
-    public Controleur(FenetrePrincipale fenetrePrincipale) 
+    public Controleur() 
     {
-        this.fenetrePrincipale  = fenetrePrincipale;
         this.lstLiaisons        = new ArrayList<LiaisonVue>();
         this.lstBlocs           = new ArrayList<BlocClasse>();
         this.gestionSauvegarde  = new GestionSauvegarde(this);
+        this.fenetrePrincipale  = new FenetrePrincipale(this);
     }
 
     //----------------------//
     //      METHODES        //
     //----------------------//
+
+    public static void main(String[] args) 
+    {
+         // Vérification de la structure du projet
+        VerificationStructureProjet verification = new VerificationStructureProjet();
+        verification.verifierStructure();
+
+        Controleur controleur = new Controleur();
+        controleur.fenetrePrincipale.setVisible(true);
+    }
 
     /**
     * Charge un projet pour convertir son contenu en liste de BlocClasses, et liste de LiaisonVue qui sont ensuite stockées dans Controleur.

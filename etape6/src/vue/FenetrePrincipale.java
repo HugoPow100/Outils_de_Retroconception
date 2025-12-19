@@ -13,7 +13,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
-import metier.util.test_structure_projet.VerificationStructureProjet;
 import vue.liaison.LiaisonVue;
 
 /**
@@ -35,7 +34,7 @@ public class FenetrePrincipale extends JFrame
     //      CONSTRUCTEUR       //
     //-------------------------//
     
-    public FenetrePrincipale() 
+    public FenetrePrincipale(Controleur controleur) 
     {
         setTitle("Générateur de diagramme UML");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -46,7 +45,7 @@ public class FenetrePrincipale extends JFrame
 
         panneauProjets   = new PanneauProjets  (this);
         panneauDiagramme = new PanneauDiagramme(this);
-        this.controleur  = new Controleur      (this);
+        this.controleur  = controleur;
 
         setLayout(new BorderLayout());
         
@@ -64,6 +63,7 @@ public class FenetrePrincipale extends JFrame
 
         this.add(splitPane           , BorderLayout.CENTER);
         this.add(new BarreMenus(this), BorderLayout.NORTH );
+
     }
 
     //----------------------//
@@ -159,18 +159,6 @@ public class FenetrePrincipale extends JFrame
         }
     }
 
-    public static void main(String[] args) 
-    {
-         // Vérification de la structure du projet
-        VerificationStructureProjet verification = new VerificationStructureProjet();
-        verification.verifierStructure();
-
-        SwingUtilities.invokeLater(() ->
-        {
-            FenetrePrincipale fenetre = new FenetrePrincipale();
-            fenetre.setVisible(true);
-        });
-    }
 
     public void affichageAttributs(boolean b)
     {
