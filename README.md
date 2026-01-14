@@ -1,4 +1,4 @@
-### Compilation et exécution
+## Compilation et exécution
 
 #### Windows
 ./run.bat
